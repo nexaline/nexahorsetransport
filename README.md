@@ -3,6 +3,7 @@
 Simple static website for Nexa Horse Transport (Sundre, Alberta; serving Canada and the US).
 
 - `index.html`: home, services, instant quote calculator + booking request form, contact
+- `events.html`: Events Calendar of upcoming horse shows, competitions, races and auctions (reads `events.json`)
 - `terms.html`: terms and conditions
 - `styles.css`: shared styles (mobile-friendly)
 
@@ -15,6 +16,10 @@ Trips with both ends in Canada are kept in Canada using pass-through waypoints (
 - Western Canada to NB, NS or PEI: all five, west to east
 
 The route is then checked against the `US_AREAS` boxes. If it still leaves Canada, the customer sees a note asking them to confirm the distance with us, including which part of the route is in the US and between which waypoints (also logged to the browser console). The note is included in the booking email.
+
+## Events calendar
+
+`events.json` is refreshed every Monday by `.github/workflows/update-events.yml`, which runs `scripts/update-events.mjs` and commits the result to `main` (it can also be run by hand from the repository's Actions tab). The script checks each source's robots.txt, then reads only structured data the site publishes itself: iCal feeds, schema.org event data, or a WordPress events-calendar API. It keeps just the basic facts (name, type, dates, place, links). A source that fails keeps its last known events and the error is logged in the run summary; events that have ended are removed. To add or change a source, edit `SOURCES` at the top of the script.
 
 No build step. Open `index.html` in a browser, or host the folder on any static host (e.g. GitHub Pages).
 

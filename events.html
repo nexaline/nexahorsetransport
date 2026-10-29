@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Events Calendar | Nexa Horse Transport</title>
+  <meta name="description" content="Upcoming horse shows, competitions, races and horse auctions in Canada and the United States, with transport booking from Nexa Horse Transport.">
+  <link rel="icon" href="nexa-logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="logo"><img src="nexa-logo.svg" alt="Nexa Horse Transport" width="140" height="70"></a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="index.html#home">Home</a>
+        <a href="index.html#services">Services</a>
+        <a href="index.html#booking">Book</a>
+        <a href="events.html" aria-current="page">Events</a>
+        <a href="index.html#contact">Contact</a>
+        <a href="terms.html">Terms</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-title">
+      <div class="container">
+        <h1>Events Calendar</h1>
+        <p>Major horse shows, competitions, races and horse auctions in Canada and the United States.</p>
+      </div>
+    </div>
+
+    <div class="events-page">
+      <div class="container">
+        <p class="notice events-notice" role="note"><strong>Please note:</strong> This calendar is provided for general information only and is compiled automatically from public sources. Nexa Horse Transport does not organise these events and does not guarantee that dates, locations or other details are accurate or current. Always confirm details with the official event organiser before making plans.</p>
+
+        <form class="event-filters" id="event-filters" role="search" aria-label="Filter events">
+          <div class="field">
+            <label for="filter-search">Search</label>
+            <input id="filter-search" type="search" placeholder="Event, venue or city" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="filter-country">Country</label>
+            <select id="filter-country">
+              <option value="">All</option>
+              <option value="CA">Canada</option>
+              <option value="US">United States</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="filter-region">Province / state</label>
+            <select id="filter-region">
+              <option value="">All</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="filter-type">Event type</label>
+            <select id="filter-type">
+              <option value="">All types</option>
+              <option value="show">Horse shows</option>
+              <option value="competition">Competitions</option>
+              <option value="race">Races</option>
+              <option value="auction">Auctions &amp; sales</option>
+            </select>
+          </div>
+        </form>
+
+        <p class="events-count" id="events-count" aria-live="polite">Loading events...</p>
+        <div class="event-list" id="event-list"></div>
+
+        <section class="more-calendars" aria-labelledby="more-calendars-heading">
+          <h2 id="more-calendars-heading">More event calendars</h2>
+          <p class="lead">The official calendars this page is compiled from. Check them for the full and latest details.</p>
+          <ul class="calendar-links" id="calendar-links"></ul>
+          <p class="hint" id="events-updated"></p>
+        </section>
+
+        <p class="notice events-notice" role="note"><strong>Please note:</strong> This calendar is provided for general information only and is compiled automatically from public sources. Nexa Horse Transport does not organise these events and does not guarantee that dates, locations or other details are accurate or current. Always confirm details with the official event organiser before making plans.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span>&copy; <span id="year">2026</span> Nexa Horse Transport &middot; Sundre, Alberta</span>
+      <div class="footer-links">
+        <a class="social-link" href="https://www.facebook.com/profile.php?id=61592349386291" target="_blank" rel="noopener noreferrer"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"/></svg>Facebook<span class="visually-hidden"> (opens in a new tab)</span></a>
+        <a href="terms.html">Terms &amp; Conditions</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Events come from events.json, which a weekly GitHub Actions job (scripts/update-events.mjs) refreshes.
+    // Event names and links come from other websites, so they are only ever inserted as text.
+    var TYPE_LABELS = { show: "Horse show", competition: "Competition", race: "Race", auction: "Auction / sale" };
+    var COUNTRIES = { CA: "Canada", US: "United States" };
+    var REGIONS = {
+      AB: "Alberta", BC: "British Columbia", MB: "Manitoba", NB: "New Brunswick", NL: "Newfoundland and Labrador",
+      NS: "Nova Scotia", NT: "Northwest Territories", NU: "Nunavut", ON: "Ontario", PE: "Prince Edward Island",
+      QC: "Quebec", SK: "Saskatchewan", YT: "Yukon",
+      AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California", CO: "Colorado", CT: "Connecticut",
+      DE: "Delaware", FL: "Florida", GA: "Georgia", HI: "Hawaii", ID: "Idaho", IL: "Illinois", IN: "Indiana", IA: "Iowa",
+      KS: "Kansas", KY: "Kentucky", LA: "Louisiana", ME: "Maine", MD: "Maryland", MA: "Massachusetts", MI: "Michigan",
+      MN: "Minnesota", MS: "Mississippi", MO: "Missouri", MT: "Montana", NE: "Nebraska", NV: "Nevada", NH: "New Hampshire",
+      NJ: "New Jersey", NM: "New Mexico", NY: "New York", NC: "North Carolina", ND: "North Dakota", OH: "Ohio",
+      OK: "Oklahoma", OR: "Oregon", PA: "Pennsylvania", RI: "Rhode Island", SC: "South Carolina", SD: "South Dakota",
+      TN: "Tennessee", TX: "Texas", UT: "Utah", VT: "Vermont", VA: "Virginia", WA: "Washington", WV: "West Virginia",
+      WI: "Wisconsin", WY: "Wyoming", DC: "District of Columbia"
+    };
+
+    var list = document.getElementById("event-list");
+    var count = document.getElementById("events-count");
+    var filters = {
+      search: document.getElementById("filter-search"),
+      country: document.getElementById("filter-country"),
+      region: document.getElementById("filter-region"),
+      type: document.getElementById("filter-type")
+    };
+    var allEvents = [];
+
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    function localDate(iso) {
+      var p = iso.split("-");
+      return new Date(+p[0], +p[1] - 1, +p[2]);
+    }
+
+    function todayIso() {
+      var d = new Date();
+      return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    }
+
+    var dateFormat = new Intl.DateTimeFormat("en-CA", { month: "short", day: "numeric", year: "numeric" });
+
+    function formatDates(e) {
+      var start = localDate(e.start);
+      var end = localDate(e.end || e.start);
+      if (e.end === e.start || !e.end) return dateFormat.format(start);
+      return dateFormat.formatRange ? dateFormat.formatRange(start, end) : dateFormat.format(start) + " – " + dateFormat.format(end);
+    }
+
+    function placeText(e, codes) {
+      var region = codes ? e.region : REGIONS[e.region] || e.region;
+      return [e.venue, e.city, region, COUNTRIES[e.country] || e.country].filter(Boolean).join(", ");
+    }
+
+    function safeUrl(url) {
+      return /^https?:\/\//i.test(url || "") ? url : null;
+    }
+
+    function externalLink(url, text, className) {
+      var a = document.createElement("a");
+      a.href = url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      if (className) a.className = className;
+      a.textContent = text;
+      var hidden = document.createElement("span");
+      hidden.className = "visually-hidden";
+      hidden.textContent = " (opens in a new tab)";
+      a.appendChild(hidden);
+      return a;
+    }
+
+    // Opens the quote form with this event's location as the drop-off.
+    function bookingLink(e) {
+      var params = new URLSearchParams({
+        dropoff: placeText(e, true),
+        event: e.name + " (" + formatDates(e) + ")"
+      });
+      return "index.html?" + params.toString() + "#booking";
+    }
+
+    function eventCard(e) {
+      var card = document.createElement("article");
+      card.className = "event-card";
+
+      var badge = document.createElement("span");
+      badge.className = "event-type type-" + (TYPE_LABELS[e.type] ? e.type : "show");
+      badge.textContent = TYPE_LABELS[e.type] || "Event";
+
+      var title = document.createElement("h3");
+      title.textContent = e.name;
+
+      var when = document.createElement("p");
+      when.className = "event-when";
+      when.textContent = formatDates(e);
+
+      var where = document.createElement("p");
+      where.className = "event-where";
+      where.textContent = placeText(e, false);
+
+      var actions = document.createElement("div");
+      actions.className = "event-actions";
+      var book = document.createElement("a");
+      book.className = "btn btn-small";
+      book.href = bookingLink(e);
+      book.textContent = "Book transport to this event";
+      actions.appendChild(book);
+      var source = safeUrl(e.sourceUrl) || safeUrl(e.website);
+      if (source) actions.appendChild(externalLink(source, "Source", "event-source"));
+      var website = safeUrl(e.website);
+      if (website && website !== source) actions.appendChild(externalLink(website, "Event website", "event-source"));
+
+      card.append(badge, title, when, where, actions);
+      return card;
+    }
+
+    function searchText(e) {
+      return [e.name, e.venue, e.city, e.region, REGIONS[e.region], COUNTRIES[e.country], TYPE_LABELS[e.type]]
+        .filter(Boolean).join(" ").toLowerCase();
+    }
+
+    function fillRegions() {
+      var country = filters.country.value;
+      var current = filters.region.value;
+      var codes = {};
+      allEvents.forEach(function (e) {
+        if (e.region && (!country || e.country === country)) codes[e.region] = REGIONS[e.region] || e.region;
+      });
+      filters.region.innerHTML = "";
+      var all = document.createElement("option");
+      all.value = "";
+      all.textContent = "All";
+      filters.region.appendChild(all);
+      Object.keys(codes).sort(function (a, b) { return codes[a].localeCompare(codes[b]); }).forEach(function (code) {
+        var option = document.createElement("option");
+        option.value = code;
+        option.textContent = codes[code];
+        filters.region.appendChild(option);
+      });
+      filters.region.value = codes[current] ? current : "";
+    }
+
+    function render() {
+      var words = filters.search.value.toLowerCase().split(/\s+/).filter(Boolean);
+      var shown = allEvents.filter(function (e) {
+        if (filters.country.value && e.country !== filters.country.value) return false;
+        if (filters.region.value && e.region !== filters.region.value) return false;
+        if (filters.type.value && e.type !== filters.type.value) return false;
+        var text = searchText(e);
+        return words.every(function (w) { return text.indexOf(w) !== -1; });
+      });
+      list.innerHTML = "";
+      shown.forEach(function (e) { list.appendChild(eventCard(e)); });
+      if (!allEvents.length) {
+        count.textContent = "No upcoming events have been collected yet. Please check the official calendars below.";
+      } else if (!shown.length) {
+        count.textContent = "No events match your filters.";
+      } else {
+        count.textContent = "Showing " + shown.length + " upcoming event" + (shown.length === 1 ? "" : "s") + ".";
+      }
+    }
+
+    function showSources(sources, updated) {
+      var links = document.getElementById("calendar-links");
+      sources.forEach(function (s) {
+        var url = safeUrl(s.calendarUrl);
+        if (!url) return;
+        var li = document.createElement("li");
+        li.appendChild(externalLink(url, s.name));
+        links.appendChild(li);
+      });
+      document.getElementById("events-updated").textContent = updated
+        ? "Calendar last checked " + dateFormat.format(new Date(updated)) + "."
+        : "";
+    }
+
+    fetch("events.json", { cache: "no-cache" }).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).then(function (data) {
+      var today = todayIso();
+      // The weekly job removes past events too; this also hides any that ended since it last ran.
+      allEvents = (data.events || []).filter(function (e) { return e.name && e.start && (e.end || e.start) >= today; })
+        .sort(function (a, b) { return a.start.localeCompare(b.start) || a.name.localeCompare(b.name); });
+      fillRegions();
+      render();
+      showSources(data.sources || [], data.updated);
+    }).catch(function () {
+      count.textContent = "The events calendar couldn't be loaded right now. Please try again later.";
+    });
+
+    filters.search.addEventListener("input", render);
+    filters.country.addEventListener("change", function () { fillRegions(); render(); });
+    filters.region.addEventListener("change", render);
+    filters.type.addEventListener("change", render);
+    document.getElementById("event-filters").addEventListener("submit", function (e) { e.preventDefault(); });
+  </script>
+</body>
+</html>

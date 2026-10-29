@@ -1,0 +1,46 @@
+name: Update events calendar
+
+# Collects upcoming horse shows, races, competitions and auctions into events.json once a week,
+# and commits the result to main. It can also be run by hand from the Actions tab.
+on:
+  schedule:
+    - cron: "17 10 * * 1"  # Mondays at 10:17 UTC (4:17 am in Alberta)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-events
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # A source that fails keeps its last known events; the script only exits with an error if
+      # something unexpected happens, and then leaves events.json unchanged.
+      - name: Collect events
+        run: node scripts/update-events.mjs
+
+      - name: Commit events.json
+        run: |
+          if git diff --quiet -- events.json; then
+            echo "events.json unchanged"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add events.json
+          git commit -m "Update events calendar"
+          git pull --rebase origin main
+          git push origin HEAD:main
