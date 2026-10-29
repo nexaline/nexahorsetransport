@@ -308,6 +308,17 @@ textarea { min-height: 110px; resize: vertical; }
   color: var(--muted);
 }
 
+.route-note {
+  margin: 8px 0 0;
+  padding: 10px 14px;
+  background: #fdecea;
+  border-left: 5px solid #b3261e;
+  border-radius: 6px;
+  color: #5f1410;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
 .quote {
   display: grid;
   gap: 16px;

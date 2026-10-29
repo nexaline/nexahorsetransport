@@ -123,6 +123,7 @@
               <button type="button" id="calc-distance" class="btn btn-secondary">Calculate distance</button>
             </div>
             <p class="hint" id="distance-status" aria-live="polite">Choose your pickup and drop-off addresses and we'll work out the driving distance for you. You can also type it in.</p>
+            <p class="route-note" id="route-note" role="alert" hidden></p>
           </div>
 
           <div class="quote field full" id="quote">
@@ -293,6 +294,7 @@
     function quoteText(q) {
       if (!q) return ["Instant quote: not available"];
       var out = ["INSTANT QUOTE (estimate)", "Driving distance: " + q.km + " km (" + distanceInput.dataset.source + ")"];
+      if (routeNote) out.push("Route note: " + routeNote);
       q.lines.forEach(function (l) { out.push(l.text + " = " + money.format(l.amount)); });
       if (q.minimumApplied) out.push("Minimum charge applied: " + money.format(MINIMUM_CHARGE));
       out.push("Subtotal: " + money.format(q.subtotal));
@@ -306,11 +308,16 @@
     // This key is visible to anyone viewing the page, so restrict it to this website in Google Cloud Console.
     var GOOGLE_MAPS_API_KEY = "AIzaSyDggnwE12zXfCbviW2oEJPXhXEkCVQQ92A"; // paste your Google Maps Platform API key here
 
-    function googlePost(url, fieldMask, body) {
+    function googleRequest(url, fieldMask, body) {
       if (!GOOGLE_MAPS_API_KEY) return Promise.reject(new Error("No Google Maps API key set"));
-      var headers = { "Content-Type": "application/json", "X-Goog-Api-Key": GOOGLE_MAPS_API_KEY };
+      var headers = { "X-Goog-Api-Key": GOOGLE_MAPS_API_KEY };
+      var options = { method: body ? "POST" : "GET", headers: headers };
       if (fieldMask) headers["X-Goog-FieldMask"] = fieldMask;
-      return fetch(url, { method: "POST", headers: headers, body: JSON.stringify(body) }).then(function (r) {
+      if (body) {
+        headers["Content-Type"] = "application/json";
+        options.body = JSON.stringify(body);
+      }
+      return fetch(url, options).then(function (r) {
         if (!r.ok) throw new Error("Google request failed (" + r.status + ")");
         return r.json();
       });
@@ -383,7 +390,7 @@
         }
         timer = setTimeout(function () {
           var id = ++requestId;
-          googlePost("https://places.googleapis.com/v1/places:autocomplete", null, {
+          googleRequest("https://places.googleapis.com/v1/places:autocomplete", null, {
             input: text,
             includedRegionCodes: ["ca", "us"]
           }).then(function (data) {
@@ -415,8 +422,127 @@
       return input.dataset.placeId ? { placeId: input.dataset.placeId } : { address: input.value.trim() };
     }
 
+    // Trips within Canada must stay in Canada. Routes API can't avoid borders, so when Google's route
+    // dips into the US we route again through these Trans-Canada Highway towns (only the ones that lie
+    // between the pickup and drop-off), as pass-through points rather than stops.
+    var TRANS_CANADA_VIA = [
+      { name: "Thunder Bay, ON", address: "Thunder Bay, ON, Canada", lng: -89.25 },
+      { name: "Sault Ste. Marie, ON", address: "Sault Ste. Marie, ON, Canada", lng: -84.33 }
+    ];
+
+    // Areas clearly inside the US, as [west, east, south, north] in degrees. Each keeps a margin back from
+    // the border, so towns right on it (Windsor, Sarnia, Fort Frances, Niagara Falls) are never flagged,
+    // while a route through the US is caught by the points it has well inside the country.
+    var US_AREAS = [
+      [-170.0, -141.1, 51.0, 72.0],  // Alaska
+      [-125.0, -123.0, 40.0, 48.2],  // Washington's Olympic Peninsula
+      [-123.0, -95.2, 40.0, 48.8],   // south of the 49th parallel, BC to Manitoba
+      [-95.2, -89.7, 40.0, 48.3],    // Minnesota
+      [-89.7, -84.6, 40.0, 47.0],    // Wisconsin and Michigan's Upper Peninsula
+      [-84.6, -83.2, 40.0, 45.5],    // Michigan's Lower Peninsula
+      [-82.4, -79.1, 40.0, 42.2],    // Ohio and Pennsylvania, south of Lake Erie
+      [-78.8, -77.0, 40.0, 43.4],    // western New York
+      [-77.0, -74.7, 40.0, 44.0],    // northern New York
+      [-74.7, -71.0, 40.0, 44.85],   // Vermont and New Hampshire
+      [-71.0, -70.0, 40.0, 45.2],    // western Maine
+      [-70.0, -67.9, 40.0, 46.3],    // central and eastern Maine
+      [-125.0, -66.0, 24.0, 41.6]    // everything further south
+    ];
+
+    function decodePolyline(encoded) {
+      var points = [];
+      var index = 0, lat = 0, lng = 0;
+      while (index < encoded.length) {
+        [0, 1].forEach(function (n) {
+          var result = 0, shift = 0, b;
+          do {
+            b = encoded.charCodeAt(index++) - 63;
+            result |= (b & 0x1f) << shift;
+            shift += 5;
+          } while (b >= 0x20);
+          var delta = result & 1 ? ~(result >> 1) : result >> 1;
+          if (n === 0) lat += delta; else lng += delta;
+        });
+        points.push([lat / 1e5, lng / 1e5]);
+      }
+      return points;
+    }
+
+    function entersUS(points) {
+      return points.some(function (p) {
+        return US_AREAS.some(function (a) {
+          return p[1] >= a[0] && p[1] < a[1] && p[0] >= a[2] && p[0] < a[3];
+        });
+      });
+    }
+
+    function computeRoute(origin, destination, vias) {
+      var body = { origin: origin, destination: destination, travelMode: "DRIVE", units: "METRIC" };
+      if (vias.length) {
+        body.intermediates = vias.map(function (v) { return { address: v.address, via: true }; });
+      }
+      return googleRequest("https://routes.googleapis.com/directions/v2:computeRoutes",
+        "routes.distanceMeters,routes.polyline.encodedPolyline,routes.legs.startLocation,routes.legs.endLocation,geocodingResults",
+        body
+      ).then(function (data) {
+        var route = data.routes && data.routes[0];
+        if (!route || !route.distanceMeters) throw new Error("We couldn't find a driving route between those addresses.");
+        var geo = data.geocodingResults || {};
+        return {
+          km: Math.round(route.distanceMeters / 1000),
+          entersUS: entersUS(decodePolyline((route.polyline && route.polyline.encodedPolyline) || "")),
+          startLng: route.legs[0].startLocation.latLng.longitude,
+          endLng: route.legs[route.legs.length - 1].endLocation.latLng.longitude,
+          originPlaceId: origin.placeId || (geo.origin && geo.origin.placeId),
+          destinationPlaceId: destination.placeId || (geo.destination && geo.destination.placeId),
+          vias: vias
+        };
+      });
+    }
+
+    function placeCountry(placeId) {
+      if (!placeId) return Promise.resolve(null);
+      return googleRequest("https://places.googleapis.com/v1/places/" + encodeURIComponent(placeId), "addressComponents")
+        .then(function (place) {
+          var country = (place.addressComponents || []).filter(function (c) { return c.types.indexOf("country") !== -1; })[0];
+          return country ? country.shortText : null;
+        });
+    }
+
+    // Finds the driving route, keeping it inside Canada when both ends are in Canada.
+    function findRoute(origin, destination) {
+      return computeRoute(origin, destination, []).then(function (route) {
+        if (!route.entersUS) return route;
+        return Promise.all([placeCountry(route.originPlaceId), placeCountry(route.destinationPlaceId)])
+          .catch(function () { return [null, null]; })
+          .then(function (countries) {
+            if (countries[0] !== "CA" || countries[1] !== "CA") return route;
+            route.domestic = true;
+            var west = Math.min(route.startLng, route.endLng);
+            var east = Math.max(route.startLng, route.endLng);
+            var vias = TRANS_CANADA_VIA.filter(function (v) { return v.lng > west && v.lng < east; });
+            if (route.startLng > route.endLng) vias.reverse();
+            if (!vias.length) return route;
+            return computeRoute(origin, destination, vias).then(function (rerouted) {
+              rerouted.domestic = true;
+              return rerouted;
+            }).catch(function () { return route; });
+          });
+      });
+    }
+
     var lookupId = 0;
     var lastLookup = "";
+    var routeNote = "";
+    var ROUTE_WARNING = "Google's route for this trip passes through the United States. Please contact Nexa Horse " +
+      "Transportation to confirm the distance for a route that stays in Canada.";
+
+    function setRouteNote(text, warning) {
+      var note = document.getElementById("route-note");
+      routeNote = text;
+      note.textContent = text;
+      note.hidden = !warning;
+    }
 
     function lookupDistance(force) {
       var from = form.pickup.value.trim();
@@ -429,28 +555,24 @@
       if (!force && key === lastLookup) return;
       lastLookup = key;
       var id = ++lookupId;
+      setRouteNote("", false);
       distanceStatus.textContent = "Calculating driving distance...";
-      googlePost("https://routes.googleapis.com/directions/v2:computeRoutes", "routes.distanceMeters", {
-        origin: waypoint(form.pickup),
-        destination: waypoint(form.dropoff),
-        travelMode: "DRIVE",
-        units: "METRIC"
-      }).then(function (data) {
-        if (!data.routes || !data.routes.length || !data.routes[0].distanceMeters) {
-          throw new Error("We couldn't find a driving route between those addresses.");
-        }
-        return Math.round(data.routes[0].distanceMeters / 1000);
-      }).then(function (km) {
+      findRoute(waypoint(form.pickup), waypoint(form.dropoff)).then(function (route) {
         if (id !== lookupId) return;
-        distanceInput.value = km;
+        var via = route.vias.map(function (v) { return v.name; }).join(" and ");
+        distanceInput.value = route.km;
         distanceInput.dataset.source = "calculated automatically";
-        distanceStatus.textContent = "About " + km + " km by road from " + from + " to " + to +
+        distanceStatus.textContent = "About " + route.km + " km by road from " + from + " to " + to +
+          (via ? (route.entersUS ? ", routed via " : ", staying in Canada via ") + via + " on the Trans-Canada Highway" : "") +
           ". If this doesn't look right, check the addresses or type the distance in.";
+        if (route.domestic && route.entersUS) setRouteNote(ROUTE_WARNING, true);
+        else if (via) setRouteNote("Routed via " + via + " to stay in Canada.", false);
         updateQuote();
       }).catch(function (err) {
         if (id !== lookupId) return;
         lastLookup = "";
         distanceInput.value = "";
+        setRouteNote("", false);
         updateQuote();
         var reason = err && err.message && err.message.indexOf("couldn't") !== -1 ? err.message : "We couldn't calculate the distance automatically.";
         distanceStatus.textContent = reason + " Please check the addresses or type the driving distance in km.";
@@ -465,6 +587,7 @@
     document.getElementById("calc-distance").addEventListener("click", function () { lookupDistance(true); });
     distanceInput.addEventListener("input", function () {
       distanceInput.dataset.source = "entered by customer";
+      setRouteNote("", false);
       updateQuote();
     });
     STALLS.forEach(function (s) {
