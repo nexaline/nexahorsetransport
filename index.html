@@ -87,13 +87,17 @@
             <label for="email">Email *</label>
             <input id="email" name="email" type="email" autocomplete="email" required>
           </div>
-          <div class="field">
-            <label for="pickup">Pickup location *</label>
-            <input id="pickup" name="pickup" type="text" placeholder="City, Province/State" required>
+          <div class="field autocomplete">
+            <label for="pickup">Pickup address *</label>
+            <input id="pickup" name="pickup" type="text" placeholder="Start typing an address or town" autocomplete="off" required
+              role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="pickup-list">
+            <ul class="suggestions" id="pickup-list" role="listbox" hidden></ul>
           </div>
-          <div class="field">
-            <label for="dropoff">Drop-off location *</label>
-            <input id="dropoff" name="dropoff" type="text" placeholder="City, Province/State" required>
+          <div class="field autocomplete">
+            <label for="dropoff">Drop-off address *</label>
+            <input id="dropoff" name="dropoff" type="text" placeholder="Start typing an address or town" autocomplete="off" required
+              role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="dropoff-list">
+            <ul class="suggestions" id="dropoff-list" role="listbox" hidden></ul>
           </div>
           <fieldset class="field full stalls">
             <legend>How many horses need each stall type? *</legend>
@@ -118,7 +122,7 @@
               <input id="distance" name="distance" type="number" min="1" step="1" inputmode="numeric" required>
               <button type="button" id="calc-distance" class="btn btn-secondary">Calculate distance</button>
             </div>
-            <p class="hint" id="distance-status" aria-live="polite">Enter your pickup and drop-off locations and we'll work out the driving distance for you. You can also type it in.</p>
+            <p class="hint" id="distance-status" aria-live="polite">Choose your pickup and drop-off addresses and we'll work out the driving distance for you. You can also type it in.</p>
           </div>
 
           <div class="quote field full" id="quote">
@@ -298,17 +302,117 @@
       return out;
     }
 
-    // Driving distance via OpenStreetMap: Nominatim finds each place, OSRM finds the road route.
-    function geocode(place) {
-      var url = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=ca,us&q=" +
-        encodeURIComponent(place);
-      return fetch(url).then(function (r) {
-        if (!r.ok) throw new Error("lookup failed");
+    // Google Maps Platform: Places API (New) suggests addresses, Routes API finds the driving distance.
+    // This key is visible to anyone viewing the page, so restrict it to this website in Google Cloud Console.
+    var GOOGLE_MAPS_API_KEY = ""; // paste your Google Maps Platform API key here
+
+    function googlePost(url, fieldMask, body) {
+      if (!GOOGLE_MAPS_API_KEY) return Promise.reject(new Error("No Google Maps API key set"));
+      var headers = { "Content-Type": "application/json", "X-Goog-Api-Key": GOOGLE_MAPS_API_KEY };
+      if (fieldMask) headers["X-Goog-FieldMask"] = fieldMask;
+      return fetch(url, { method: "POST", headers: headers, body: JSON.stringify(body) }).then(function (r) {
+        if (!r.ok) throw new Error("Google request failed (" + r.status + ")");
         return r.json();
-      }).then(function (results) {
-        if (!results.length) throw new Error("We couldn't find \"" + place + "\".");
-        return results[0];
       });
+    }
+
+    function setupAutocomplete(input) {
+      var list = document.getElementById(input.id + "-list");
+      var timer;
+      var requestId = 0;
+      var items = [];
+      var active = -1;
+
+      function close() {
+        list.hidden = true;
+        list.innerHTML = "";
+        items = [];
+        active = -1;
+        input.setAttribute("aria-expanded", "false");
+        input.removeAttribute("aria-activedescendant");
+      }
+
+      function choose(item) {
+        input.value = item.text;
+        input.dataset.placeId = item.placeId;
+        close();
+        lookupDistance(false);
+      }
+
+      function highlight(i) {
+        var options = list.querySelectorAll("[role=option]");
+        if (!options.length) return;
+        active = (i + options.length) % options.length;
+        options.forEach(function (o, n) { o.setAttribute("aria-selected", n === active ? "true" : "false"); });
+        input.setAttribute("aria-activedescendant", options[active].id);
+      }
+
+      function render(suggestions) {
+        close();
+        items = suggestions;
+        if (!items.length) return;
+        items.forEach(function (item, i) {
+          var li = document.createElement("li");
+          li.id = input.id + "-option-" + i;
+          li.setAttribute("role", "option");
+          li.textContent = item.text;
+          // mousedown (not click) so the choice lands before the input loses focus
+          li.addEventListener("mousedown", function (e) {
+            e.preventDefault();
+            choose(item);
+          });
+          list.appendChild(li);
+        });
+        var credit = document.createElement("li");
+        credit.className = "powered-by";
+        credit.setAttribute("aria-hidden", "true");
+        credit.textContent = "Powered by Google";
+        list.appendChild(credit);
+        list.hidden = false;
+        input.setAttribute("aria-expanded", "true");
+      }
+
+      input.addEventListener("input", function () {
+        delete input.dataset.placeId;
+        clearTimeout(timer);
+        var text = input.value.trim();
+        if (text.length < 3) {
+          requestId++;
+          close();
+          return;
+        }
+        timer = setTimeout(function () {
+          var id = ++requestId;
+          googlePost("https://places.googleapis.com/v1/places:autocomplete", null, {
+            input: text,
+            includedRegionCodes: ["ca", "us"]
+          }).then(function (data) {
+            if (id !== requestId) return;
+            render((data.suggestions || []).filter(function (s) { return s.placePrediction; }).map(function (s) {
+              return { placeId: s.placePrediction.placeId, text: s.placePrediction.text.text };
+            }));
+          }).catch(close);
+        }, 250);
+      });
+
+      input.addEventListener("keydown", function (e) {
+        if (list.hidden) return;
+        if (e.key === "ArrowDown") { e.preventDefault(); highlight(active + 1); }
+        else if (e.key === "ArrowUp") { e.preventDefault(); highlight(active - 1); }
+        else if (e.key === "Enter" && active >= 0) { e.preventDefault(); choose(items[active]); }
+        else if (e.key === "Escape") { close(); }
+      });
+
+      input.addEventListener("blur", function () {
+        clearTimeout(timer);
+        requestId++;
+        close();
+      });
+    }
+
+    // A chosen suggestion is routed by its place ID; anything typed by hand is routed by its text.
+    function waypoint(input) {
+      return input.dataset.placeId ? { placeId: input.dataset.placeId } : { address: input.value.trim() };
     }
 
     var lookupId = 0;
@@ -318,31 +422,30 @@
       var from = form.pickup.value.trim();
       var to = form.dropoff.value.trim();
       if (!from || !to) {
-        if (force) distanceStatus.textContent = "Please enter both a pickup and a drop-off location.";
+        if (force) distanceStatus.textContent = "Please enter both a pickup and a drop-off address.";
         return;
       }
-      var key = from + "|" + to;
+      var key = JSON.stringify([waypoint(form.pickup), waypoint(form.dropoff)]);
       if (!force && key === lastLookup) return;
       lastLookup = key;
       var id = ++lookupId;
-      var a;
       distanceStatus.textContent = "Calculating driving distance...";
-      geocode(from).then(function (result) {
-        a = result;
-        return geocode(to);
-      }).then(function (b) {
-        var url = "https://router.project-osrm.org/route/v1/driving/" +
-          a.lon + "," + a.lat + ";" + b.lon + "," + b.lat + "?overview=false";
-        return fetch(url).then(function (r) { return r.json(); }).then(function (data) {
-          if (data.code !== "Ok" || !data.routes.length) throw new Error("We couldn't find a driving route.");
-          return { km: Math.round(data.routes[0].distance / 1000), from: a.display_name, to: b.display_name };
-        });
-      }).then(function (route) {
+      googlePost("https://routes.googleapis.com/directions/v2:computeRoutes", "routes.distanceMeters", {
+        origin: waypoint(form.pickup),
+        destination: waypoint(form.dropoff),
+        travelMode: "DRIVE",
+        units: "METRIC"
+      }).then(function (data) {
+        if (!data.routes || !data.routes.length || !data.routes[0].distanceMeters) {
+          throw new Error("We couldn't find a driving route between those addresses.");
+        }
+        return Math.round(data.routes[0].distanceMeters / 1000);
+      }).then(function (km) {
         if (id !== lookupId) return;
-        distanceInput.value = route.km;
+        distanceInput.value = km;
         distanceInput.dataset.source = "calculated automatically";
-        distanceStatus.textContent = "About " + route.km + " km by road from " + route.from + " to " + route.to +
-          ". If this doesn't look right, add more detail to the locations or type the distance in.";
+        distanceStatus.textContent = "About " + km + " km by road from " + from + " to " + to +
+          ". If this doesn't look right, check the addresses or type the distance in.";
         updateQuote();
       }).catch(function (err) {
         if (id !== lookupId) return;
@@ -350,10 +453,12 @@
         distanceInput.value = "";
         updateQuote();
         var reason = err && err.message && err.message.indexOf("couldn't") !== -1 ? err.message : "We couldn't calculate the distance automatically.";
-        distanceStatus.textContent = reason + " Please check the locations or type the driving distance in km.";
+        distanceStatus.textContent = reason + " Please check the addresses or type the driving distance in km.";
       });
     }
 
+    setupAutocomplete(form.pickup);
+    setupAutocomplete(form.dropoff);
     distanceInput.dataset.source = "entered by customer";
     form.pickup.addEventListener("change", function () { lookupDistance(false); });
     form.dropoff.addEventListener("change", function () { lookupDistance(false); });

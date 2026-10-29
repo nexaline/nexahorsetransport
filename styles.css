@@ -228,6 +228,39 @@ textarea { min-height: 110px; resize: vertical; }
 }
 
 /* Quote calculator */
+.autocomplete { position: relative; }
+
+.suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  margin: 4px 0 0;
+  padding: 4px 0;
+  list-style: none;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.suggestions [role=option] {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.suggestions [role=option]:hover,
+.suggestions [aria-selected=true] { background: var(--bg-alt); }
+
+.suggestions .powered-by {
+  padding: 4px 12px 2px;
+  text-align: right;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
 .stalls {
   margin: 0;
   padding: 0;
@@ -277,8 +310,7 @@ textarea { min-height: 110px; resize: vertical; }
 
 .quote {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 16px;
   padding: 20px;
   background: var(--bg-alt);
   border: 2px solid var(--accent);
@@ -415,6 +447,6 @@ textarea { min-height: 110px; resize: vertical; }
   section { padding: 44px 0; }
   .hero { padding: 56px 0 52px; }
   .booking-form { grid-template-columns: 1fr; padding: 18px; }
-  .quote { grid-template-columns: 1fr; padding: 16px; }
+  .quote { padding: 16px; }
   .stall-grid { gap: 8px; }
 }
