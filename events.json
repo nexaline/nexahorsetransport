@@ -1,117 +1,117 @@
 {
-  "updated": null,
+  "updated": "2026-10-29T20:03:42.473Z",
   "sources": [
     {
       "id": "equestrian-canada",
       "name": "Equestrian Canada",
-      "calendarUrl": "https://www.equestrian.ca/",
-      "status": "pending",
+      "calendarUrl": "https://equestrian.ca/",
+      "status": "not-readable",
       "lastSuccess": null,
-      "message": "Not checked yet"
+      "message": "no calendar feed or structured event data found (also: HTTP 404 for https://www.equestrian.ca/competitions; fetch failed)"
     },
     {
       "id": "usef",
       "name": "US Equestrian (USEF)",
-      "calendarUrl": "https://www.usef.org/",
-      "status": "pending",
+      "calendarUrl": "https://www.usef.org/compete/competitions",
+      "status": "not-readable",
       "lastSuccess": null,
-      "message": "Not checked yet"
+      "message": "no calendar feed or structured event data found (also: HTTP 404 for https://www.usef.org/events)"
     },
     {
       "id": "spruce-meadows",
       "name": "Spruce Meadows",
-      "calendarUrl": "https://www.sprucemeadows.com/",
-      "status": "pending",
+      "calendarUrl": "https://www.sprucemeadows.com/tournaments/",
+      "status": "not-readable",
       "lastSuccess": null,
-      "message": "Not checked yet"
+      "message": "no calendar feed or structured event data found"
     },
     {
       "id": "calgary-stampede",
       "name": "Calgary Stampede",
       "calendarUrl": "https://www.calgarystampede.com/",
-      "status": "pending",
+      "status": "not-readable",
       "lastSuccess": null,
-      "message": "Not checked yet"
+      "message": "no calendar feed or structured event data found (also: HTTP 404 for https://www.calgarystampede.com/stampede)"
     },
     {
       "id": "horse-racing-alberta",
       "name": "Horse Racing Alberta",
       "calendarUrl": "https://www.horseracingalberta.com/",
-      "status": "pending",
+      "status": "error",
       "lastSuccess": null,
-      "message": "Not checked yet"
+      "message": "blocked by robots.txt: /race-dates; blocked by robots.txt: /"
     },
     {
       "id": "century-mile",
       "name": "Century Mile Racetrack",
       "calendarUrl": "https://www.centurymile.com/",
-      "status": "pending",
+      "status": "error",
       "lastSuccess": null,
-      "message": "Not checked yet"
+      "message": "HTTP 403 for https://www.centurymile.com/racing; HTTP 403 for https://www.centurymile.com/events; HTTP 403 for https://www.centurymile.com/"
     },
     {
       "id": "woodbine",
       "name": "Woodbine Racetrack",
-      "calendarUrl": "https://woodbine.com/",
-      "status": "pending",
+      "calendarUrl": "https://woodbine.com/experiences/",
+      "status": "not-readable",
       "lastSuccess": null,
-      "message": "Not checked yet"
+      "message": "no calendar feed or structured event data found"
     },
     {
       "id": "hastings",
       "name": "Hastings Racecourse",
-      "calendarUrl": "https://www.hastingsracecourse.com/",
-      "status": "pending",
+      "calendarUrl": "https://greatcanadian.com/destinations/britishcolumbia/hastings/",
+      "status": "not-readable",
       "lastSuccess": null,
-      "message": "Not checked yet"
+      "message": "no calendar feed or structured event data found"
     },
     {
       "id": "royal-winter-fair",
       "name": "Royal Agricultural Winter Fair (Royal Horse Show)",
       "calendarUrl": "https://www.royalfair.org/",
-      "status": "pending",
+      "status": "not-readable",
       "lastSuccess": null,
-      "message": "Not checked yet"
+      "message": "no calendar feed or structured event data found"
     },
     {
       "id": "cths-alberta",
       "name": "Canadian Thoroughbred Horse Society (Alberta) sales",
       "calendarUrl": "https://www.cthsalberta.com/",
-      "status": "pending",
+      "status": "error",
       "lastSuccess": null,
-      "message": "Not checked yet"
+      "message": "blocked by robots.txt: /sales; blocked by robots.txt: /"
     },
     {
       "id": "keeneland",
       "name": "Keeneland (racing and sales)",
-      "calendarUrl": "https://www.keeneland.com/",
-      "status": "pending",
+      "calendarUrl": "https://www.keeneland.com/sales/",
+      "status": "not-readable",
       "lastSuccess": null,
-      "message": "Not checked yet"
+      "message": "no calendar feed or structured event data found"
     },
     {
       "id": "kentucky-derby",
       "name": "Kentucky Derby / Churchill Downs",
-      "calendarUrl": "https://www.churchilldowns.com/",
-      "status": "pending",
+      "calendarUrl": "https://www.kentuckyderby.com/",
+      "status": "not-readable",
       "lastSuccess": null,
-      "message": "Not checked yet"
+      "message": "no calendar feed or structured event data found"
     },
     {
       "id": "breeders-cup",
       "name": "Breeders' Cup",
       "calendarUrl": "https://www.breederscup.com/",
-      "status": "pending",
+      "status": "not-readable",
       "lastSuccess": null,
-      "message": "Not checked yet"
+      "message": "no calendar feed or structured event data found"
     },
     {
       "id": "fasig-tipton",
       "name": "Fasig-Tipton sales",
       "calendarUrl": "https://www.fasigtipton.com/",
-      "status": "pending",
+      "status": "not-readable",
       "lastSuccess": null,
-      "message": "Not checked yet"
+      "message": "no calendar feed or structured event data found (also: HTTP 404 for https://www.fasigtipton.com/sales)"
     }
   ],
   "events": []
