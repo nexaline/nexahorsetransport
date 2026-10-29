@@ -228,6 +228,67 @@ textarea { min-height: 110px; resize: vertical; }
 }
 
 /* Quote calculator */
+.field-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+}
+
+.mode-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  justify-content: start;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.mode-tab {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--brand-dark);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.mode-tab:hover { background: var(--bg-alt); }
+
+.mode-tab[aria-selected=true] {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+  font-weight: 600;
+}
+
+.mode-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.mode-panel.autocomplete { position: relative; }
+
+.pick-map,
+.route-map {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-alt);
+}
+
+.pick-map { height: 260px; }
+
+.route-map { height: 280px; }
+
+.route-map.unavailable,
+.pick-map.unavailable {
+  height: auto;
+  padding: 12px;
+  border-style: dashed;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.location-found:empty { display: none; }
+
 .autocomplete { position: relative; }
 
 .suggestions {
@@ -459,5 +520,8 @@ textarea { min-height: 110px; resize: vertical; }
   .hero { padding: 56px 0 52px; }
   .booking-form { grid-template-columns: 1fr; padding: 18px; }
   .quote { padding: 16px; }
+  .mode-tabs { grid-template-columns: 1fr 1fr; justify-content: stretch; }
+  .pick-map { height: 220px; }
+  .route-map { height: 220px; }
   .stall-grid { gap: 8px; }
 }

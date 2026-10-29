@@ -87,17 +87,59 @@
             <label for="email">Email *</label>
             <input id="email" name="email" type="email" autocomplete="email" required>
           </div>
-          <div class="field autocomplete">
-            <label for="pickup">Pickup address *</label>
-            <input id="pickup" name="pickup" type="text" placeholder="Start typing an address or town" autocomplete="off" required
-              role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="pickup-list">
-            <ul class="suggestions" id="pickup-list" role="listbox" hidden></ul>
+          <div class="field full location" id="pickup-location">
+            <span class="field-label" id="pickup-heading">Pickup location *</span>
+            <div class="mode-tabs" role="tablist" aria-labelledby="pickup-heading">
+              <button type="button" role="tab" class="mode-tab" data-mode="address" aria-selected="true" aria-controls="pickup-panel-address">Address</button>
+              <button type="button" role="tab" class="mode-tab" data-mode="postal" aria-selected="false" aria-controls="pickup-panel-postal">Postal / ZIP code</button>
+              <button type="button" role="tab" class="mode-tab" data-mode="gps" aria-selected="false" aria-controls="pickup-panel-gps">GPS coordinates</button>
+              <button type="button" role="tab" class="mode-tab" data-mode="map" aria-selected="false" aria-controls="pickup-panel-map">Pick on map</button>
+            </div>
+            <div class="mode-panel autocomplete" id="pickup-panel-address" role="tabpanel">
+              <input id="pickup" name="pickup" type="text" placeholder="Start typing an address or town" autocomplete="off" aria-label="Pickup address"
+                role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="pickup-list">
+              <ul class="suggestions" id="pickup-list" role="listbox" hidden></ul>
+            </div>
+            <div class="mode-panel" id="pickup-panel-postal" role="tabpanel" hidden>
+              <input id="pickup-postal" type="text" placeholder="e.g. T0M 1X0 or 59801" autocomplete="off" aria-label="Pickup postal or ZIP code">
+            </div>
+            <div class="mode-panel" id="pickup-panel-gps" role="tabpanel" hidden>
+              <input id="pickup-gps" type="text" inputmode="decimal" placeholder="e.g. 51.0447, -114.0719" autocomplete="off" aria-label="Pickup GPS coordinates, latitude then longitude">
+            </div>
+            <div class="mode-panel" id="pickup-panel-map" role="tabpanel" hidden>
+              <div class="pick-map" id="pickup-pick-map" aria-label="Map for choosing the pickup location"></div>
+              <p class="hint">Tap the map to drop a pin, then drag it to fine-tune.</p>
+            </div>
+            <p class="hint location-found" id="pickup-found" aria-live="polite"></p>
           </div>
-          <div class="field autocomplete">
-            <label for="dropoff">Drop-off address *</label>
-            <input id="dropoff" name="dropoff" type="text" placeholder="Start typing an address or town" autocomplete="off" required
-              role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="dropoff-list">
-            <ul class="suggestions" id="dropoff-list" role="listbox" hidden></ul>
+          <div class="field full location" id="dropoff-location">
+            <span class="field-label" id="dropoff-heading">Drop-off location *</span>
+            <div class="mode-tabs" role="tablist" aria-labelledby="dropoff-heading">
+              <button type="button" role="tab" class="mode-tab" data-mode="address" aria-selected="true" aria-controls="dropoff-panel-address">Address</button>
+              <button type="button" role="tab" class="mode-tab" data-mode="postal" aria-selected="false" aria-controls="dropoff-panel-postal">Postal / ZIP code</button>
+              <button type="button" role="tab" class="mode-tab" data-mode="gps" aria-selected="false" aria-controls="dropoff-panel-gps">GPS coordinates</button>
+              <button type="button" role="tab" class="mode-tab" data-mode="map" aria-selected="false" aria-controls="dropoff-panel-map">Pick on map</button>
+            </div>
+            <div class="mode-panel autocomplete" id="dropoff-panel-address" role="tabpanel">
+              <input id="dropoff" name="dropoff" type="text" placeholder="Start typing an address or town" autocomplete="off" aria-label="Drop-off address"
+                role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="dropoff-list">
+              <ul class="suggestions" id="dropoff-list" role="listbox" hidden></ul>
+            </div>
+            <div class="mode-panel" id="dropoff-panel-postal" role="tabpanel" hidden>
+              <input id="dropoff-postal" type="text" placeholder="e.g. T0M 1X0 or 59801" autocomplete="off" aria-label="Drop-off postal or ZIP code">
+            </div>
+            <div class="mode-panel" id="dropoff-panel-gps" role="tabpanel" hidden>
+              <input id="dropoff-gps" type="text" inputmode="decimal" placeholder="e.g. 51.0447, -114.0719" autocomplete="off" aria-label="Drop-off GPS coordinates, latitude then longitude">
+            </div>
+            <div class="mode-panel" id="dropoff-panel-map" role="tabpanel" hidden>
+              <div class="pick-map" id="dropoff-pick-map" aria-label="Map for choosing the drop-off location"></div>
+              <p class="hint">Tap the map to drop a pin, then drag it to fine-tune.</p>
+            </div>
+            <p class="hint location-found" id="dropoff-found" aria-live="polite"></p>
+          </div>
+          <div class="field full">
+            <div class="route-map" id="route-map" aria-label="Map of the pickup, drop-off and route"></div>
+            <p class="hint" id="map-status">The map shows both locations and the route once you've entered them.</p>
           </div>
           <fieldset class="field full stalls">
             <legend>How many horses need each stall type? *</legend>
@@ -122,7 +164,7 @@
               <input id="distance" name="distance" type="number" min="1" step="1" inputmode="numeric" required>
               <button type="button" id="calc-distance" class="btn btn-secondary">Calculate distance</button>
             </div>
-            <p class="hint" id="distance-status" aria-live="polite">Choose your pickup and drop-off addresses and we'll work out the driving distance for you. You can also type it in.</p>
+            <p class="hint" id="distance-status" aria-live="polite">Enter your pickup and drop-off locations and we'll work out the driving distance for you. You can also type it in.</p>
             <p class="route-note" id="route-note" role="alert" hidden></p>
           </div>
 
@@ -342,8 +384,9 @@
       function choose(item) {
         input.value = item.text;
         input.dataset.placeId = item.placeId;
+        input.dataset.resolvedValue = item.text;
         close();
-        lookupDistance(false);
+        updateLocation(locationFor(input.id));
       }
 
       function highlight(i) {
@@ -417,9 +460,298 @@
       });
     }
 
-    // A chosen suggestion is routed by its place ID; anything typed by hand is routed by its text.
-    function waypoint(input) {
-      return input.dataset.placeId ? { placeId: input.dataset.placeId } : { address: input.value.trim() };
+    // Google Maps JavaScript API, for the maps and for turning postal codes, GPS points and map pins into
+    // addresses (Geocoding API). Without it the calculator still works; only the maps are missing.
+    var mapsReady = new Promise(function (resolve, reject) {
+      if (!GOOGLE_MAPS_API_KEY) return reject(new Error("No Google Maps API key set"));
+      window.initNexaMaps = function () { resolve(window.google.maps); };
+      window.gm_authFailure = mapUnavailable;
+      var script = document.createElement("script");
+      script.src = "https://maps.googleapis.com/maps/api/js?key=" + encodeURIComponent(GOOGLE_MAPS_API_KEY) +
+        "&v=weekly&loading=async&callback=initNexaMaps";
+      script.async = true;
+      script.onerror = function () { reject(new Error("Google Maps failed to load")); };
+      document.head.appendChild(script);
+      setTimeout(function () { reject(new Error("Google Maps took too long to load")); }, 10000);
+    });
+
+    function geocode(request) {
+      return mapsReady.then(function (maps) {
+        return new maps.Geocoder().geocode(request);
+      }).then(function (response) {
+        var result = response.results && response.results[0];
+        if (!result) throw new Error("Location not found");
+        var place = {
+          label: result.formatted_address,
+          lat: result.geometry.location.lat(),
+          lng: result.geometry.location.lng(),
+          placeId: result.place_id,
+          country: null,
+          province: null
+        };
+        result.address_components.forEach(function (c) {
+          if (c.types.indexOf("country") !== -1) place.country = c.short_name;
+          if (c.types.indexOf("administrative_area_level_1") !== -1) place.province = c.short_name;
+        });
+        return place;
+      });
+    }
+
+    // Each location is resolved to a place, whichever tab it was entered on:
+    // { label, lat, lng, placeId, country, province, entered, exact }. Exact places (GPS coordinates or a
+    // map pin) are routed to their exact coordinates; the others to Google's place for the address.
+    var LOCATIONS = ["pickup", "dropoff"].map(function (key) {
+      return {
+        key: key,
+        name: key === "pickup" ? "Pickup" : "Drop-off",
+        mode: "address",
+        place: null,
+        version: 0,
+        pin: null,
+        pickMap: null,
+        root: document.getElementById(key + "-location"),
+        found: document.getElementById(key + "-found")
+      };
+    });
+    var pickupLoc = LOCATIONS[0];
+    var dropoffLoc = LOCATIONS[1];
+
+    function locationFor(key) {
+      return key === "pickup" ? pickupLoc : dropoffLoc;
+    }
+
+    var CA_POSTAL = /^([A-Z]\d[A-Z])\s*-?\s*(\d[A-Z]\d)$/;
+    var US_ZIP = /^\d{5}(-\d{4})?$/;
+
+    function parseCoordinates(text) {
+      var m = text.trim().match(/^(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)$/);
+      if (!m) return null;
+      var lat = parseFloat(m[1]);
+      var lng = parseFloat(m[2]);
+      if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+      return { lat: lat, lng: lng };
+    }
+
+    function coordsText(p) {
+      return p.lat.toFixed(5) + ", " + p.lng.toFixed(5);
+    }
+
+    // A GPS point or map pin keeps its exact coordinates; Google only adds the nearest address.
+    function exactPlace(coords, entered) {
+      var place = { label: coordsText(coords), lat: coords.lat, lng: coords.lng, exact: true, entered: entered, country: null, province: null };
+      return geocode({ location: coords }).then(function (found) {
+        place.label = "Near " + found.label;
+        place.country = found.country;
+        place.province = found.province;
+        return place;
+      }).catch(function () { return place; });
+    }
+
+    function resolveLocation(loc) {
+      if (loc.mode === "address") {
+        var input = document.getElementById(loc.key);
+        var text = input.value.trim();
+        if (!text) return Promise.reject(new Error(""));
+        if (input.dataset.placeId) {
+          var placeId = input.dataset.placeId;
+          return placeInfo(placeId).then(function (info) {
+            return Object.assign(info, { label: text, placeId: placeId, entered: "address" });
+          }, function () {
+            return { label: text, placeId: placeId, entered: "address" };
+          });
+        }
+        return geocode({ address: text, componentRestrictions: { country: ["ca", "us"] } }).then(function (place) {
+          place.entered = "address \"" + text + "\"";
+          return place;
+        }, function () {
+          return { label: text, address: text, entered: "address" };
+        });
+      }
+      if (loc.mode === "postal") {
+        var code = document.getElementById(loc.key + "-postal").value.trim().toUpperCase();
+        if (!code) return Promise.reject(new Error(""));
+        var ca = code.match(CA_POSTAL);
+        if (!ca && !US_ZIP.test(code)) {
+          return Promise.reject(new Error("Please enter a Canadian postal code (like T0M 1X0) or a US ZIP code (like 59801)."));
+        }
+        if (ca) code = ca[1] + " " + ca[2];
+        var country = ca ? "CA" : "US";
+        var address = code + (ca ? ", Canada" : ", USA");
+        return geocode({ address: code, componentRestrictions: { country: country, postalCode: code } }).then(function (place) {
+          place.entered = "postal / ZIP code " + code;
+          return place;
+        }, function () {
+          return { label: address, address: address, country: country, entered: "postal / ZIP code " + code };
+        });
+      }
+      if (loc.mode === "gps") {
+        var raw = document.getElementById(loc.key + "-gps").value.trim();
+        if (!raw) return Promise.reject(new Error(""));
+        var coords = parseCoordinates(raw);
+        if (!coords) {
+          return Promise.reject(new Error("Please enter latitude and longitude separated by a comma, like 51.0447, -114.0719."));
+        }
+        if (coords.lng > 0) {
+          return Promise.reject(new Error("Longitude is negative in Canada and the US. Did you mean " + coords.lat + ", -" + coords.lng + "?"));
+        }
+        return exactPlace(coords, "GPS coordinates " + raw);
+      }
+      if (!loc.pin) return Promise.reject(new Error(""));
+      var pos = loc.pin.getPosition();
+      return exactPlace({ lat: pos.lat(), lng: pos.lng() }, "pin on map");
+    }
+
+    // Resolves a location from its current tab, then shows it and looks up the distance.
+    function updateLocation(loc, skipLookup) {
+      var version = ++loc.version;
+      loc.found.textContent = "Finding location...";
+      return resolveLocation(loc).then(function (place) {
+        if (version !== loc.version) return;
+        loc.place = place;
+        showFound(loc);
+        updateMapMarkers();
+        if (!skipLookup) lookupDistance(false);
+      }, function (err) {
+        if (version !== loc.version) return;
+        loc.place = null;
+        loc.found.textContent = err.message;
+        updateMapMarkers();
+      });
+    }
+
+    function setApproximatePosition(place, point) {
+      place.lat = point[0];
+      place.lng = point[1];
+      place.approximate = true;
+    }
+
+    function showFound(loc) {
+      var p = loc.place;
+      if (!p) return;
+      var gps = p.lat != null && p.label !== coordsText(p) ? " (GPS " + coordsText(p) + (p.approximate ? ", approximate" : "") + ")" : "";
+      loc.found.textContent = "Using: " + p.label + gps;
+    }
+
+    // A chosen place is routed by Google's place ID; GPS points and map pins by their exact coordinates.
+    function waypointFor(place) {
+      if (!place.exact && place.placeId) return { placeId: place.placeId };
+      if (place.lat != null && !place.approximate) {
+        return { location: { latLng: { latitude: place.lat, longitude: place.lng } } };
+      }
+      return { address: place.address || place.label };
+    }
+
+    function locationLines(loc) {
+      var p = loc.place;
+      var lines = [loc.name + ": " + p.label];
+      if (p.lat != null) {
+        lines.push("  GPS: " + coordsText(p) + (p.approximate ? " (approximate, from the route)" : ""));
+        lines.push("  Navigate: https://www.google.com/maps/search/?api=1&query=" + p.lat.toFixed(6) + "," + p.lng.toFixed(6));
+      } else {
+        lines.push("  GPS: not available");
+      }
+      lines.push("  Entered as: " + p.entered);
+      return lines;
+    }
+
+    function setMode(loc, mode) {
+      loc.mode = mode;
+      loc.root.querySelectorAll(".mode-tab").forEach(function (tab) {
+        var selected = tab.dataset.mode === mode;
+        tab.setAttribute("aria-selected", selected ? "true" : "false");
+        document.getElementById(tab.getAttribute("aria-controls")).hidden = !selected;
+      });
+      // Switching tabs keeps the current location until something new is entered on the new tab.
+      if (mode === "map") openPickMap(loc);
+    }
+
+    var MAP_OPTIONS = { mapTypeControl: false, streetViewControl: false, fullscreenControl: false, clickableIcons: false };
+    var SUNDRE = { lat: 51.80, lng: -114.64 };
+    var routeMap = null;
+    var routeMarkers = {};
+    var routeLine = null;
+    var routePath = null;
+
+    function mapUnavailable() {
+      document.getElementById("map-status").textContent =
+        "The map isn't available right now, but you can still enter your locations and get a quote.";
+      var routeBox = document.getElementById("route-map");
+      routeBox.classList.add("unavailable");
+      routeBox.textContent = "Map unavailable";
+      LOCATIONS.forEach(function (loc) {
+        var pickBox = document.getElementById(loc.key + "-pick-map");
+        pickBox.classList.add("unavailable");
+        pickBox.textContent = "The map isn't available right now. Please use another option.";
+      });
+    }
+
+    mapsReady.then(function (maps) {
+      routeMap = new maps.Map(document.getElementById("route-map"),
+        Object.assign({ center: { lat: 54, lng: -100 }, zoom: 3 }, MAP_OPTIONS));
+      updateMapMarkers();
+    }).catch(mapUnavailable);
+
+    function updateMapMarkers() {
+      if (!routeMap) return;
+      var maps = window.google.maps;
+      var bounds = new maps.LatLngBounds();
+      var count = 0;
+      LOCATIONS.forEach(function (loc) {
+        var p = loc.place;
+        var marker = routeMarkers[loc.key];
+        if (p && p.lat != null) {
+          var position = { lat: p.lat, lng: p.lng };
+          if (!marker) {
+            marker = routeMarkers[loc.key] = new maps.Marker({ label: loc.key === "pickup" ? "P" : "D", title: loc.name });
+          }
+          marker.setPosition(position);
+          marker.setMap(routeMap);
+          bounds.extend(position);
+          count++;
+        } else if (marker) {
+          marker.setMap(null);
+        }
+      });
+      (routePath || []).forEach(function (point) { bounds.extend(point); });
+      if (count === 1 && !routePath) {
+        routeMap.setCenter(bounds.getCenter());
+        routeMap.setZoom(9);
+      } else if (count) {
+        routeMap.fitBounds(bounds);
+      }
+    }
+
+    function drawRoute(points) {
+      routePath = points && points.length ? points.map(function (p) { return { lat: p[0], lng: p[1] }; }) : null;
+      if (!routeMap) return;
+      if (!routeLine) {
+        routeLine = new window.google.maps.Polyline({ strokeColor: "#6b3e1f", strokeOpacity: 0.85, strokeWeight: 4 });
+      }
+      routeLine.setPath(routePath || []);
+      routeLine.setMap(routePath ? routeMap : null);
+      updateMapMarkers();
+    }
+
+    // The pick-on-map maps are created when their tab is first opened, since a hidden map can't size itself.
+    function openPickMap(loc) {
+      mapsReady.then(function (maps) {
+        if (loc.pickMap) return;
+        var p = loc.place;
+        var center = p && p.lat != null ? { lat: p.lat, lng: p.lng } : SUNDRE;
+        loc.pickMap = new maps.Map(document.getElementById(loc.key + "-pick-map"),
+          Object.assign({ center: center, zoom: p && p.lat != null ? 11 : 6 }, MAP_OPTIONS));
+        loc.pickMap.addListener("click", function (e) { setPin(loc, e.latLng); });
+      }).catch(function () {});
+    }
+
+    function setPin(loc, latLng) {
+      if (!loc.pin) {
+        loc.pin = new window.google.maps.Marker({ map: loc.pickMap, position: latLng, draggable: true, title: loc.name + " location" });
+        loc.pin.addListener("dragend", function () { updateLocation(loc); });
+      } else {
+        loc.pin.setPosition(latLng);
+      }
+      updateLocation(loc);
     }
 
     // Trips within Canada must stay in Canada. Routes API can't avoid borders, so trips between these
@@ -549,14 +881,16 @@
         body
       ).then(function (data) {
         var route = data.routes && data.routes[0];
-        if (!route || !route.distanceMeters) throw new Error("We couldn't find a driving route between those addresses.");
+        if (!route || !route.distanceMeters) throw new Error("We couldn't find a driving route between those locations.");
         var geo = data.geocodingResults || {};
-        var sections = usSections(decodePolyline((route.polyline && route.polyline.encodedPolyline) || ""), vias);
+        var points = decodePolyline((route.polyline && route.polyline.encodedPolyline) || "");
+        var sections = usSections(points, vias);
         if (sections.length) console.warn("Route leaves Canada: " + sections.join("; "));
         return {
           km: Math.round(route.distanceMeters / 1000),
           entersUS: sections.length > 0,
           usSections: sections,
+          points: points,
           originPlaceId: origin.placeId || (geo.origin && geo.origin.placeId),
           destinationPlaceId: destination.placeId || (geo.destination && geo.destination.placeId),
           vias: vias
@@ -564,12 +898,19 @@
       });
     }
 
-    // Country, province and longitude of a place, e.g. { country: "CA", province: "AB", lng: -114.07 }.
+    // Address, position, country and province of a Google place,
+    // e.g. { label: "Calgary, AB, Canada", lat: 51.05, lng: -114.07, country: "CA", province: "AB" }.
     function placeInfo(placeId) {
-      if (!placeId) return Promise.resolve(null);
-      return googleRequest("https://places.googleapis.com/v1/places/" + encodeURIComponent(placeId), "addressComponents,location")
-        .then(function (place) {
-          var info = { country: null, province: null, lng: place.location && place.location.longitude };
+      return googleRequest("https://places.googleapis.com/v1/places/" + encodeURIComponent(placeId),
+        "addressComponents,location,formattedAddress"
+      ).then(function (place) {
+          var info = {
+            label: place.formattedAddress,
+            lat: place.location && place.location.latitude,
+            lng: place.location && place.location.longitude,
+            country: null,
+            province: null
+          };
           (place.addressComponents || []).forEach(function (c) {
             if (c.types.indexOf("country") !== -1) info.country = c.shortText;
             if (c.types.indexOf("administrative_area_level_1") !== -1) info.province = c.shortText;
@@ -578,22 +919,34 @@
         });
     }
 
-    // Finds the driving route, keeping it inside Canada when both ends are in Canada. Typed addresses
-    // have no place ID yet, so they are routed once first to let Google find the places.
-    function findRoute(origin, destination) {
-      var first = origin.placeId && destination.placeId ? Promise.resolve(null) : computeRoute(origin, destination, []);
+    // Finds the driving route, keeping it inside Canada when both ends are in Canada. If a place's country
+    // or province isn't known yet (Google couldn't geocode it in the browser), the route is found once
+    // first and Google's own place IDs for its ends are looked up.
+    function findRoute(from, to) {
+      var known = function (p) { return !!(p.country && p.province && p.lng != null); };
+      var origin = waypointFor(from);
+      var destination = waypointFor(to);
+      var first = known(from) && known(to) ? Promise.resolve(null) : computeRoute(origin, destination, []);
       return first.then(function (route) {
-        var ids = route ? [route.originPlaceId, route.destinationPlaceId] : [origin.placeId, destination.placeId];
-        return Promise.all(ids.map(placeInfo)).catch(function () { return [null, null]; }).then(function (places) {
-          var domestic = !!(places[0] && places[1] && places[0].country === "CA" && places[1].country === "CA");
-          var vias = domestic ? canadianVias(places[0], places[1]) : [];
+        var fill = function (p, placeId) {
+          if (known(p) || !placeId) return Promise.resolve(p);
+          return placeInfo(placeId).then(function (info) {
+            return Object.assign({}, p, { country: info.country, province: info.province, lat: info.lat, lng: info.lng });
+          }, function () { return p; });
+        };
+        return Promise.all([fill(from, route && route.originPlaceId), fill(to, route && route.destinationPlaceId)]).then(function (places) {
+          var a = places[0], b = places[1];
+          var vias = a.country === "CA" && b.country === "CA" && known(a) && known(b) ? canadianVias(a, b) : [];
           var result = route && !vias.length ? Promise.resolve(route) : computeRoute(origin, destination, vias).catch(function (err) {
             // If a waypoint route fails, fall back to Google's own route; the US check below still applies.
             if (!vias.length) throw err;
             return route || computeRoute(origin, destination, []);
           });
           return result.then(function (r) {
-            r.domestic = domestic;
+            // A trip counts as Canadian when both ends are in Canada, or, if a country is unknown,
+            // when neither end of the route is in the US.
+            var endInUS = function (p, point) { return p.country ? p.country !== "CA" : !!(point && usArea(point)); };
+            r.domestic = !endInUS(a, r.points[0]) && !endInUS(b, r.points[r.points.length - 1]);
             return r;
           });
         });
@@ -614,27 +967,33 @@
     }
 
     function lookupDistance(force) {
-      var from = form.pickup.value.trim();
-      var to = form.dropoff.value.trim();
+      var from = pickupLoc.place;
+      var to = dropoffLoc.place;
       if (!from || !to) {
-        if (force) distanceStatus.textContent = "Please enter both a pickup and a drop-off address.";
+        if (force) distanceStatus.textContent = "Please enter both a pickup and a drop-off location.";
         return;
       }
-      var key = JSON.stringify([waypoint(form.pickup), waypoint(form.dropoff)]);
+      var key = JSON.stringify([waypointFor(from), waypointFor(to)]);
       if (!force && key === lastLookup) return;
       lastLookup = key;
       var id = ++lookupId;
       setRouteNote("", false);
+      drawRoute(null);
       distanceStatus.textContent = "Calculating driving distance...";
-      findRoute(waypoint(form.pickup), waypoint(form.dropoff)).then(function (route) {
+      findRoute(from, to).then(function (route) {
         if (id !== lookupId) return;
+        // Places Google couldn't position in the browser take their position from the route's ends.
+        if (from.lat == null && route.points.length) setApproximatePosition(from, route.points[0]);
+        if (to.lat == null && route.points.length) setApproximatePosition(to, route.points[route.points.length - 1]);
+        LOCATIONS.forEach(showFound);
+        drawRoute(route.points);
         var names = route.vias.map(function (v) { return v.name; });
         var via = names.length > 1 ? names.slice(0, -1).join(", ") + " and " + names[names.length - 1] : names.join("");
         distanceInput.value = route.km;
         distanceInput.dataset.source = "calculated automatically";
-        distanceStatus.textContent = "About " + route.km + " km by road from " + from + " to " + to +
+        distanceStatus.textContent = "About " + route.km + " km by road from " + from.label + " to " + to.label +
           (via ? (route.entersUS ? ", routed via " : ", staying in Canada via ") + via + " on the Trans-Canada Highway" : "") +
-          ". If this doesn't look right, check the addresses or type the distance in.";
+          ". If this doesn't look right, check the locations or type the distance in.";
         if (route.domestic && route.entersUS) {
           setRouteNote(ROUTE_WARNING + " (Route leaves Canada in: " + route.usSections.join("; ") + ".)", true);
         }
@@ -647,16 +1006,33 @@
         setRouteNote("", false);
         updateQuote();
         var reason = err && err.message && err.message.indexOf("couldn't") !== -1 ? err.message : "We couldn't calculate the distance automatically.";
-        distanceStatus.textContent = reason + " Please check the addresses or type the driving distance in km.";
+        distanceStatus.textContent = reason + " Please check the locations or type the driving distance in km.";
       });
     }
 
-    setupAutocomplete(form.pickup);
-    setupAutocomplete(form.dropoff);
+    LOCATIONS.forEach(function (loc) {
+      var address = document.getElementById(loc.key);
+      setupAutocomplete(address);
+      address.addEventListener("change", function () {
+        if (address.value !== address.dataset.resolvedValue) updateLocation(loc);
+      });
+      [address, document.getElementById(loc.key + "-postal"), document.getElementById(loc.key + "-gps")].forEach(function (input) {
+        if (input !== address) input.addEventListener("change", function () { updateLocation(loc); });
+        // Enter finds the location rather than sending the form
+        input.addEventListener("keydown", function (e) {
+          if (e.key !== "Enter" || e.defaultPrevented) return;
+          e.preventDefault();
+          updateLocation(loc);
+        });
+      });
+      loc.root.querySelectorAll(".mode-tab").forEach(function (tab) {
+        tab.addEventListener("click", function () { setMode(loc, tab.dataset.mode); });
+      });
+    });
     distanceInput.dataset.source = "entered by customer";
-    form.pickup.addEventListener("change", function () { lookupDistance(false); });
-    form.dropoff.addEventListener("change", function () { lookupDistance(false); });
-    document.getElementById("calc-distance").addEventListener("click", function () { lookupDistance(true); });
+    document.getElementById("calc-distance").addEventListener("click", function () {
+      Promise.all(LOCATIONS.map(function (loc) { return updateLocation(loc, true); })).then(function () { lookupDistance(true); });
+    });
     distanceInput.addEventListener("input", function () {
       distanceInput.dataset.source = "entered by customer";
       setRouteNote("", false);
@@ -676,13 +1052,20 @@
         document.getElementById("stall-standard").focus();
         return;
       }
+      var missing = LOCATIONS.filter(function (loc) { return !loc.place; })[0];
+      if (missing) {
+        document.getElementById("form-status").textContent = "Please enter the " + missing.name.toLowerCase() + " location.";
+        missing.root.querySelector(".mode-tab[aria-selected=true]").focus();
+        return;
+      }
       var stalls = STALLS.map(function (s) { return s.label + ": " + stallCount(s.input); }).join(", ");
       var lines = [
         "Name: " + f.name.value,
         "Phone: " + f.phone.value,
         "Email: " + f.email.value,
-        "Pickup: " + f.pickup.value,
-        "Drop-off: " + f.dropoff.value,
+        ""
+      ].concat(locationLines(pickupLoc), locationLines(dropoffLoc), [
+        "",
         "Preferred date: " + f.date.value,
         "Number of horses: " + q.horses + " (" + stalls + ")",
         "Trip type: " + f.trip.value,
@@ -690,11 +1073,11 @@
         "Details:",
         f.details.value || "(none)",
         ""
-      ].concat(quoteText(q), [
+      ]).concat(quoteText(q), [
         "",
         "I have read and agree to the Terms & Conditions."
       ]);
-      var subject = "Booking request: " + f.pickup.value + " to " + f.dropoff.value;
+      var subject = "Booking request: " + pickupLoc.place.label + " to " + dropoffLoc.place.label;
       window.location.href = "mailto:" + BOOKING_EMAIL +
         "?subject=" + encodeURIComponent(subject) +
         "&body=" + encodeURIComponent(lines.join("\n"));
