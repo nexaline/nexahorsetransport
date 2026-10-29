@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nexa Horse Transportation | Sundre, Alberta</title>
+  <meta name="description" content="Safe, professional horse transportation from Sundre, Alberta to destinations across Canada and the United States.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="#home" class="logo">Nexa <span>Horse Transportation</span></a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="#home">Home</a>
+        <a href="#services">Services</a>
+        <a href="#booking">Book</a>
+        <a href="#contact">Contact</a>
+        <a href="terms.html">Terms</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section id="home" class="hero">
+      <div class="container">
+        <h1>Safe, Caring Horse Transport</h1>
+        <p>Based in Sundre, Alberta, Nexa Horse Transportation moves horses across Canada and the United States, with the comfort and safety of every horse as our first priority.</p>
+        <a href="#booking" class="btn">Request a Booking</a>
+        <ul class="highlights">
+          <li>Sundre, Alberta</li>
+          <li>Canada &amp; USA</li>
+          <li>Experienced horse handlers</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="services" class="section-alt">
+      <div class="container">
+        <h2>Our Services</h2>
+        <p class="lead">Whether it's across town or across the border, we'll get your horse there safely.</p>
+        <div class="cards">
+          <div class="card">
+            <h3>Local &amp; Regional Hauls</h3>
+            <p>Trips around Sundre, Central Alberta and the rest of the province, including vet appointments, farm moves and trainer drop-offs.</p>
+          </div>
+          <div class="card">
+            <h3>Long-Distance Canada</h3>
+            <p>Coast-to-coast transport across Canada, with planned rest stops, regular checks, and water and hay throughout the trip.</p>
+          </div>
+          <div class="card">
+            <h3>Canada &ndash; US Transport</h3>
+            <p>Cross-border trips to and from the United States. We help you plan the health papers and border documents your horse needs.</p>
+          </div>
+          <div class="card">
+            <h3>Shows, Events &amp; Sales</h3>
+            <p>Reliable delivery to competitions, clinics, rodeos and sales, so your horse arrives on time and ready.</p>
+          </div>
+          <div class="card">
+            <h3>New Purchases</h3>
+            <p>Bought a horse from out of province or out of country? We'll pick it up and bring it home.</p>
+          </div>
+          <div class="card">
+            <h3>Emergency &amp; Vet Trips</h3>
+            <p>Ask us about short-notice transport to veterinary clinics, subject to availability.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="booking">
+      <div class="container">
+        <h2>Booking Request</h2>
+        <p class="lead">Tell us about your trip and we'll get back to you with availability and a quote. Submitting this form is a request only; your booking is confirmed once we contact you.</p>
+
+        <form id="booking-form" class="booking-form">
+          <div class="field">
+            <label for="name">Full name *</label>
+            <input id="name" name="name" type="text" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="phone">Phone *</label>
+            <input id="phone" name="phone" type="tel" autocomplete="tel" required>
+          </div>
+          <div class="field full">
+            <label for="email">Email *</label>
+            <input id="email" name="email" type="email" autocomplete="email" required>
+          </div>
+          <div class="field">
+            <label for="pickup">Pickup location *</label>
+            <input id="pickup" name="pickup" type="text" placeholder="City, Province/State" required>
+          </div>
+          <div class="field">
+            <label for="dropoff">Drop-off location *</label>
+            <input id="dropoff" name="dropoff" type="text" placeholder="City, Province/State" required>
+          </div>
+          <div class="field">
+            <label for="date">Preferred pickup date *</label>
+            <input id="date" name="date" type="date" required>
+          </div>
+          <div class="field">
+            <label for="horses">Number of horses *</label>
+            <select id="horses" name="horses" required>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5+">5 or more</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label for="trip">Trip type</label>
+            <select id="trip" name="trip">
+              <option>Local / within Alberta</option>
+              <option>Within Canada</option>
+              <option>Canada &ndash; US (cross-border)</option>
+              <option>Within the US</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label for="details">Horse details &amp; special requirements</label>
+            <textarea id="details" name="details" placeholder="Breed, age, size, temperament, any health or handling needs, flexibility on dates..."></textarea>
+          </div>
+          <div class="field full checkbox">
+            <input id="agree" name="agree" type="checkbox" required>
+            <label for="agree">I have read and agree to the <a href="terms.html" target="_blank">Terms &amp; Conditions</a>. *</label>
+          </div>
+          <div class="field full">
+            <button type="submit" class="btn">Send Booking Request</button>
+          </div>
+          <p class="form-note field full">Submitting opens your email app with your request filled in. Just press send.</p>
+          <p class="form-status field full" id="form-status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+
+    <section id="contact" class="section-alt">
+      <div class="container">
+        <h2>Contact Us</h2>
+        <p class="lead">Questions before you book? Reach out any time.</p>
+        <ul class="contact-list">
+          <li><strong>Location:</strong> Sundre, Alberta, Canada</li>
+          <li><strong>Service area:</strong> Canada &amp; the United States</li>
+          <li><strong>Phone:</strong> <a href="tel:+10000000000">(000) 000-0000</a></li>
+          <li><strong>Email:</strong> <a href="mailto:bookings@example.com">bookings@example.com</a></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span>&copy; <span id="year">2026</span> Nexa Horse Transportation &middot; Sundre, Alberta</span>
+      <a href="terms.html">Terms &amp; Conditions</a>
+    </div>
+  </footer>
+
+  <script>
+    // Booking requests are sent to this address.
+    var BOOKING_EMAIL = "bookings@example.com";
+
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    document.getElementById("booking-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var f = e.target;
+      var lines = [
+        "Name: " + f.name.value,
+        "Phone: " + f.phone.value,
+        "Email: " + f.email.value,
+        "Pickup: " + f.pickup.value,
+        "Drop-off: " + f.dropoff.value,
+        "Preferred date: " + f.date.value,
+        "Number of horses: " + f.horses.value,
+        "Trip type: " + f.trip.value,
+        "",
+        "Details:",
+        f.details.value || "(none)",
+        "",
+        "I have read and agree to the Terms & Conditions."
+      ];
+      var subject = "Booking request: " + f.pickup.value + " to " + f.dropoff.value;
+      window.location.href = "mailto:" + BOOKING_EMAIL +
+        "?subject=" + encodeURIComponent(subject) +
+        "&body=" + encodeURIComponent(lines.join("\n"));
+      document.getElementById("form-status").textContent =
+        "Thanks! Your email app should open now. If it doesn't, email us at " + BOOKING_EMAIL + ".";
+    });
+  </script>
+</body>
+</html>
