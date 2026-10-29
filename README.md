@@ -2,7 +2,9 @@
 
 Simple static website for Nexa Horse Transportation (Sundre, Alberta; serving Canada and the US).
 
-- `index.html`: home, services, booking request form, contact
+- `index.html`: home, services, instant quote calculator + booking request form, contact
+
+Quote rates live at the top of the script in `index.html` (`RATES`, `MINIMUM_CHARGE`, `GST_RATE`); the "See our rates" table in the booking section shows the same numbers, so update both together. Driving distance comes from free OpenStreetMap services (Nominatim and the OSRM demo server); customers can type the distance in if the lookup fails.
 - `terms.html`: terms and conditions
 - `styles.css`: shared styles (mobile-friendly)
 
