@@ -8,7 +8,13 @@ Simple static website for Nexa Horse Transportation (Sundre, Alberta; serving Ca
 
 Quote rates live at the top of the script in `index.html` (`RATES`, `MINIMUM_CHARGE`, `GST_RATE`); the "See our rates" table in the booking section shows the same numbers, so update both together. Addresses are suggested by Google Places API (New) and driving distance comes from Google Routes API, using the key in `GOOGLE_MAPS_API_KEY` near the bottom of `index.html` (left blank in the repository; until it is set, customers type the distance in); customers can type the distance in if the lookup fails.
 
-Trips with both ends in Canada are kept in Canada: if Google's route passes through the US (checked against the `US_AREAS` boxes), the calculator routes again through Thunder Bay and/or Sault Ste. Marie (`TRANS_CANADA_VIA`, only those between pickup and drop-off). If the route still leaves Canada, the customer sees a note asking them to confirm the distance with us, and the note is included in the booking email.
+Trips with both ends in Canada are kept in Canada using pass-through waypoints (`CANADIAN_ROUTE_VIA`), skipping any that aren't between the pickup and drop-off:
+
+- Western Canada (BC, AB, SK, MB) to Ontario or Quebec: Thunder Bay and Sault Ste. Marie
+- Ontario or Quebec to NB, NS or PEI: Rivière-du-Loup and Edmundston
+- Western Canada to NB, NS or PEI: all four, west to east
+
+The route is then checked against the `US_AREAS` boxes. If it still leaves Canada, the customer sees a note asking them to confirm the distance with us, and the note is included in the booking email.
 
 No build step. Open `index.html` in a browser, or host the folder on any static host (e.g. GitHub Pages).
 

@@ -422,13 +422,33 @@
       return input.dataset.placeId ? { placeId: input.dataset.placeId } : { address: input.value.trim() };
     }
 
-    // Trips within Canada must stay in Canada. Routes API can't avoid borders, so when Google's route
-    // dips into the US we route again through these Trans-Canada Highway towns (only the ones that lie
-    // between the pickup and drop-off), as pass-through points rather than stops.
-    var TRANS_CANADA_VIA = [
-      { name: "Thunder Bay, ON", address: "Thunder Bay, ON, Canada", lng: -89.25 },
-      { name: "Sault Ste. Marie, ON", address: "Sault Ste. Marie, ON, Canada", lng: -84.33 }
-    ];
+    // Trips within Canada must stay in Canada. Routes API can't avoid borders, so trips between these
+    // regions are routed through Trans-Canada Highway towns, as pass-through points rather than stops.
+    var THUNDER_BAY = { name: "Thunder Bay", address: "Thunder Bay, ON, Canada", lng: -89.25 };
+    var SAULT_STE_MARIE = { name: "Sault Ste. Marie", address: "Sault Ste. Marie, ON, Canada", lng: -84.33 };
+    var RIVIERE_DU_LOUP = { name: "Rivière-du-Loup", address: "Rivière-du-Loup, QC, Canada", lng: -69.53 };
+    var EDMUNDSTON = { name: "Edmundston", address: "Edmundston, NB, Canada", lng: -68.33 };
+    var REGIONS = {
+      BC: "west", AB: "west", SK: "west", MB: "west",
+      ON: "central", QC: "central",
+      NB: "maritimes", NS: "maritimes", PE: "maritimes"
+    };
+    // Keyed by the two regions in alphabetical order; waypoints listed west to east.
+    var CANADIAN_ROUTE_VIA = {
+      "central+west": [THUNDER_BAY, SAULT_STE_MARIE],          // around Lake Superior, not through the US
+      "central+maritimes": [RIVIERE_DU_LOUP, EDMUNDSTON],      // not through Maine
+      "maritimes+west": [THUNDER_BAY, SAULT_STE_MARIE, RIVIERE_DU_LOUP, EDMUNDSTON]
+    };
+
+    // Waypoints for a trip between two Canadian places, in travel order. A waypoint is skipped when it isn't
+    // between the two ends (e.g. Kenora, ON is west of Thunder Bay, so Kenora to Calgary needs neither).
+    function canadianVias(from, to) {
+      var key = [REGIONS[from.province], REGIONS[to.province]].sort().join("+");
+      var west = Math.min(from.lng, to.lng);
+      var east = Math.max(from.lng, to.lng);
+      var vias = (CANADIAN_ROUTE_VIA[key] || []).filter(function (v) { return v.lng > west && v.lng < east; });
+      return from.lng > to.lng ? vias.reverse() : vias;
+    }
 
     // Areas clearly inside the US, as [west, east, south, north] in degrees. Each keeps a margin back from
     // the border, so towns right on it (Windsor, Sarnia, Fort Frances, Niagara Falls) are never flagged,
@@ -482,7 +502,7 @@
         body.intermediates = vias.map(function (v) { return { address: v.address, via: true }; });
       }
       return googleRequest("https://routes.googleapis.com/directions/v2:computeRoutes",
-        "routes.distanceMeters,routes.polyline.encodedPolyline,routes.legs.startLocation,routes.legs.endLocation,geocodingResults",
+        "routes.distanceMeters,routes.polyline.encodedPolyline,geocodingResults",
         body
       ).then(function (data) {
         var route = data.routes && data.routes[0];
@@ -491,8 +511,6 @@
         return {
           km: Math.round(route.distanceMeters / 1000),
           entersUS: entersUS(decodePolyline((route.polyline && route.polyline.encodedPolyline) || "")),
-          startLng: route.legs[0].startLocation.latLng.longitude,
-          endLng: route.legs[route.legs.length - 1].endLocation.latLng.longitude,
           originPlaceId: origin.placeId || (geo.origin && geo.origin.placeId),
           destinationPlaceId: destination.placeId || (geo.destination && geo.destination.placeId),
           vias: vias
@@ -500,34 +518,39 @@
       });
     }
 
-    function placeCountry(placeId) {
+    // Country, province and longitude of a place, e.g. { country: "CA", province: "AB", lng: -114.07 }.
+    function placeInfo(placeId) {
       if (!placeId) return Promise.resolve(null);
-      return googleRequest("https://places.googleapis.com/v1/places/" + encodeURIComponent(placeId), "addressComponents")
+      return googleRequest("https://places.googleapis.com/v1/places/" + encodeURIComponent(placeId), "addressComponents,location")
         .then(function (place) {
-          var country = (place.addressComponents || []).filter(function (c) { return c.types.indexOf("country") !== -1; })[0];
-          return country ? country.shortText : null;
+          var info = { country: null, province: null, lng: place.location && place.location.longitude };
+          (place.addressComponents || []).forEach(function (c) {
+            if (c.types.indexOf("country") !== -1) info.country = c.shortText;
+            if (c.types.indexOf("administrative_area_level_1") !== -1) info.province = c.shortText;
+          });
+          return info;
         });
     }
 
-    // Finds the driving route, keeping it inside Canada when both ends are in Canada.
+    // Finds the driving route, keeping it inside Canada when both ends are in Canada. Typed addresses
+    // have no place ID yet, so they are routed once first to let Google find the places.
     function findRoute(origin, destination) {
-      return computeRoute(origin, destination, []).then(function (route) {
-        if (!route.entersUS) return route;
-        return Promise.all([placeCountry(route.originPlaceId), placeCountry(route.destinationPlaceId)])
-          .catch(function () { return [null, null]; })
-          .then(function (countries) {
-            if (countries[0] !== "CA" || countries[1] !== "CA") return route;
-            route.domestic = true;
-            var west = Math.min(route.startLng, route.endLng);
-            var east = Math.max(route.startLng, route.endLng);
-            var vias = TRANS_CANADA_VIA.filter(function (v) { return v.lng > west && v.lng < east; });
-            if (route.startLng > route.endLng) vias.reverse();
-            if (!vias.length) return route;
-            return computeRoute(origin, destination, vias).then(function (rerouted) {
-              rerouted.domestic = true;
-              return rerouted;
-            }).catch(function () { return route; });
+      var first = origin.placeId && destination.placeId ? Promise.resolve(null) : computeRoute(origin, destination, []);
+      return first.then(function (route) {
+        var ids = route ? [route.originPlaceId, route.destinationPlaceId] : [origin.placeId, destination.placeId];
+        return Promise.all(ids.map(placeInfo)).catch(function () { return [null, null]; }).then(function (places) {
+          var domestic = !!(places[0] && places[1] && places[0].country === "CA" && places[1].country === "CA");
+          var vias = domestic ? canadianVias(places[0], places[1]) : [];
+          var result = route && !vias.length ? Promise.resolve(route) : computeRoute(origin, destination, vias).catch(function (err) {
+            // If a waypoint route fails, fall back to Google's own route; the US check below still applies.
+            if (!vias.length) throw err;
+            return route || computeRoute(origin, destination, []);
           });
+          return result.then(function (r) {
+            r.domestic = domestic;
+            return r;
+          });
+        });
       });
     }
 
@@ -559,7 +582,8 @@
       distanceStatus.textContent = "Calculating driving distance...";
       findRoute(waypoint(form.pickup), waypoint(form.dropoff)).then(function (route) {
         if (id !== lookupId) return;
-        var via = route.vias.map(function (v) { return v.name; }).join(" and ");
+        var names = route.vias.map(function (v) { return v.name; });
+        var via = names.length > 1 ? names.slice(0, -1).join(", ") + " and " + names[names.length - 1] : names.join("");
         distanceInput.value = route.km;
         distanceInput.dataset.source = "calculated automatically";
         distanceStatus.textContent = "About " + route.km + " km by road from " + from + " to " + to +
