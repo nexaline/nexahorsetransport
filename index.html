@@ -88,59 +88,33 @@
             <label for="email">Email *</label>
             <input id="email" name="email" type="email" autocomplete="email" required>
           </div>
-          <div class="field full location" id="pickup-location">
-            <span class="field-label" id="pickup-heading">Pickup location *</span>
-            <div class="mode-tabs" role="tablist" aria-labelledby="pickup-heading">
-              <button type="button" role="tab" class="mode-tab" data-mode="address" aria-selected="true" aria-controls="pickup-panel-address">Address</button>
-              <button type="button" role="tab" class="mode-tab" data-mode="postal" aria-selected="false" aria-controls="pickup-panel-postal">Postal / ZIP code</button>
-              <button type="button" role="tab" class="mode-tab" data-mode="gps" aria-selected="false" aria-controls="pickup-panel-gps">GPS coordinates</button>
-              <button type="button" role="tab" class="mode-tab" data-mode="map" aria-selected="false" aria-controls="pickup-panel-map">Pick on map</button>
-            </div>
-            <div class="mode-panel autocomplete" id="pickup-panel-address" role="tabpanel">
-              <input id="pickup" name="pickup" type="text" placeholder="Start typing an address or town" autocomplete="off" aria-label="Pickup address"
+          <div class="field location" id="pickup-location">
+            <label for="pickup">Pickup location *</label>
+            <div class="autocomplete">
+              <input id="pickup" name="pickup" type="text" placeholder="Address, postal/ZIP code, or GPS coordinates" autocomplete="off"
                 role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="pickup-list">
               <ul class="suggestions" id="pickup-list" role="listbox" hidden></ul>
             </div>
-            <div class="mode-panel" id="pickup-panel-postal" role="tabpanel" hidden>
-              <input id="pickup-postal" type="text" placeholder="e.g. T0M 1X0 or 59801" autocomplete="off" aria-label="Pickup postal or ZIP code">
-            </div>
-            <div class="mode-panel" id="pickup-panel-gps" role="tabpanel" hidden>
-              <input id="pickup-gps" type="text" inputmode="decimal" placeholder="e.g. 51.0447, -114.0719" autocomplete="off" aria-label="Pickup GPS coordinates, latitude then longitude">
-            </div>
-            <div class="mode-panel" id="pickup-panel-map" role="tabpanel" hidden>
-              <div class="pick-map" id="pickup-pick-map" aria-label="Map for choosing the pickup location"></div>
-              <p class="hint">Tap the map to drop a pin, then drag it to fine-tune.</p>
-            </div>
+            <button type="button" class="link-button pick-on-map" data-location="pickup">or pick on the map</button>
             <p class="hint location-found" id="pickup-found" aria-live="polite"></p>
           </div>
-          <div class="field full location" id="dropoff-location">
-            <span class="field-label" id="dropoff-heading">Drop-off location *</span>
-            <div class="mode-tabs" role="tablist" aria-labelledby="dropoff-heading">
-              <button type="button" role="tab" class="mode-tab" data-mode="address" aria-selected="true" aria-controls="dropoff-panel-address">Address</button>
-              <button type="button" role="tab" class="mode-tab" data-mode="postal" aria-selected="false" aria-controls="dropoff-panel-postal">Postal / ZIP code</button>
-              <button type="button" role="tab" class="mode-tab" data-mode="gps" aria-selected="false" aria-controls="dropoff-panel-gps">GPS coordinates</button>
-              <button type="button" role="tab" class="mode-tab" data-mode="map" aria-selected="false" aria-controls="dropoff-panel-map">Pick on map</button>
-            </div>
-            <div class="mode-panel autocomplete" id="dropoff-panel-address" role="tabpanel">
-              <input id="dropoff" name="dropoff" type="text" placeholder="Start typing an address or town" autocomplete="off" aria-label="Drop-off address"
+          <div class="field location" id="dropoff-location">
+            <label for="dropoff">Drop-off location *</label>
+            <div class="autocomplete">
+              <input id="dropoff" name="dropoff" type="text" placeholder="Address, postal/ZIP code, or GPS coordinates" autocomplete="off"
                 role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="dropoff-list">
               <ul class="suggestions" id="dropoff-list" role="listbox" hidden></ul>
             </div>
-            <div class="mode-panel" id="dropoff-panel-postal" role="tabpanel" hidden>
-              <input id="dropoff-postal" type="text" placeholder="e.g. T0M 1X0 or 59801" autocomplete="off" aria-label="Drop-off postal or ZIP code">
-            </div>
-            <div class="mode-panel" id="dropoff-panel-gps" role="tabpanel" hidden>
-              <input id="dropoff-gps" type="text" inputmode="decimal" placeholder="e.g. 51.0447, -114.0719" autocomplete="off" aria-label="Drop-off GPS coordinates, latitude then longitude">
-            </div>
-            <div class="mode-panel" id="dropoff-panel-map" role="tabpanel" hidden>
-              <div class="pick-map" id="dropoff-pick-map" aria-label="Map for choosing the drop-off location"></div>
-              <p class="hint">Tap the map to drop a pin, then drag it to fine-tune.</p>
-            </div>
+            <button type="button" class="link-button pick-on-map" data-location="dropoff">or pick on the map</button>
             <p class="hint location-found" id="dropoff-found" aria-live="polite"></p>
           </div>
           <div class="field full">
-            <div class="route-map" id="route-map" aria-label="Map of the pickup, drop-off and route"></div>
-            <p class="hint" id="map-status">The map shows both locations and the route once you've entered them.</p>
+            <p class="map-hint" id="map-hint" aria-live="polite" hidden>
+              <span id="map-hint-text"></span>
+              <button type="button" class="link-button" id="map-hint-cancel">Cancel</button>
+            </p>
+            <div class="route-map" id="route-map" aria-label="Map of the pickup (A), drop-off (B) and route"></div>
+            <p class="hint" id="map-status">Pin A is the pickup and pin B the drop-off. Drag either pin to fine-tune it.</p>
           </div>
           <fieldset class="field full stalls">
             <legend>How many horses need each stall type? *</legend>
@@ -431,7 +405,7 @@
         delete input.dataset.placeId;
         clearTimeout(timer);
         var text = input.value.trim();
-        if (text.length < 3) {
+        if (text.length < 3 || looksLikeCoordinates(text)) {
           requestId++;
           close();
           return;
@@ -502,19 +476,17 @@
       });
     }
 
-    // Each location is resolved to a place, whichever tab it was entered on:
+    // Each location is resolved to a place, however it was entered:
     // { label, lat, lng, placeId, country, province, entered, exact }. Exact places (GPS coordinates or a
     // map pin) are routed to their exact coordinates; the others to Google's place for the address.
     var LOCATIONS = ["pickup", "dropoff"].map(function (key) {
       return {
         key: key,
         name: key === "pickup" ? "Pickup" : "Drop-off",
-        mode: "address",
+        pinLabel: key === "pickup" ? "A" : "B",
         place: null,
         version: 0,
-        pin: null,
-        pickMap: null,
-        root: document.getElementById(key + "-location"),
+        input: document.getElementById(key),
         found: document.getElementById(key + "-found")
       };
     });
@@ -527,9 +499,15 @@
 
     var CA_POSTAL = /^([A-Z]\d[A-Z])\s*-?\s*(\d[A-Z]\d)$/;
     var US_ZIP = /^\d{5}(-\d{4})?$/;
+    var COORDINATES = /^(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)$/;
+
+    // True for text that is meant as coordinates, e.g. "51.0447, -114.0719" (not "59801" or "123 Main St").
+    function looksLikeCoordinates(text) {
+      return COORDINATES.test(text.trim());
+    }
 
     function parseCoordinates(text) {
-      var m = text.trim().match(/^(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)$/);
+      var m = text.trim().match(COORDINATES);
       if (!m) return null;
       var lat = parseFloat(m[1]);
       var lng = parseFloat(m[2]);
@@ -552,33 +530,33 @@
       }).catch(function () { return place; });
     }
 
+    // Works out what the text in a location box is: coordinates, a chosen suggestion, a postal / ZIP code,
+    // or an address typed without choosing a suggestion.
     function resolveLocation(loc) {
-      if (loc.mode === "address") {
-        var input = document.getElementById(loc.key);
-        var text = input.value.trim();
-        if (!text) return Promise.reject(new Error(""));
-        if (input.dataset.placeId) {
-          var placeId = input.dataset.placeId;
-          return placeInfo(placeId).then(function (info) {
-            return Object.assign(info, { label: text, placeId: placeId, entered: "address" });
-          }, function () {
-            return { label: text, placeId: placeId, entered: "address" };
-          });
+      var input = loc.input;
+      var text = input.value.trim();
+      if (!text) return Promise.reject(new Error(""));
+      if (looksLikeCoordinates(text)) {
+        var coords = parseCoordinates(text);
+        if (!coords) {
+          return Promise.reject(new Error("Those coordinates are out of range. Enter latitude then longitude, like 51.0447, -114.0719."));
         }
-        return geocode({ address: text, componentRestrictions: { country: ["ca", "us"] } }).then(function (place) {
-          place.entered = "address \"" + text + "\"";
-          return place;
+        if (coords.lng > 0) {
+          return Promise.reject(new Error("Longitude is negative in Canada and the US. Did you mean " + coords.lat + ", -" + coords.lng + "?"));
+        }
+        return exactPlace(coords, "GPS coordinates " + text);
+      }
+      if (input.dataset.placeId) {
+        var placeId = input.dataset.placeId;
+        return placeInfo(placeId).then(function (info) {
+          return Object.assign(info, { label: text, placeId: placeId, entered: "address \"" + text + "\"" });
         }, function () {
-          return { label: text, address: text, entered: "address" };
+          return { label: text, placeId: placeId, entered: "address \"" + text + "\"" };
         });
       }
-      if (loc.mode === "postal") {
-        var code = document.getElementById(loc.key + "-postal").value.trim().toUpperCase();
-        if (!code) return Promise.reject(new Error(""));
-        var ca = code.match(CA_POSTAL);
-        if (!ca && !US_ZIP.test(code)) {
-          return Promise.reject(new Error("Please enter a Canadian postal code (like T0M 1X0) or a US ZIP code (like 59801)."));
-        }
+      var code = text.toUpperCase();
+      var ca = code.match(CA_POSTAL);
+      if (ca || US_ZIP.test(code)) {
         if (ca) code = ca[1] + " " + ca[2];
         var country = ca ? "CA" : "US";
         var address = code + (ca ? ", Canada" : ", USA");
@@ -589,28 +567,19 @@
           return { label: address, address: address, country: country, entered: "postal / ZIP code " + code };
         });
       }
-      if (loc.mode === "gps") {
-        var raw = document.getElementById(loc.key + "-gps").value.trim();
-        if (!raw) return Promise.reject(new Error(""));
-        var coords = parseCoordinates(raw);
-        if (!coords) {
-          return Promise.reject(new Error("Please enter latitude and longitude separated by a comma, like 51.0447, -114.0719."));
-        }
-        if (coords.lng > 0) {
-          return Promise.reject(new Error("Longitude is negative in Canada and the US. Did you mean " + coords.lat + ", -" + coords.lng + "?"));
-        }
-        return exactPlace(coords, "GPS coordinates " + raw);
-      }
-      if (!loc.pin) return Promise.reject(new Error(""));
-      var pos = loc.pin.getPosition();
-      return exactPlace({ lat: pos.lat(), lng: pos.lng() }, "pin on map");
+      return geocode({ address: text, componentRestrictions: { country: ["ca", "us"] } }).then(function (place) {
+        place.entered = "address \"" + text + "\"";
+        return place;
+      }, function () {
+        return { label: text, address: text, entered: "address \"" + text + "\"" };
+      });
     }
 
-    // Resolves a location from its current tab, then shows it and looks up the distance.
-    function updateLocation(loc, skipLookup) {
+    // Shows a resolved place (or why it couldn't be found), then looks up the distance.
+    function applyPlace(loc, pending, skipLookup) {
       var version = ++loc.version;
       loc.found.textContent = "Finding location...";
-      return resolveLocation(loc).then(function (place) {
+      return pending.then(function (place) {
         if (version !== loc.version) return;
         loc.place = place;
         showFound(loc);
@@ -622,6 +591,21 @@
         loc.found.textContent = err.message;
         updateMapMarkers();
       });
+    }
+
+    function updateLocation(loc, skipLookup) {
+      keepMapView = false;
+      return applyPlace(loc, resolveLocation(loc), skipLookup);
+    }
+
+    // A pin placed or dragged on the map: the box shows its coordinates, and the route uses its exact spot.
+    function placePin(loc, latLng) {
+      var coords = { lat: latLng.lat(), lng: latLng.lng() };
+      loc.input.value = coordsText(coords);
+      loc.input.dataset.resolvedValue = loc.input.value;
+      delete loc.input.dataset.placeId;
+      keepMapView = true;
+      return applyPlace(loc, exactPlace(coords, "pin on map"));
     }
 
     function setApproximatePosition(place, point) {
@@ -659,23 +643,17 @@
       return lines;
     }
 
-    function setMode(loc, mode) {
-      loc.mode = mode;
-      loc.root.querySelectorAll(".mode-tab").forEach(function (tab) {
-        var selected = tab.dataset.mode === mode;
-        tab.setAttribute("aria-selected", selected ? "true" : "false");
-        document.getElementById(tab.getAttribute("aria-controls")).hidden = !selected;
-      });
-      // Switching tabs keeps the current location until something new is entered on the new tab.
-      if (mode === "map") openPickMap(loc);
-    }
-
+    // One map for both locations: pins A (pickup) and B (drop-off) and the route between them.
     var MAP_OPTIONS = { mapTypeControl: false, streetViewControl: false, fullscreenControl: false, clickableIcons: false };
-    var SUNDRE = { lat: 51.80, lng: -114.64 };
+    var WESTERN_CANADA = { lat: 53.5, lng: -112 };
     var routeMap = null;
     var routeMarkers = {};
     var routeLine = null;
     var routePath = null;
+    var pickingFor = null;
+    // After a pin is placed or dragged the map stays where the customer is looking, instead of zooming out.
+    var keepMapView = false;
+    var mapHint = document.getElementById("map-hint");
 
     function mapUnavailable() {
       document.getElementById("map-status").textContent =
@@ -683,18 +661,39 @@
       var routeBox = document.getElementById("route-map");
       routeBox.classList.add("unavailable");
       routeBox.textContent = "Map unavailable";
-      LOCATIONS.forEach(function (loc) {
-        var pickBox = document.getElementById(loc.key + "-pick-map");
-        pickBox.classList.add("unavailable");
-        pickBox.textContent = "The map isn't available right now. Please use another option.";
-      });
+      document.querySelectorAll(".pick-on-map").forEach(function (link) { link.hidden = true; });
+      stopPicking();
     }
 
     mapsReady.then(function (maps) {
       routeMap = new maps.Map(document.getElementById("route-map"),
-        Object.assign({ center: { lat: 54, lng: -100 }, zoom: 3 }, MAP_OPTIONS));
+        Object.assign({ center: WESTERN_CANADA, zoom: 4, draggableCursor: null }, MAP_OPTIONS));
+      routeMap.addListener("click", function (e) {
+        if (!pickingFor) return;
+        var loc = pickingFor;
+        stopPicking();
+        placePin(loc, e.latLng);
+      });
       updateMapMarkers();
     }).catch(mapUnavailable);
+
+    function startPicking(loc) {
+      pickingFor = loc;
+      document.getElementById("map-hint-text").textContent =
+        "Click the map to set your " + loc.name.toLowerCase() + " location (pin " + loc.pinLabel + ").";
+      mapHint.hidden = false;
+      document.getElementById("route-map").classList.add("picking");
+      if (routeMap) routeMap.setOptions({ draggableCursor: "crosshair" });
+      // Centre the map on screen so the hint above it isn't hidden under the sticky header.
+      document.getElementById("route-map").scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function stopPicking() {
+      pickingFor = null;
+      mapHint.hidden = true;
+      document.getElementById("route-map").classList.remove("picking");
+      if (routeMap) routeMap.setOptions({ draggableCursor: null });
+    }
 
     function updateMapMarkers() {
       if (!routeMap) return;
@@ -707,7 +706,8 @@
         if (p && p.lat != null) {
           var position = { lat: p.lat, lng: p.lng };
           if (!marker) {
-            marker = routeMarkers[loc.key] = new maps.Marker({ label: loc.key === "pickup" ? "P" : "D", title: loc.name });
+            marker = routeMarkers[loc.key] = new maps.Marker({ label: loc.pinLabel, title: loc.name + " (drag to adjust)", draggable: true });
+            marker.addListener("dragend", function () { placePin(loc, marker.getPosition()); });
           }
           marker.setPosition(position);
           marker.setMap(routeMap);
@@ -717,12 +717,16 @@
           marker.setMap(null);
         }
       });
+      if (keepMapView) return;
       (routePath || []).forEach(function (point) { bounds.extend(point); });
       if (count === 1 && !routePath) {
         routeMap.setCenter(bounds.getCenter());
         routeMap.setZoom(9);
       } else if (count) {
         routeMap.fitBounds(bounds);
+      } else {
+        routeMap.setCenter(WESTERN_CANADA);
+        routeMap.setZoom(4);
       }
     }
 
@@ -735,28 +739,6 @@
       routeLine.setPath(routePath || []);
       routeLine.setMap(routePath ? routeMap : null);
       updateMapMarkers();
-    }
-
-    // The pick-on-map maps are created when their tab is first opened, since a hidden map can't size itself.
-    function openPickMap(loc) {
-      mapsReady.then(function (maps) {
-        if (loc.pickMap) return;
-        var p = loc.place;
-        var center = p && p.lat != null ? { lat: p.lat, lng: p.lng } : SUNDRE;
-        loc.pickMap = new maps.Map(document.getElementById(loc.key + "-pick-map"),
-          Object.assign({ center: center, zoom: p && p.lat != null ? 11 : 6 }, MAP_OPTIONS));
-        loc.pickMap.addListener("click", function (e) { setPin(loc, e.latLng); });
-      }).catch(function () {});
-    }
-
-    function setPin(loc, latLng) {
-      if (!loc.pin) {
-        loc.pin = new window.google.maps.Marker({ map: loc.pickMap, position: latLng, draggable: true, title: loc.name + " location" });
-        loc.pin.addListener("dragend", function () { updateLocation(loc); });
-      } else {
-        loc.pin.setPosition(latLng);
-      }
-      updateLocation(loc);
     }
 
     // Trips within Canada must stay in Canada. Routes API can't avoid borders, so trips between these
@@ -1016,24 +998,22 @@
     }
 
     LOCATIONS.forEach(function (loc) {
-      var address = document.getElementById(loc.key);
-      setupAutocomplete(address);
-      address.addEventListener("change", function () {
-        if (address.value !== address.dataset.resolvedValue) updateLocation(loc);
+      var input = loc.input;
+      setupAutocomplete(input);
+      input.addEventListener("change", function () {
+        if (input.value !== input.dataset.resolvedValue) updateLocation(loc);
       });
-      [address, document.getElementById(loc.key + "-postal"), document.getElementById(loc.key + "-gps")].forEach(function (input) {
-        if (input !== address) input.addEventListener("change", function () { updateLocation(loc); });
-        // Enter finds the location rather than sending the form
-        input.addEventListener("keydown", function (e) {
-          if (e.key !== "Enter" || e.defaultPrevented) return;
-          e.preventDefault();
-          updateLocation(loc);
-        });
-      });
-      loc.root.querySelectorAll(".mode-tab").forEach(function (tab) {
-        tab.addEventListener("click", function () { setMode(loc, tab.dataset.mode); });
+      // Enter finds the location rather than sending the form
+      input.addEventListener("keydown", function (e) {
+        if (e.key !== "Enter" || e.defaultPrevented) return;
+        e.preventDefault();
+        updateLocation(loc);
       });
     });
+    document.querySelectorAll(".pick-on-map").forEach(function (link) {
+      link.addEventListener("click", function () { startPicking(locationFor(link.dataset.location)); });
+    });
+    document.getElementById("map-hint-cancel").addEventListener("click", stopPicking);
     distanceInput.dataset.source = "entered by customer";
     document.getElementById("calc-distance").addEventListener("click", function () {
       Promise.all(LOCATIONS.map(function (loc) { return updateLocation(loc, true); })).then(function () { lookupDistance(true); });
@@ -1060,7 +1040,7 @@
       var missing = LOCATIONS.filter(function (loc) { return !loc.place; })[0];
       if (missing) {
         document.getElementById("form-status").textContent = "Please enter the " + missing.name.toLowerCase() + " location.";
-        missing.root.querySelector(".mode-tab[aria-selected=true]").focus();
+        missing.input.focus();
         return;
       }
       var stalls = STALLS.map(function (s) { return s.label + ": " + stallCount(s.input); }).join(", ");

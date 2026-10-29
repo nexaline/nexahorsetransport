@@ -276,60 +276,18 @@ textarea { min-height: 110px; resize: vertical; }
 }
 
 /* Quote calculator */
-.field-label {
-  font-weight: 600;
-  font-size: 0.95rem;
-  margin-bottom: 6px;
-}
-
-.mode-tabs {
-  display: grid;
-  grid-template-columns: repeat(4, auto);
-  justify-content: start;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-
-.mode-tab {
-  padding: 6px 12px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--white);
-  color: var(--purple);
-  font: inherit;
-  font-size: 0.85rem;
-  line-height: 1.3;
-  cursor: pointer;
-  min-width: 0;
-}
-
-.mode-tab:hover { background: var(--bg-alt); }
-
-.mode-tab[aria-selected=true] {
-  background: var(--purple);
-  border-color: var(--purple);
-  color: var(--white);
-  font-weight: 600;
-}
-
-.mode-tab:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
-
-.mode-panel.autocomplete { position: relative; }
-
-.pick-map,
 .route-map {
   width: 100%;
+  height: 320px;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--bg-alt);
 }
 
-.pick-map { height: 260px; }
+/* While choosing a pin location, the map gets a purple outline */
+.route-map.picking { outline: 3px solid var(--purple); outline-offset: 2px; }
 
-.route-map { height: 280px; }
-
-.route-map.unavailable,
-.pick-map.unavailable {
+.route-map.unavailable {
   height: auto;
   padding: 12px;
   border-style: dashed;
@@ -338,6 +296,41 @@ textarea { min-height: 110px; resize: vertical; }
 }
 
 .location-found:empty { display: none; }
+
+/* A button that looks like a small text link */
+.link-button {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--purple);
+  font: inherit;
+  font-size: 0.9rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.link-button:hover { color: var(--purple-dark); }
+
+.link-button:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+.map-hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 0 0 8px;
+  padding: 8px 12px;
+  background: var(--note-bg);
+  border-left: 5px solid var(--purple);
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.map-hint[hidden] { display: none; }
+
+.map-hint .link-button { margin: 0; font-weight: 400; }
 
 .autocomplete { position: relative; }
 
@@ -595,8 +588,6 @@ textarea { min-height: 110px; resize: vertical; }
   .logo img { height: 50px; }
   .booking-form { grid-template-columns: minmax(0, 1fr); padding: 18px; }
   .quote { padding: 16px; }
-  .mode-tabs { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); justify-content: stretch; }
-  .pick-map { height: 220px; }
-  .route-map { height: 220px; }
+  .route-map { height: 260px; }
   .stall-grid { gap: 8px; }
 }
