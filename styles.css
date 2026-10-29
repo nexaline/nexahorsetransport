@@ -99,23 +99,15 @@ a { color: var(--purple); }
 
 /* Hero */
 .hero {
-  background: linear-gradient(135deg, var(--purple), var(--purple-dark));
-  color: var(--on-purple);
+  background: var(--white);
+  color: var(--text);
   text-align: center;
   padding: 80px 0 72px;
 }
 
-.hero-logo {
-  display: block;
-  width: 100%;
-  max-width: 600px;
-  height: auto;
-  margin: 0 auto 28px;
-}
-
 .hero h1 {
   margin: 0 0 12px;
-  color: var(--yellow);
+  color: var(--purple);
   font-size: clamp(1.9rem, 5vw, 2.8rem);
   line-height: 1.2;
 }
@@ -124,8 +116,17 @@ a { color: var(--purple); }
   max-width: 640px;
   margin: 0 auto 28px;
   font-size: 1.1rem;
-  color: var(--on-purple);
+  color: var(--text);
 }
+
+/* The hero is white, so its button is purple with white text */
+.hero .btn {
+  background: var(--purple);
+  border-color: var(--purple);
+  color: var(--white);
+}
+
+.hero .btn:hover { background: var(--purple-dark); border-color: var(--purple-dark); }
 
 .btn {
   display: inline-block;
@@ -159,7 +160,6 @@ section { padding: 60px 0; }
 
 .section-alt a { color: var(--yellow); }
 
-.hero .btn:focus-visible,
 .section-alt .btn:focus-visible { outline-color: var(--white); }
 
 h2 {
@@ -182,10 +182,10 @@ h2 {
   padding: 0;
   list-style: none;
   font-size: 0.95rem;
-  color: var(--on-purple);
+  color: var(--text);
 }
 
-.highlights li:last-child { color: var(--yellow); font-weight: 600; }
+.highlights li:last-child { color: var(--red); font-weight: 600; }
 
 /* Services */
 .cards {
@@ -591,9 +591,8 @@ textarea { min-height: 110px; resize: vertical; }
 
 @media (max-width: 640px) {
   section { padding: 44px 0; }
-  .hero { padding: 40px 0 52px; }
+  .hero { padding: 56px 0 52px; }
   .logo img { height: 50px; }
-  .hero-logo { margin-bottom: 20px; }
   .booking-form { grid-template-columns: minmax(0, 1fr); padding: 18px; }
   .quote { padding: 16px; }
   .mode-tabs { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); justify-content: stretch; }
