@@ -10,11 +10,11 @@ Quote rates live at the top of the script in `index.html` (`RATES`, `MINIMUM_CHA
 
 Trips with both ends in Canada are kept in Canada using pass-through waypoints (`CANADIAN_ROUTE_VIA`), skipping any that aren't between the pickup and drop-off:
 
-- Western Canada (BC, AB, SK, MB) to Ontario or Quebec: Thunder Bay and Sault Ste. Marie
+- Western Canada (BC, AB, SK, MB) to Ontario or Quebec: Thunder Bay, Sault Ste. Marie and Sudbury (Sudbury is kept for southwestern Ontario too, so the route doesn't cut through Michigan from the Sault)
 - Ontario or Quebec to NB, NS or PEI: Rivière-du-Loup and Edmundston
-- Western Canada to NB, NS or PEI: all four, west to east
+- Western Canada to NB, NS or PEI: all five, west to east
 
-The route is then checked against the `US_AREAS` boxes. If it still leaves Canada, the customer sees a note asking them to confirm the distance with us, and the note is included in the booking email.
+The route is then checked against the `US_AREAS` boxes. If it still leaves Canada, the customer sees a note asking them to confirm the distance with us, including which part of the route is in the US and between which waypoints (also logged to the browser console). The note is included in the booking email.
 
 No build step. Open `index.html` in a browser, or host the folder on any static host (e.g. GitHub Pages).
 

@@ -424,10 +424,12 @@
 
     // Trips within Canada must stay in Canada. Routes API can't avoid borders, so trips between these
     // regions are routed through Trans-Canada Highway towns, as pass-through points rather than stops.
-    var THUNDER_BAY = { name: "Thunder Bay", address: "Thunder Bay, ON, Canada", lng: -89.25 };
-    var SAULT_STE_MARIE = { name: "Sault Ste. Marie", address: "Sault Ste. Marie, ON, Canada", lng: -84.33 };
-    var RIVIERE_DU_LOUP = { name: "Rivière-du-Loup", address: "Rivière-du-Loup, QC, Canada", lng: -69.53 };
-    var EDMUNDSTON = { name: "Edmundston", address: "Edmundston, NB, Canada", lng: -68.33 };
+    // Full province names, so Google can't pick Sault Ste. Marie, Michigan or another town of the same name.
+    var THUNDER_BAY = { name: "Thunder Bay", address: "Thunder Bay, Ontario, Canada", lat: 48.38, lng: -89.25 };
+    var SAULT_STE_MARIE = { name: "Sault Ste. Marie", address: "Sault Ste. Marie, Ontario, Canada", lat: 46.52, lng: -84.33 };
+    var SUDBURY = { name: "Sudbury", address: "Sudbury, Ontario, Canada", lat: 46.49, lng: -80.99 };
+    var RIVIERE_DU_LOUP = { name: "Rivière-du-Loup", address: "Rivière-du-Loup, Quebec, Canada", lat: 47.83, lng: -69.53 };
+    var EDMUNDSTON = { name: "Edmundston", address: "Edmundston, New Brunswick, Canada", lat: 47.37, lng: -68.33 };
     var REGIONS = {
       BC: "west", AB: "west", SK: "west", MB: "west",
       ON: "central", QC: "central",
@@ -435,38 +437,44 @@
     };
     // Keyed by the two regions in alphabetical order; waypoints listed west to east.
     var CANADIAN_ROUTE_VIA = {
-      "central+west": [THUNDER_BAY, SAULT_STE_MARIE],          // around Lake Superior, not through the US
-      "central+maritimes": [RIVIERE_DU_LOUP, EDMUNDSTON],      // not through Maine
-      "maritimes+west": [THUNDER_BAY, SAULT_STE_MARIE, RIVIERE_DU_LOUP, EDMUNDSTON]
+      "central+west": [THUNDER_BAY, SAULT_STE_MARIE, SUDBURY],  // around Lake Superior, not through Michigan
+      "central+maritimes": [RIVIERE_DU_LOUP, EDMUNDSTON],        // not through Maine
+      "maritimes+west": [THUNDER_BAY, SAULT_STE_MARIE, SUDBURY, RIVIERE_DU_LOUP, EDMUNDSTON]
     };
 
     // Waypoints for a trip between two Canadian places, in travel order. A waypoint is skipped when it isn't
     // between the two ends (e.g. Kenora, ON is west of Thunder Bay, so Kenora to Calgary needs neither).
+    // Sudbury is the exception: southwestern Ontario (Windsor, Sarnia, London) is west of Sudbury but south
+    // of it, and without Sudbury Google crosses Michigan from the Sault, so it always follows the Sault there.
     function canadianVias(from, to) {
       var key = [REGIONS[from.province], REGIONS[to.province]].sort().join("+");
-      var west = Math.min(from.lng, to.lng);
-      var east = Math.max(from.lng, to.lng);
-      var vias = (CANADIAN_ROUTE_VIA[key] || []).filter(function (v) { return v.lng > west && v.lng < east; });
-      return from.lng > to.lng ? vias.reverse() : vias;
+      var westEnd = from.lng < to.lng ? from : to;
+      var eastEnd = westEnd === from ? to : from;
+      var between = function (v) { return v.lng > westEnd.lng && v.lng < eastEnd.lng; };
+      var vias = (CANADIAN_ROUTE_VIA[key] || []).filter(function (v) {
+        if (v === SUDBURY) return between(SAULT_STE_MARIE) && (between(SUDBURY) || eastEnd.lat < 46);
+        return between(v);
+      });
+      return westEnd === to ? vias.reverse() : vias;
     }
 
-    // Areas clearly inside the US, as [west, east, south, north] in degrees. Each keeps a margin back from
+    // Areas clearly inside the US, as [west, east, south, north, name] in degrees. Each keeps a margin back from
     // the border, so towns right on it (Windsor, Sarnia, Fort Frances, Niagara Falls) are never flagged,
     // while a route through the US is caught by the points it has well inside the country.
     var US_AREAS = [
-      [-170.0, -141.1, 51.0, 72.0],  // Alaska
-      [-125.0, -123.0, 40.0, 48.2],  // Washington's Olympic Peninsula
-      [-123.0, -95.2, 40.0, 48.8],   // south of the 49th parallel, BC to Manitoba
-      [-95.2, -89.7, 40.0, 48.3],    // Minnesota
-      [-89.7, -84.6, 40.0, 47.0],    // Wisconsin and Michigan's Upper Peninsula
-      [-84.6, -83.2, 40.0, 45.5],    // Michigan's Lower Peninsula
-      [-82.4, -79.1, 40.0, 42.2],    // Ohio and Pennsylvania, south of Lake Erie
-      [-78.8, -77.0, 40.0, 43.4],    // western New York
-      [-77.0, -74.7, 40.0, 44.0],    // northern New York
-      [-74.7, -71.0, 40.0, 44.85],   // Vermont and New Hampshire
-      [-71.0, -70.0, 40.0, 45.2],    // western Maine
-      [-70.0, -67.9, 40.0, 46.3],    // central and eastern Maine
-      [-125.0, -66.0, 24.0, 41.6]    // everything further south
+      [-170.0, -141.1, 51.0, 72.0, "Alaska"],
+      [-125.0, -123.0, 40.0, 48.2, "Washington's Olympic Peninsula"],
+      [-123.0, -95.2, 40.0, 48.8, "the US south of the 49th parallel (Washington to North Dakota)"],
+      [-95.2, -89.7, 40.0, 48.3, "Minnesota"],
+      [-89.7, -84.6, 40.0, 47.0, "Wisconsin or Michigan's Upper Peninsula"],
+      [-84.6, -83.2, 40.0, 45.5, "Michigan's Lower Peninsula"],
+      [-82.4, -79.1, 40.0, 42.2, "Ohio or Pennsylvania"],
+      [-78.8, -77.0, 40.0, 43.4, "western New York"],
+      [-77.0, -74.7, 40.0, 44.0, "northern New York"],
+      [-74.7, -71.0, 40.0, 44.85, "Vermont or New Hampshire"],
+      [-71.0, -70.0, 40.0, 45.2, "western Maine"],
+      [-70.0, -67.9, 40.0, 46.3, "central or eastern Maine"],
+      [-125.0, -66.0, 24.0, 41.6, "the US further south"]
     ];
 
     function decodePolyline(encoded) {
@@ -488,11 +496,46 @@
       return points;
     }
 
-    function entersUS(points) {
-      return points.some(function (p) {
-        return US_AREAS.some(function (a) {
-          return p[1] >= a[0] && p[1] < a[1] && p[0] >= a[2] && p[0] < a[3];
-        });
+    function usArea(p) {
+      return US_AREAS.filter(function (a) {
+        return p[1] >= a[0] && p[1] < a[1] && p[0] >= a[2] && p[0] < a[3];
+      })[0];
+    }
+
+    // Index of the route point closest to a waypoint, so a US section can be placed between two waypoints.
+    function nearestPoint(points, place) {
+      var best = 0, bestDist = Infinity;
+      points.forEach(function (p, i) {
+        var dLat = p[0] - place.lat, dLng = (p[1] - place.lng) * Math.cos(place.lat * Math.PI / 180);
+        var d = dLat * dLat + dLng * dLng;
+        if (d < bestDist) { best = i; bestDist = d; }
+      });
+      return best;
+    }
+
+    // Describes each part of the route that is in the US, e.g. "Michigan's Lower Peninsula, between
+    // Sault Ste. Marie and Sudbury (46.40, -84.20 to 43.00, -82.42)". Returns [] when it stays in Canada.
+    function usSections(points, vias) {
+      var marks = vias.map(function (v) { return { name: v.name, index: nearestPoint(points, v) }; });
+      var stops = [{ name: "the pickup", index: 0 }].concat(marks, [{ name: "the drop-off", index: points.length - 1 }]);
+      var sections = [];
+      var current = null;
+      points.forEach(function (p, i) {
+        var area = usArea(p);
+        if (area && current && i === current.end + 1) {
+          current.end = i;
+          if (current.areas.indexOf(area[4]) === -1) current.areas.push(area[4]);
+        } else if (area) {
+          current = { start: i, end: i, areas: [area[4]] };
+          sections.push(current);
+        }
+      });
+      return sections.map(function (sec) {
+        var before = stops.filter(function (st) { return st.index <= sec.start; }).pop();
+        var after = stops.filter(function (st) { return st.index >= sec.end; })[0] || stops[stops.length - 1];
+        var at = function (p) { return p[0].toFixed(2) + ", " + p[1].toFixed(2); };
+        return sec.areas.join(" and ") + ", between " + before.name + " and " + after.name +
+          " (" + at(points[sec.start]) + (sec.end > sec.start ? " to " + at(points[sec.end]) : "") + ")";
       });
     }
 
@@ -508,9 +551,12 @@
         var route = data.routes && data.routes[0];
         if (!route || !route.distanceMeters) throw new Error("We couldn't find a driving route between those addresses.");
         var geo = data.geocodingResults || {};
+        var sections = usSections(decodePolyline((route.polyline && route.polyline.encodedPolyline) || ""), vias);
+        if (sections.length) console.warn("Route leaves Canada: " + sections.join("; "));
         return {
           km: Math.round(route.distanceMeters / 1000),
-          entersUS: entersUS(decodePolyline((route.polyline && route.polyline.encodedPolyline) || "")),
+          entersUS: sections.length > 0,
+          usSections: sections,
           originPlaceId: origin.placeId || (geo.origin && geo.origin.placeId),
           destinationPlaceId: destination.placeId || (geo.destination && geo.destination.placeId),
           vias: vias
@@ -589,7 +635,9 @@
         distanceStatus.textContent = "About " + route.km + " km by road from " + from + " to " + to +
           (via ? (route.entersUS ? ", routed via " : ", staying in Canada via ") + via + " on the Trans-Canada Highway" : "") +
           ". If this doesn't look right, check the addresses or type the distance in.";
-        if (route.domestic && route.entersUS) setRouteNote(ROUTE_WARNING, true);
+        if (route.domestic && route.entersUS) {
+          setRouteNote(ROUTE_WARNING + " (Route leaves Canada in: " + route.usSections.join("; ") + ".)", true);
+        }
         else if (via) setRouteNote("Routed via " + via + " to stay in Canada.", false);
         updateQuote();
       }).catch(function (err) {
