@@ -1,6 +1,6 @@
-# Nexa Horse Transportation
+# Nexa Horse Transport
 
-Simple static website for Nexa Horse Transportation (Sundre, Alberta; serving Canada and the US).
+Simple static website for Nexa Horse Transport (Sundre, Alberta; serving Canada and the US).
 
 - `index.html`: home, services, instant quote calculator + booking request form, contact
 - `terms.html`: terms and conditions
