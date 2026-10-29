@@ -189,6 +189,10 @@
             <input id="agree" name="agree" type="checkbox" required>
             <label for="agree">I have read and agree to the <a href="terms.html" target="_blank">Terms &amp; Conditions</a>. *</label>
           </div>
+          <div class="field full checkbox sms-consent">
+            <input id="sms-consent" name="smsConsent" type="checkbox">
+            <label for="sms-consent">I agree to receive text messages from Nexa Horse Transport (Nexa Line Ltd.) at the phone number provided, about my quote, booking, and trip updates. Message frequency varies. Message and data rates may apply. Reply STOP to opt out, HELP for help. Consent is not a condition of booking. See our <a href="terms.html#sms" target="_blank">Terms</a> and <a href="terms.html#sms-privacy" target="_blank">Privacy Policy</a>.</label>
+          </div>
           <div class="field full">
             <button type="submit" class="btn">Send Booking Request</button>
           </div>
@@ -1072,7 +1076,8 @@
         ""
       ]).concat(quoteText(q), [
         "",
-        "I have read and agree to the Terms & Conditions."
+        "I have read and agree to the Terms & Conditions.",
+        "SMS consent: " + (f.smsConsent.checked ? "Yes" : "No")
       ]);
       var subject = "Booking request: " + pickupLoc.place.label + " to " + dropoffLoc.place.label;
       window.location.href = "mailto:" + BOOKING_EMAIL +

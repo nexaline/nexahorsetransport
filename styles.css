@@ -22,7 +22,8 @@
 
 * { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+/* Leave room for the sticky header when jumping to a section or heading */
+html { scroll-behavior: smooth; scroll-padding-top: 110px; }
 
 body {
   margin: 0;
@@ -141,7 +142,7 @@ a { color: var(--purple); }
   cursor: pointer;
 }
 
-.btn:hover { background: var(--white); border-color: var(--white); }
+.btn:hover { background: var(--purple); border-color: var(--purple); color: var(--white); }
 
 .btn:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
 
@@ -262,6 +263,8 @@ textarea { min-height: 110px; resize: vertical; }
 .checkbox input { width: auto; margin-top: 5px; }
 
 .checkbox label { font-weight: 400; margin: 0; }
+
+.sms-consent label { font-size: 0.9rem; color: var(--text); }
 
 .form-note {
   margin: 0;
@@ -690,6 +693,7 @@ textarea { min-height: 110px; resize: vertical; }
 @media (max-width: 640px) {
   section { padding: 44px 0; }
   .hero { padding: 56px 0 52px; }
+  html { scroll-padding-top: 150px; }
   .logo img { height: 50px; }
   .booking-form { grid-template-columns: minmax(0, 1fr); padding: 18px; }
   .quote { padding: 16px; }
