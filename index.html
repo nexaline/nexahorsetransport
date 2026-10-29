@@ -31,6 +31,7 @@
           <li>Sundre, Alberta</li>
           <li>Canada &amp; USA</li>
           <li>Experienced horse handlers</li>
+          <li>No hidden fees</li>
         </ul>
       </div>
     </section>
@@ -70,8 +71,8 @@
 
     <section id="booking">
       <div class="container">
-        <h2>Booking Request</h2>
-        <p class="lead">Tell us about your trip and we'll get back to you with availability and a quote. Submitting this form is a request only; your booking is confirmed once we contact you.</p>
+        <h2>Instant Quote &amp; Booking Request</h2>
+        <p class="lead">Tell us about your trip to see an instant price estimate, with no hidden fees. Submitting this form is a request only; your booking and price are confirmed once we contact you.</p>
 
         <form id="booking-form" class="booking-form">
           <div class="field">
@@ -94,21 +95,61 @@
             <label for="dropoff">Drop-off location *</label>
             <input id="dropoff" name="dropoff" type="text" placeholder="City, Province/State" required>
           </div>
+          <fieldset class="field full stalls">
+            <legend>How many horses need each stall type? *</legend>
+            <div class="stall-grid">
+              <div class="field">
+                <label for="stall-standard">Standard stall</label>
+                <input id="stall-standard" name="stallStandard" type="number" min="0" max="20" step="1" value="1" inputmode="numeric">
+              </div>
+              <div class="field">
+                <label for="stall-roomier">Roomier stall</label>
+                <input id="stall-roomier" name="stallRoomier" type="number" min="0" max="20" step="1" value="0" inputmode="numeric">
+              </div>
+              <div class="field">
+                <label for="stall-box">Box stall</label>
+                <input id="stall-box" name="stallBox" type="number" min="0" max="20" step="1" value="0" inputmode="numeric">
+              </div>
+            </div>
+          </fieldset>
+          <div class="field full">
+            <label for="distance">Driving distance (km) *</label>
+            <div class="distance-row">
+              <input id="distance" name="distance" type="number" min="1" step="1" inputmode="numeric" required>
+              <button type="button" id="calc-distance" class="btn btn-secondary">Calculate distance</button>
+            </div>
+            <p class="hint" id="distance-status" aria-live="polite">Enter your pickup and drop-off locations and we'll work out the driving distance for you. You can also type it in.</p>
+          </div>
+
+          <div class="quote field full" id="quote">
+            <div class="quote-price">
+              <h3>Instant Quote <span class="badge">No hidden fees</span></h3>
+              <p class="quote-total" id="quote-total">Enter your trip details to see a price</p>
+              <ul class="quote-lines" id="quote-lines"></ul>
+            </div>
+            <p class="quote-notice" id="quote-notice"><strong>Please note:</strong> This is an automatic estimate only. Your price is not confirmed until Nexa Horse Transportation contacts you to confirm. Vet, border, government and customs broker fees are extra, at cost.</p>
+          </div>
+
+          <details class="rates field full">
+            <summary>See our rates</summary>
+            <table>
+              <thead>
+                <tr><th>Per horse, per km</th><th>400 km or less</th><th>Over 400 km</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Standard stall</td><td>$2.00</td><td>$1.20</td></tr>
+                <tr><td>Roomier stall</td><td>$2.20</td><td>$1.40</td></tr>
+                <tr><td>Box stall</td><td>$3.00</td><td>$2.00</td></tr>
+              </tbody>
+            </table>
+            <p>Prices are in Canadian dollars, plus 5% GST. Minimum charge $300 per trip.</p>
+          </details>
+
           <div class="field">
             <label for="date">Preferred pickup date *</label>
             <input id="date" name="date" type="date" required>
           </div>
           <div class="field">
-            <label for="horses">Number of horses *</label>
-            <select id="horses" name="horses" required>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5+">5 or more</option>
-            </select>
-          </div>
-          <div class="field full">
             <label for="trip">Trip type</label>
             <select id="trip" name="trip">
               <option>Local / within Alberta</option>
@@ -159,11 +200,183 @@
     // Booking requests are sent to this address.
     var BOOKING_EMAIL = "nexahorsetransport@gmail.com";
 
+    // Prices in CAD, per horse, per km. Trips of 400 km or less use the "short" rates.
+    var LONG_HAUL_KM = 400;
+    var RATES = {
+      short: { standard: 2.00, roomier: 2.20, box: 3.00 },
+      long:  { standard: 1.20, roomier: 1.40, box: 2.00 }
+    };
+    var MINIMUM_CHARGE = 300;
+    var GST_RATE = 0.05;
+    var STALLS = [
+      { key: "standard", label: "Standard stall", input: "stall-standard" },
+      { key: "roomier", label: "Roomier stall", input: "stall-roomier" },
+      { key: "box", label: "Box stall", input: "stall-box" }
+    ];
+    var NOTICE = document.getElementById("quote-notice").textContent.replace("Please note: ", "");
+
+    var form = document.getElementById("booking-form");
+    var distanceInput = document.getElementById("distance");
+    var distanceStatus = document.getElementById("distance-status");
+    var money = new Intl.NumberFormat("en-CA", { style: "currency", currency: "CAD" });
+
     document.getElementById("year").textContent = new Date().getFullYear();
 
-    document.getElementById("booking-form").addEventListener("submit", function (e) {
+    function stallCount(id) {
+      var n = parseInt(document.getElementById(id).value, 10);
+      return n > 0 ? n : 0;
+    }
+
+    // Returns null until there is a distance and at least one horse.
+    function calcQuote() {
+      var km = Math.round(parseFloat(distanceInput.value));
+      if (!(km > 0)) return null;
+      var tier = km > LONG_HAUL_KM ? "long" : "short";
+      var horses = 0;
+      var subtotal = 0;
+      var lines = [];
+      STALLS.forEach(function (s) {
+        var count = stallCount(s.input);
+        if (!count) return;
+        var rate = RATES[tier][s.key];
+        var amount = count * rate * km;
+        horses += count;
+        subtotal += amount;
+        lines.push({ text: count + " x " + s.label + " @ " + money.format(rate) + "/km x " + km + " km", amount: amount });
+      });
+      if (!horses) return null;
+      var minimumApplied = subtotal < MINIMUM_CHARGE;
+      if (minimumApplied) subtotal = MINIMUM_CHARGE;
+      var gst = subtotal * GST_RATE;
+      return {
+        km: km,
+        tier: tier,
+        horses: horses,
+        lines: lines,
+        minimumApplied: minimumApplied,
+        subtotal: subtotal,
+        gst: gst,
+        total: subtotal + gst
+      };
+    }
+
+    function updateQuote() {
+      var q = calcQuote();
+      var total = document.getElementById("quote-total");
+      var list = document.getElementById("quote-lines");
+      list.innerHTML = "";
+      if (!q) {
+        total.textContent = "Enter your trip details to see a price";
+        return;
+      }
+      total.textContent = money.format(q.total) + " CAD";
+      var rows = q.lines.map(function (l) { return [l.text, money.format(l.amount)]; });
+      if (q.minimumApplied) rows.push(["Minimum charge applied", money.format(MINIMUM_CHARGE)]);
+      rows.push(["Subtotal", money.format(q.subtotal)]);
+      rows.push(["GST (5%)", money.format(q.gst)]);
+      rows.forEach(function (r) {
+        var li = document.createElement("li");
+        var label = document.createElement("span");
+        var value = document.createElement("span");
+        label.textContent = r[0];
+        value.textContent = r[1];
+        li.appendChild(label);
+        li.appendChild(value);
+        list.appendChild(li);
+      });
+    }
+
+    function quoteText(q) {
+      if (!q) return ["Instant quote: not available"];
+      var out = ["INSTANT QUOTE (estimate)", "Driving distance: " + q.km + " km (" + distanceInput.dataset.source + ")"];
+      q.lines.forEach(function (l) { out.push(l.text + " = " + money.format(l.amount)); });
+      if (q.minimumApplied) out.push("Minimum charge applied: " + money.format(MINIMUM_CHARGE));
+      out.push("Subtotal: " + money.format(q.subtotal));
+      out.push("GST (5%): " + money.format(q.gst));
+      out.push("Estimated total: " + money.format(q.total) + " CAD");
+      out.push(NOTICE);
+      return out;
+    }
+
+    // Driving distance via OpenStreetMap: Nominatim finds each place, OSRM finds the road route.
+    function geocode(place) {
+      var url = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=ca,us&q=" +
+        encodeURIComponent(place);
+      return fetch(url).then(function (r) {
+        if (!r.ok) throw new Error("lookup failed");
+        return r.json();
+      }).then(function (results) {
+        if (!results.length) throw new Error("We couldn't find \"" + place + "\".");
+        return results[0];
+      });
+    }
+
+    var lookupId = 0;
+    var lastLookup = "";
+
+    function lookupDistance(force) {
+      var from = form.pickup.value.trim();
+      var to = form.dropoff.value.trim();
+      if (!from || !to) {
+        if (force) distanceStatus.textContent = "Please enter both a pickup and a drop-off location.";
+        return;
+      }
+      var key = from + "|" + to;
+      if (!force && key === lastLookup) return;
+      lastLookup = key;
+      var id = ++lookupId;
+      var a;
+      distanceStatus.textContent = "Calculating driving distance...";
+      geocode(from).then(function (result) {
+        a = result;
+        return geocode(to);
+      }).then(function (b) {
+        var url = "https://router.project-osrm.org/route/v1/driving/" +
+          a.lon + "," + a.lat + ";" + b.lon + "," + b.lat + "?overview=false";
+        return fetch(url).then(function (r) { return r.json(); }).then(function (data) {
+          if (data.code !== "Ok" || !data.routes.length) throw new Error("We couldn't find a driving route.");
+          return { km: Math.round(data.routes[0].distance / 1000), from: a.display_name, to: b.display_name };
+        });
+      }).then(function (route) {
+        if (id !== lookupId) return;
+        distanceInput.value = route.km;
+        distanceInput.dataset.source = "calculated automatically";
+        distanceStatus.textContent = "About " + route.km + " km by road from " + route.from + " to " + route.to +
+          ". If this doesn't look right, add more detail to the locations or type the distance in.";
+        updateQuote();
+      }).catch(function (err) {
+        if (id !== lookupId) return;
+        lastLookup = "";
+        distanceInput.value = "";
+        updateQuote();
+        var reason = err && err.message && err.message.indexOf("couldn't") !== -1 ? err.message : "We couldn't calculate the distance automatically.";
+        distanceStatus.textContent = reason + " Please check the locations or type the driving distance in km.";
+      });
+    }
+
+    distanceInput.dataset.source = "entered by customer";
+    form.pickup.addEventListener("change", function () { lookupDistance(false); });
+    form.dropoff.addEventListener("change", function () { lookupDistance(false); });
+    document.getElementById("calc-distance").addEventListener("click", function () { lookupDistance(true); });
+    distanceInput.addEventListener("input", function () {
+      distanceInput.dataset.source = "entered by customer";
+      updateQuote();
+    });
+    STALLS.forEach(function (s) {
+      document.getElementById(s.input).addEventListener("input", updateQuote);
+    });
+    updateQuote();
+
+    form.addEventListener("submit", function (e) {
       e.preventDefault();
       var f = e.target;
+      var q = calcQuote();
+      if (!q) {
+        document.getElementById("form-status").textContent = "Please enter at least one horse in a stall type.";
+        document.getElementById("stall-standard").focus();
+        return;
+      }
+      var stalls = STALLS.map(function (s) { return s.label + ": " + stallCount(s.input); }).join(", ");
       var lines = [
         "Name: " + f.name.value,
         "Phone: " + f.phone.value,
@@ -171,14 +384,16 @@
         "Pickup: " + f.pickup.value,
         "Drop-off: " + f.dropoff.value,
         "Preferred date: " + f.date.value,
-        "Number of horses: " + f.horses.value,
+        "Number of horses: " + q.horses + " (" + stalls + ")",
         "Trip type: " + f.trip.value,
         "",
         "Details:",
         f.details.value || "(none)",
+        ""
+      ].concat(quoteText(q), [
         "",
         "I have read and agree to the Terms & Conditions."
-      ];
+      ]);
       var subject = "Booking request: " + f.pickup.value + " to " + f.dropoff.value;
       window.location.href = "mailto:" + BOOKING_EMAIL +
         "?subject=" + encodeURIComponent(subject) +
