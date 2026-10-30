@@ -710,6 +710,20 @@ textarea { min-height: 110px; resize: vertical; }
   gap: 8px 24px;
 }
 
+.footer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.footer-owner { font-size: 0.85rem; }
+
+.company-note {
+  margin-top: 0;
+  font-weight: 600;
+  color: var(--purple);
+}
+
 .footer-links {
   display: flex;
   flex-wrap: wrap;
