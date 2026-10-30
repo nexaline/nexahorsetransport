@@ -2,7 +2,7 @@
 
 Simple static website for Nexa Horse Transport (Sundre, Alberta; serving Canada and the US).
 
-- `index.html`: home, services, instant quote calculator + booking request form, contact
+- `index.html`: home, services, videos (embedded YouTube uploads playlist, newest first, no API key), instant quote calculator + booking request form, contact
 - `events.html`: Events Calendar of upcoming horse shows, competitions, races and auctions (reads `events.json`)
 - `terms.html`: terms and conditions
 - `styles.css`: shared styles (mobile-friendly)

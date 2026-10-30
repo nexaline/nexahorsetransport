@@ -212,6 +212,35 @@ h2 {
 
 .card p { margin: 0; }
 
+/* Videos */
+.videos { background: var(--bg-alt); }
+
+/* 16:9 box that scales with the screen width */
+.video-frame {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  aspect-ratio: 16 / 9;
+  margin: 0 auto;
+  border: 4px solid var(--purple);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--purple-dark);
+}
+
+.video-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.video-more {
+  margin: 20px 0 0;
+  text-align: center;
+}
+
 /* Form */
 .booking-form {
   display: grid;
