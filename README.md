@@ -5,6 +5,7 @@ Simple static website for Nexa Horse Transport (Sundre, Alberta; serving Canada 
 - `index.html`: home, services, instant quote calculator + booking request form, videos (embedded YouTube uploads playlist, newest first, no API key), contact
 - `events.html`: Events Calendar of upcoming horse shows, competitions, races and auctions (reads `events.json`)
 - `terms.html`: terms and conditions
+- `privacy.html`: privacy policy (PIPEDA / Alberta PIPA, text messaging section at `#sms`)
 - `styles.css`: shared styles (mobile-friendly)
 
 Quote rates live at the top of the script in `index.html` (`RATES`, `MINIMUM_CHARGE`, `GST_RATE`); the "See our rates" table in the booking section shows the same numbers, so update both together. Customers enter each location in one box (an address or postal / ZIP code with Google Places API (New) autocomplete, or GPS coordinates like `51.0447, -114.0719`), or pick it on the map; every location is turned into an address plus GPS coordinates (Places API (New), or the Geocoding API through the Maps JavaScript API), both of which go in the booking email. Driving distance comes from Google Routes API, and a single map under the location fields shows pin A (pickup), pin B (drop-off) and the route; both pins can be dragged. The key is in `GOOGLE_MAPS_API_KEY` near the bottom of `index.html`; customers can type the distance in if the lookup fails.
