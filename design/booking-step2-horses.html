@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Booking step 2: Horses</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&amp;family=Source+Sans+3:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#6A2C91}a:hover{color:#3D1758}
+</style>
+</helmet>
+<div style="width: 1000px; min-height: 1500px; box-sizing: border-box; background: #FBF8F2; padding: 48px 56px; font-family: 'Source Sans 3', sans-serif; font-size: 17px; color: #222222">
+<h2 style="margin: 0 0 6px; font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 34px; color: #3D1758; text-align: center">Get an instant quote</h2>
+<p style="margin: 0 0 28px; text-align: center; color: #4A4450">Four short steps. We'll call you to confirm before anything is booked.</p>
+
+<ol aria-label="Booking steps" style="list-style: none; margin: 0 0 28px; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+<li style="text-align: center"><a href="#step1" style="text-decoration: none"><div style="height: 6px; border-radius: 3px; background: #6A2C91; margin-bottom: 8px"></div><span style="font-weight: 600; color: #6A2C91; font-size: 15px">✓ 1 · Trip</span></a></li>
+<li style="text-align: center"><div style="height: 6px; border-radius: 3px; background: #6A2C91; margin-bottom: 8px"></div><span style="font-family: 'Archivo', sans-serif; font-weight: 700; color: #3D1758; font-size: 15px">2 · Horses</span></li>
+<li style="text-align: center"><div style="height: 6px; border-radius: 3px; background: #E4DCEA; margin-bottom: 8px"></div><span style="font-weight: 600; color: #6E6676; font-size: 15px">3 · Dates</span></li>
+<li style="text-align: center"><div style="height: 6px; border-radius: 3px; background: #E4DCEA; margin-bottom: 8px"></div><span style="font-weight: 600; color: #6E6676; font-size: 15px">4 · Your details</span></li>
+</ol>
+
+<div style="background: #FFFFFF; border: 1px solid #EAE2D3; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 22px">
+<h3 style="margin: 0; font-family: 'Archivo', sans-serif; font-size: 22px; color: #3D1758">Tell us about your horses</h3>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span style="font-weight: 600">How many horses need each stall type?</span>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px">
+<div style="border: 1.5px solid #6A2C91; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; background: #F7F2FA">
+<label for="b2-std" style="font-family: 'Archivo', sans-serif; font-weight: 700; color: #3D1758">Standard stall</label>
+<span style="font-size: 14px; color: #5B5560">Most horses</span>
+<input id="b2-std" type="number" value="1" style="padding: 10px 12px; border: 1px solid #CFC4D8; border-radius: 8px; font-size: 16px; font-family: inherit; width: 90px">
+</div>
+<div style="border: 1px solid #E4DCEA; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px">
+<label for="b2-room" style="font-family: 'Archivo', sans-serif; font-weight: 700; color: #3D1758">Roomier stall</label>
+<span style="font-size: 14px; color: #5B5560">Larger horses</span>
+<input id="b2-room" type="number" value="0" style="padding: 10px 12px; border: 1px solid #CFC4D8; border-radius: 8px; font-size: 16px; font-family: inherit; width: 90px">
+</div>
+<div style="border: 1px solid #E4DCEA; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px">
+<label for="b2-box" style="font-family: 'Archivo', sans-serif; font-weight: 700; color: #3D1758">Box stall</label>
+<span style="font-size: 14px; color: #5B5560">Mares with foals, stallions</span>
+<input id="b2-box" type="number" value="0" style="padding: 10px 12px; border: 1px solid #CFC4D8; border-radius: 8px; font-size: 16px; font-family: inherit; width: 90px">
+</div>
+</div>
+</div>
+
+<div style="border: 1px solid #EAE2D3; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 14px; background: #FBF8F2">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px">
+<span style="font-family: 'Archivo', sans-serif; font-weight: 700; color: #3D1758">Horse 1 · Standard stall</span>
+<span style="font-size: 14px; color: #6E6676">All optional</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px">
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="b2-h" style="font-weight: 600; font-size: 15px">Height (hands)</label><input id="b2-h" type="text" placeholder="e.g. 15.2" style="padding: 10px 12px; border: 1px solid #CFC4D8; border-radius: 8px; font-size: 16px; font-family: inherit; background: #FFFFFF"></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="b2-w" style="font-weight: 600; font-size: 15px">Weight (kg)</label><input id="b2-w" type="text" placeholder="e.g. 500" style="padding: 10px 12px; border: 1px solid #CFC4D8; border-radius: 8px; font-size: 16px; font-family: inherit; background: #FFFFFF"></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="b2-a" style="font-weight: 600; font-size: 15px">Age (years)</label><input id="b2-a" type="text" placeholder="e.g. 8" style="padding: 10px 12px; border: 1px solid #CFC4D8; border-radius: 8px; font-size: 16px; font-family: inherit; background: #FFFFFF"></div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px">
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="b2-s" style="font-weight: 600; font-size: 15px">Sex</label>
+<select id="b2-s" style="padding: 10px 12px; border: 1px solid #CFC4D8; border-radius: 8px; font-size: 16px; font-family: inherit; background: #FFFFFF"><option>Choose…</option><option>Mare</option><option>Gelding</option><option>Stallion</option></select></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 600; font-size: 15px">Foal or young horse?</span>
+<div style="display: flex; gap: 10px">
+<label style="flex: 1; display: flex; align-items: center; gap: 8px; border: 1px solid #CFC4D8; border-radius: 8px; padding: 9px 12px; background: #FFFFFF"><input type="radio" name="b2-foal"> Yes</label>
+<label style="flex: 1; display: flex; align-items: center; gap: 8px; border: 1px solid #CFC4D8; border-radius: 8px; padding: 9px 12px; background: #FFFFFF"><input type="radio" name="b2-foal" checked> No</label>
+</div></div>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="b2-notes" style="font-weight: 600">Horse details &amp; special requirements</label>
+<textarea id="b2-notes" placeholder="Breed, temperament, loading experience, health or handling needs…" style="min-height: 96px; padding: 12px 14px; border: 1px solid #CFC4D8; border-radius: 10px; font-size: 16px; font-family: inherit; resize: vertical"></textarea>
+</div>
+</div>
+
+<div style="margin-top: 22px; background: #FFFFFF; border: 1px solid #EAE2D3; border-radius: 16px; padding: 18px">
+<div style="display: flex; justify-content: space-between; gap: 12px; margin: 0 0 12px; font-size: 15px"><span style="font-weight: 600; color: #3D1758">Your route</span><span>Calgary → Toronto · <strong>3,432 km</strong> · Across Canada</span></div>
+<svg viewBox="0 0 900 300" width="100%" role="img" aria-label="Illustration of the route map from Calgary to Toronto" style="display: block; border-radius: 12px; background: #EAF0E4">
+<path d="M540 70 q70 -34 140 -2 q24 42 -46 64 q-80 12 -94 -62z" fill="#CFE2EF"></path>
+<path d="M700 150 q34 -12 56 22 q-10 32 -44 22z" fill="#CFE2EF"></path>
+<path d="M120 120 C 260 110 420 60 560 132 S 720 172 790 192" fill="none" stroke="#6A2C91" stroke-width="5" stroke-linecap="round"></path>
+<circle cx="120" cy="120" r="15" fill="#6A2C91"></circle>
+<text x="120" y="126" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="800" font-size="16" fill="#FFFFFF">A</text>
+<text x="120" y="156" text-anchor="middle" font-family="Source Sans 3, sans-serif" font-size="15" fill="#3D1758">Calgary</text>
+<circle cx="790" cy="192" r="15" fill="#E8141C"></circle>
+<text x="790" y="198" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="800" font-size="16" fill="#FFFFFF">B</text>
+<text x="790" y="228" text-anchor="middle" font-family="Source Sans 3, sans-serif" font-size="15" fill="#3D1758">Toronto</text>
+</svg>
+</div>
+
+<div style="display: flex; justify-content: space-between; gap: 12px; margin-top: 24px">
+<button type="button" style="background: #FFFFFF; color: #6A2C91; border: 2px solid #6A2C91; padding: 13px 26px; border-radius: 10px; font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 17px; cursor: pointer">← Back</button>
+<button type="button" style="background: #FFE100; color: #3D1758; border: 0; padding: 15px 30px; border-radius: 10px; font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 17px; cursor: pointer">Next: dates</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1000,"height":1500}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Booking step 4: Your details and quote</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&amp;family=Source+Sans+3:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#6A2C91}a:hover{color:#3D1758}
+</style>
+</helmet>
+<div style="width: 1000px; min-height: 1550px; box-sizing: border-box; background: #FBF8F2; padding: 48px 56px; font-family: 'Source Sans 3', sans-serif; font-size: 17px; color: #222222">
+<h2 style="margin: 0 0 6px; font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 34px; color: #3D1758; text-align: center">Get an instant quote</h2>
+<p style="margin: 0 0 28px; text-align: center; color: #4A4450">Four short steps. We'll call you to confirm before anything is booked.</p>
+
+<ol aria-label="Booking steps" style="list-style: none; margin: 0 0 28px; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+<li style="text-align: center"><a href="#step1" style="text-decoration: none"><div style="height: 6px; border-radius: 3px; background: #6A2C91; margin-bottom: 8px"></div><span style="font-weight: 600; color: #6A2C91; font-size: 15px">✓ 1 · Trip</span></a></li>
+<li style="text-align: center"><a href="#step2" style="text-decoration: none"><div style="height: 6px; border-radius: 3px; background: #6A2C91; margin-bottom: 8px"></div><span style="font-weight: 600; color: #6A2C91; font-size: 15px">✓ 2 · Horses</span></a></li>
+<li style="text-align: center"><a href="#step3" style="text-decoration: none"><div style="height: 6px; border-radius: 3px; background: #6A2C91; margin-bottom: 8px"></div><span style="font-weight: 600; color: #6A2C91; font-size: 15px">✓ 3 · Dates</span></a></li>
+<li style="text-align: center"><div style="height: 6px; border-radius: 3px; background: #6A2C91; margin-bottom: 8px"></div><span style="font-family: 'Archivo', sans-serif; font-weight: 700; color: #3D1758; font-size: 15px">4 · Your details</span></li>
+</ol>
+
+<div style="background: #FFFFFF; border: 1px solid #EAE2D3; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 18px">
+<h3 style="margin: 0; font-family: 'Archivo', sans-serif; font-size: 22px; color: #3D1758">Your quote</h3>
+<div style="display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 22px; align-items: start">
+<svg viewBox="0 0 900 420" width="100%" role="img" aria-label="Illustration of the route map from Calgary to Toronto" style="display: block; border-radius: 12px; background: #EAF0E4">
+<path d="M540 110 q70 -34 140 -2 q24 42 -46 64 q-80 12 -94 -62z" fill="#CFE2EF"></path>
+<path d="M700 200 q34 -12 56 22 q-10 32 -44 22z" fill="#CFE2EF"></path>
+<path d="M110 170 C 260 160 420 100 560 182 S 720 232 790 252" fill="none" stroke="#6A2C91" stroke-width="6" stroke-linecap="round"></path>
+<circle cx="110" cy="170" r="17" fill="#6A2C91"></circle>
+<text x="110" y="177" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="800" font-size="18" fill="#FFFFFF">A</text>
+<text x="110" y="212" text-anchor="middle" font-family="Source Sans 3, sans-serif" font-size="18" fill="#3D1758">Calgary</text>
+<circle cx="790" cy="252" r="17" fill="#E8141C"></circle>
+<text x="790" y="259" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="800" font-size="18" fill="#FFFFFF">B</text>
+<text x="790" y="294" text-anchor="middle" font-family="Source Sans 3, sans-serif" font-size="18" fill="#3D1758">Toronto</text>
+</svg>
+<div style="display: flex; flex-direction: column; gap: 10px; font-size: 16px">
+<div style="display: flex; justify-content: space-between; gap: 12px"><span>Calgary → Toronto</span><strong>3,432 km</strong></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; color: #5B5560"><span>Trip type</span><span>Across Canada</span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; color: #5B5560"><span>Pickup</span><span>Nov 10–14, 2026</span></div>
+<div style="height: 1px; background: #EAE2D3; margin: 4px 0"></div>
+<div style="display: flex; justify-content: space-between; gap: 12px"><span>1 × Standard stall<br><span style="font-size: 14px; color: #6E6676">$1.20/km × 3,432 km</span></span><span>$4,118.40</span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; color: #5B5560"><span>GST (5%)</span><span>$205.92</span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; align-items: baseline; padding: 12px 14px; background: #F4EEF8; border-radius: 10px"><span style="font-family: 'Archivo', sans-serif; font-weight: 700; color: #3D1758">Total</span><span style="font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 26px; color: #3D1758">$4,324.32 CAD</span></div>
+<span style="font-size: 14px; color: #5B5560">No hidden fees. Vet, border, government and customs broker fees are extra, at cost.</span>
+</div>
+</div>
+<p style="margin: 0; padding: 12px 14px; background: #FFF9D6; border-radius: 10px; font-size: 15px; color: #3D3500"><strong>Please note:</strong> this is an automatic estimate. Your price is confirmed when we call you.</p>
+</div>
+
+<div style="margin-top: 22px; background: #FFFFFF; border: 1px solid #EAE2D3; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 18px">
+<h3 style="margin: 0; font-family: 'Archivo', sans-serif; font-size: 22px; color: #3D1758">How can we reach you?</h3>
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="b4-name" style="font-weight: 600">Full name</label><input id="b4-name" type="text" style="padding: 13px 15px; border: 1px solid #CFC4D8; border-radius: 10px; font-size: 16px; font-family: inherit"></div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="b4-phone" style="font-weight: 600">Phone</label><input id="b4-phone" type="tel" style="padding: 13px 15px; border: 1px solid #CFC4D8; border-radius: 10px; font-size: 16px; font-family: inherit"></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="b4-email" style="font-weight: 600">Email</label><input id="b4-email" type="email" style="padding: 13px 15px; border: 1px solid #CFC4D8; border-radius: 10px; font-size: 16px; font-family: inherit"></div>
+</div>
+<span style="font-size: 14px; color: #5B5560; margin-top: -8px">A phone number or an email is enough. Both is great.</span>
+<label style="display: flex; gap: 10px; align-items: flex-start; font-size: 15px"><input type="checkbox" checked style="margin-top: 4px"> <span>I have read and agree to the <a href="#terms">Terms &amp; Conditions</a>.</span></label>
+<label style="display: flex; gap: 10px; align-items: flex-start; font-size: 15px"><input type="checkbox" style="margin-top: 4px"> <span>I agree to receive text messages from Nexa Horse Transport (Nexa Line Ltd.) at the phone number provided, about my quote, booking, and trip updates. Message frequency varies. Message and data rates may apply. Reply STOP to opt out, HELP for help. Consent is not a condition of booking. See our <a href="#terms">Terms</a> and <a href="#privacy">Privacy Policy</a>.</span></label>
+</div>
+
+<div style="display: flex; justify-content: space-between; gap: 12px; margin-top: 24px">
+<button type="button" style="background: #FFFFFF; color: #6A2C91; border: 2px solid #6A2C91; padding: 13px 26px; border-radius: 10px; font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 17px; cursor: pointer">← Back</button>
+<button type="button" style="background: #FFE100; color: #3D1758; border: 0; padding: 15px 30px; border-radius: 10px; font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 17px; cursor: pointer">Send booking request</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1000,"height":1550}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
