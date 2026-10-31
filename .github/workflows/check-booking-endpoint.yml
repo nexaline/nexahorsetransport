@@ -1,0 +1,41 @@
+name: Check booking endpoint
+
+# Run by hand (Actions tab > "Check booking endpoint" > Run workflow) to see how the Google Apps Script
+# web app in BOOKING_ENDPOINT (index.html) answers. The test booking is flagged as spam (hidden "website"
+# field filled in), so the script replies normally but sends no email.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Probe the booking web app
+        run: |
+          URL=$(grep -oE 'var BOOKING_ENDPOINT = "[^"]*"' index.html | cut -d'"' -f2)
+          echo "BOOKING_ENDPOINT: $URL"
+          if [ -z "$URL" ]; then echo "::error::BOOKING_ENDPOINT is empty"; exit 1; fi
+
+          echo "=== GET (opening the URL in a browser) ==="
+          curl -sS -L -o get-body.txt -w "final HTTP %{http_code} from %{url_effective}\n" "$URL" || true
+          head -c 600 get-body.txt; echo
+
+          echo "=== POST like the website (text/plain JSON, redirect followed), spam-flagged so no email is sent ==="
+          curl -sS -L -D post-headers.txt -o post-body.txt -w "final HTTP %{http_code} from %{url_effective}\n" \
+            -H "Content-Type: text/plain;charset=utf-8" -H "Origin: https://nexahorsetransport.ca" \
+            --data '{"name":"Endpoint check","phone":"000","website":"endpoint-check","elapsedMs":0}' "$URL" || true
+          echo "--- response headers (all hops)"; grep -iE "^(HTTP|location|content-type|access-control)" post-headers.txt || true
+          echo "--- response body"; head -c 600 post-body.txt; echo
+
+          if grep -q '"ok":true' post-body.txt; then
+            echo "Result: the web app answered the website's request correctly."
+          else
+            echo "::error::The web app did not answer with {\"ok\":true}. See the response above."
+            exit 1
+          fi

@@ -478,6 +478,33 @@ textarea { min-height: 110px; resize: vertical; }
 
 .stall-grid .field { justify-content: flex-end; }
 
+/* Pickup and drop-off date windows: two dates side by side */
+.date-window {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.date-window legend {
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0;
+  margin-bottom: 6px;
+}
+
+.date-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px 20px;
+}
+
+.date-pair label { font-weight: 400; }
+
+.date-pair input { min-width: 0; }
+
+.sms-hint { margin-top: -8px; }
+
 .stall-grid label { font-weight: 400; }
 
 .distance-row {
@@ -810,6 +837,11 @@ textarea { min-height: 110px; resize: vertical; }
   .event-list { grid-template-columns: minmax(0, 1fr); }
   .calendar-links { columns: 1; }
   .stall-grid { gap: 8px; }
+}
+
+/* Narrow phones: one date per row so the date boxes aren't cut off */
+@media (max-width: 420px) {
+  .date-pair { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* The smallest phones: keep the call button beside the logo */

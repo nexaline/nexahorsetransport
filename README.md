@@ -29,6 +29,8 @@ The booking form POSTs each request to a Google Apps Script web app (`google-app
 4. Deploy > New deployment > Web app, Execute as **Me**, Who has access **Anyone**. Copy the Web app URL (ending in `/exec`) into `BOOKING_ENDPOINT` at the top of the script in `index.html`.
 5. After later code changes: Deploy > Manage deployments > Edit > New version (keeps the same URL).
 
+If the form shows "Sorry, something went wrong", open the browser console (it logs the real reply), or run the **Check booking endpoint** workflow from the Actions tab: it sends the web app a spam-flagged test request (no email is sent) and prints exactly how it answers.
+
 Spam protection: a hidden honeypot field, and submissions completed in under 3 seconds are ignored (checked in the page and again in the script).
 
 ## Events calendar

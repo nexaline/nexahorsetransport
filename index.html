@@ -85,12 +85,13 @@
             <input id="name" name="name" type="text" autocomplete="name" required>
           </div>
           <div class="field">
-            <label for="phone">Phone *</label>
-            <input id="phone" name="phone" type="tel" autocomplete="tel" required>
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" type="tel" autocomplete="tel" aria-describedby="contact-hint">
           </div>
           <div class="field full">
-            <label for="email">Email (optional)</label>
-            <input id="email" name="email" type="email" autocomplete="email">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="email" aria-describedby="contact-hint">
+            <p class="hint" id="contact-hint">Please give a phone number, an email address, or both, so we can reach you. *</p>
           </div>
           <div class="field location" id="pickup-location">
             <label for="pickup">Pickup location *</label>
@@ -171,11 +172,33 @@
             <p>Prices are in Canadian dollars, plus 5% GST. Minimum charge $300 per trip.</p>
           </details>
 
-          <div class="field">
-            <label for="date">Preferred pickup date *</label>
-            <input id="date" name="date" type="date" required>
-          </div>
-          <div class="field">
+          <fieldset class="field full date-window">
+            <legend>Pickup window</legend>
+            <div class="date-pair">
+              <div class="field">
+                <label for="pickup-earliest">Earliest pickup date *</label>
+                <input id="pickup-earliest" name="pickupEarliest" type="date" required>
+              </div>
+              <div class="field">
+                <label for="pickup-latest">Latest pickup date</label>
+                <input id="pickup-latest" name="pickupLatest" type="date">
+              </div>
+            </div>
+          </fieldset>
+          <fieldset class="field full date-window">
+            <legend>Drop-off window</legend>
+            <div class="date-pair">
+              <div class="field">
+                <label for="dropoff-earliest">Earliest drop-off date</label>
+                <input id="dropoff-earliest" name="dropoffEarliest" type="date">
+              </div>
+              <div class="field">
+                <label for="dropoff-latest">Latest drop-off date</label>
+                <input id="dropoff-latest" name="dropoffLatest" type="date">
+              </div>
+            </div>
+          </fieldset>
+          <div class="field full">
             <label for="trip">Trip type</label>
             <select id="trip" name="trip">
               <option>Local / within Alberta</option>
@@ -196,6 +219,7 @@
             <input id="sms-consent" name="smsConsent" type="checkbox">
             <label for="sms-consent">I agree to receive text messages from Nexa Horse Transport (Nexa Line Ltd.) at the phone number provided, about my quote, booking, and trip updates. Message frequency varies. Message and data rates may apply. Reply STOP to opt out, HELP for help. Consent is not a condition of booking. See our <a href="terms.html#sms" target="_blank">Terms</a> and <a href="privacy.html" target="_blank">Privacy Policy</a>.</label>
           </div>
+          <p class="hint sms-hint field full">Text messages only apply if you give a phone number.</p>
           <!-- Spam trap: hidden from people, but bots fill it in. -->
           <div class="hp-field" aria-hidden="true">
             <label for="website">Leave this field empty</label>
@@ -1084,7 +1108,12 @@
         name: f.name.value.trim(),
         phone: f.phone.value.trim(),
         email: f.email.value.trim(),
-        date: f.date.value,
+        dates: {
+          pickupEarliest: f.pickupEarliest.value,
+          pickupLatest: f.pickupLatest.value,
+          dropoffEarliest: f.dropoffEarliest.value,
+          dropoffLatest: f.dropoffLatest.value
+        },
         trip: f.trip.value,
         details: f.details.value.trim(),
         pickup: placeForEmail(pickupLoc),
@@ -1104,7 +1133,8 @@
           notice: NOTICE
         },
         termsAccepted: f.agree.checked,
-        smsConsent: f.smsConsent.checked,
+        // Text messages need a phone number, so the box only counts when one is given.
+        smsConsent: f.smsConsent.checked && !!f.phone.value.trim(),
         website: f.website.value,
         elapsedMs: Date.now() - formStartedAt,
         submittedAt: new Date().toString()
@@ -1117,9 +1147,74 @@
       sendButton.disabled = true;
     }
 
+    // ----- Pickup and drop-off date windows -----
+    var DATES = {
+      pickupEarliest: document.getElementById("pickup-earliest"),
+      pickupLatest: document.getElementById("pickup-latest"),
+      dropoffEarliest: document.getElementById("dropoff-earliest"),
+      dropoffLatest: document.getElementById("dropoff-latest")
+    };
+
+    function todayIso() {
+      var d = new Date();
+      return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    }
+
+    // Sets each date box's error message (empty when fine), so the browser shows it on that box.
+    // Dates are YYYY-MM-DD strings, which compare correctly as text.
+    function checkDates() {
+      var today = todayIso();
+      var v = {};
+      Object.keys(DATES).forEach(function (k) { v[k] = DATES[k].value; });
+      var errors = {};
+      Object.keys(DATES).forEach(function (k) {
+        if (v[k] && v[k] < today) errors[k] = "This date is in the past. Please choose today or later.";
+      });
+      if (!errors.pickupLatest && v.pickupLatest && v.pickupEarliest && v.pickupLatest < v.pickupEarliest) {
+        errors.pickupLatest = "The latest pickup date can't be before the earliest pickup date.";
+      }
+      if (!errors.dropoffEarliest && v.dropoffEarliest && v.pickupEarliest && v.dropoffEarliest < v.pickupEarliest) {
+        errors.dropoffEarliest = "Drop-off can't be before pickup.";
+      }
+      if (!errors.dropoffLatest && v.dropoffLatest && v.dropoffEarliest && v.dropoffLatest < v.dropoffEarliest) {
+        errors.dropoffLatest = "The latest drop-off date can't be before the earliest drop-off date.";
+      }
+      if (!errors.dropoffLatest && v.dropoffLatest && v.pickupEarliest && v.dropoffLatest < v.pickupEarliest) {
+        errors.dropoffLatest = "Drop-off can't be before pickup.";
+      }
+      Object.keys(DATES).forEach(function (k) {
+        DATES[k].setCustomValidity(errors[k] || "");
+        // The date pickers also grey out dates that aren't allowed.
+        DATES[k].min = k === "pickupLatest" ? (v.pickupEarliest || today)
+          : k === "dropoffEarliest" ? (v.pickupEarliest || today)
+          : k === "dropoffLatest" ? (v.dropoffEarliest || v.pickupEarliest || today)
+          : today;
+      });
+    }
+
+    Object.keys(DATES).forEach(function (k) {
+      DATES[k].addEventListener("input", checkDates);
+      DATES[k].addEventListener("change", function () {
+        checkDates();
+        if (!DATES[k].checkValidity()) DATES[k].reportValidity();
+      });
+    });
+    checkDates();
+
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       var f = e.target;
+      if (!f.phone.value.trim() && !f.email.value.trim()) {
+        showStatus("error", "Please give a phone number or an email address (or both) so we can reach you.");
+        f.phone.focus();
+        return;
+      }
+      checkDates();
+      var badDate = Object.keys(DATES).map(function (k) { return DATES[k]; }).filter(function (el) { return !el.checkValidity(); })[0];
+      if (badDate) {
+        badDate.reportValidity();
+        return;
+      }
       var q = calcQuote();
       if (!q) {
         showStatus("", "Please enter at least one horse in a stall type.");
@@ -1146,19 +1241,33 @@
       sendButton.disabled = true;
       sendButton.textContent = "Sending...";
       showStatus("", "Sending your request...");
-      // text/plain keeps this a "simple" request, which Google Apps Script accepts from other websites.
+      // Google Apps Script can't answer CORS preflight (OPTIONS) requests, so this must stay a "simple"
+      // request: POST, only a text/plain Content-Type header, and the JSON as a plain string. Apps Script
+      // replies with a redirect to script.googleusercontent.com, which fetch follows.
       fetch(BOOKING_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
+        redirect: "follow"
       }).then(function (r) {
-        if (!r.ok) throw new Error("HTTP " + r.status);
-        return r.json();
-      }).then(function (result) {
-        if (!result || !result.ok) throw new Error((result && result.error) || "not sent");
+        return r.text().then(function (text) {
+          var result = null;
+          try { result = JSON.parse(text); } catch (parseError) { /* not JSON, reported below */ }
+          if (!r.ok || !result) {
+            // A Google sign-in or error page here usually means the web app isn't deployed with
+            // "Who has access: Anyone", or the deployment URL is out of date.
+            throw new Error("Unexpected reply from the booking script: HTTP " + r.status + " from " + r.url +
+              (result ? "" : " (not JSON): " + text.slice(0, 300)));
+          }
+          if (!result.ok) throw new Error("The booking script reported an error: " + (result.error || "unknown"));
+          return result;
+        });
+      }).then(function () {
         sent();
       }).catch(function (err) {
-        console.error("Booking request failed:", err);
+        // A TypeError ("Failed to fetch") means the browser got no readable reply at all: a network problem,
+        // or a reply without CORS permission (for example a Google sign-in page).
+        console.error("Booking request failed:", err && err.message ? err.message : err, err);
         sendButton.disabled = false;
         sendButton.textContent = "Send Booking Request";
         showStatus("error", "Sorry, something went wrong. Please call us at ", true);

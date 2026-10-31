@@ -26,6 +26,8 @@ var MIN_FILL_MS = 3000;          // forms completed faster than this are treated
 var ROUTE_COLOR = "0x6A2C91";    // brand purple
 var MAX_PATH_POINTS = 250;       // keeps the Static Maps URL well under its length limit
 
+// The website sends the booking as a JSON string with Content-Type text/plain (a "simple" request, so the
+// browser doesn't need a CORS preflight, which Apps Script can't answer). The reply is always JSON.
 function doPost(e) {
   try {
     var data = JSON.parse((e && e.postData && e.postData.contents) || "{}");
@@ -34,8 +36,11 @@ function doPost(e) {
     if (clean(data.website, 200) || !(Number(data.elapsedMs) >= MIN_FILL_MS)) {
       return json({ ok: true });
     }
-    if (!clean(data.name, 120) || !clean(data.phone, 40)) {
-      return json({ ok: false, error: "Name and phone number are required." });
+    if (!clean(data.name, 120)) {
+      return json({ ok: false, error: "A name is required." });
+    }
+    if (!clean(data.phone, 40) && !clean(data.email, 200)) {
+      return json({ ok: false, error: "A phone number or an email address is required." });
     }
     sendBookingEmail(data);
     return json({ ok: true });
@@ -177,11 +182,12 @@ function encodeValue(v) {
 
 function bookingRows(data) {
   var pickup = data.pickup || {}, dropoff = data.dropoff || {};
+  var dates = data.dates || {};
   var stalls = (data.stalls || []).map(function (s) { return clean(s.type, 40) + ": " + (Number(s.count) || 0); }).join(", ");
   return [
     ["Customer", [
       ["Name", clean(data.name, 120)],
-      ["Phone", clean(data.phone, 40)],
+      ["Phone", clean(data.phone, 40) || "(not given)"],
       ["Email", clean(data.email, 200) || "(not given)"]
     ]],
     ["Trip", [
@@ -191,7 +197,10 @@ function bookingRows(data) {
       ["Drop-off", clean(dropoff.label, 300)],
       ["Drop-off GPS", gpsText(dropoff)],
       ["Drop-off entered as", clean(dropoff.entered, 200)],
-      ["Preferred date", clean(data.date, 20)],
+      ["Earliest pickup date", clean(dates.pickupEarliest, 20) || "(not given)"],
+      ["Latest pickup date", clean(dates.pickupLatest, 20) || "(not given)"],
+      ["Earliest drop-off date", clean(dates.dropoffEarliest, 20) || "(not given)"],
+      ["Latest drop-off date", clean(dates.dropoffLatest, 20) || "(not given)"],
       ["Trip type", clean(data.trip, 80)],
       ["Driving distance", (Number(data.distanceKm) || 0) + " km (" + clean(data.distanceSource, 60) + ")"],
       ["Route note", clean(data.routeNote, 600)]
@@ -205,7 +214,7 @@ function bookingRows(data) {
     ]],
     ["Consent", [
       ["Terms & Conditions", data.termsAccepted ? "Agreed" : "Not agreed"],
-      ["SMS consent", data.smsConsent ? "Yes" : "No"]
+      ["SMS consent", data.smsConsent && clean(data.phone, 40) ? "Yes" : "No"]
     ]]
   ];
 }
@@ -299,7 +308,8 @@ function json(obj) {
 // Run from the Apps Script editor to send yourself a sample booking email.
 function testBookingEmail() {
   sendBookingEmail({
-    name: "Test Customer", phone: "403-555-0100", email: "", date: "2027-06-01", trip: "Within Canada",
+    name: "Test Customer", phone: "403-555-0100", email: "", trip: "Within Canada",
+    dates: { pickupEarliest: "2027-06-01", pickupLatest: "2027-06-03", dropoffEarliest: "2027-06-02", dropoffLatest: "" },
     details: "Test request from testBookingEmail().",
     pickup: { label: "Sundre, AB, Canada", lat: 51.7976, lng: -114.6403, entered: "address \"Sundre\"" },
     dropoff: { label: "Calgary, AB, Canada", lat: 51.0447, lng: -114.0719, entered: "postal / ZIP code T2P 1J9" },
