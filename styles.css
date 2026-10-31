@@ -98,6 +98,23 @@ a { color: var(--purple); }
 
 .site-nav a:hover { color: var(--yellow); text-decoration: underline; }
 
+/* Toll-free call button, always in the sticky header */
+.call-btn {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  background: var(--yellow);
+  color: var(--purple-dark);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.call-btn:hover { background: var(--white); }
+
+.call-btn:focus-visible { outline: 3px solid var(--white); outline-offset: 2px; }
+
 /* Hero */
 .hero {
   background: var(--white);
@@ -305,6 +322,48 @@ textarea { min-height: 110px; resize: vertical; }
   margin: 0;
   font-weight: 600;
   color: var(--purple);
+}
+
+.form-status:empty { display: none; }
+
+.form-status.success,
+.form-status.error {
+  padding: 12px 14px;
+  border-radius: 6px;
+  color: var(--text);
+}
+
+.form-status.success { background: var(--bg-alt); border-left: 5px solid var(--purple); }
+
+.form-status.error { background: var(--warning-bg); border-left: 5px solid var(--red); color: var(--warning-text); }
+
+.form-actions {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-call {
+  background: var(--purple);
+  border-color: var(--purple);
+  color: var(--white);
+}
+
+.btn-call:hover { background: var(--purple-dark); border-color: var(--purple-dark); }
+
+/* Spam trap: kept off screen so only bots fill it in */
+.hp-field {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.pick-on-map {
+  align-self: flex-start;
+  margin-top: 8px;
 }
 
 /* Quote calculator */
@@ -738,6 +797,11 @@ textarea { min-height: 110px; resize: vertical; }
   .hero { padding: 56px 0 52px; }
   html { scroll-padding-top: 150px; }
   .logo img { height: 50px; }
+  /* Phones: logo and call button on the first row, menu underneath */
+  .site-header .container { gap: 6px 12px; }
+  .call-btn { order: 2; margin-left: auto; padding: 8px 10px; font-size: 0.9rem; }
+  .site-nav { order: 3; width: 100%; }
+  .form-actions .btn { flex: 1 1 100%; text-align: center; }
   .booking-form { grid-template-columns: minmax(0, 1fr); padding: 18px; }
   .quote { padding: 16px; }
   .route-map { height: 260px; }
@@ -746,4 +810,9 @@ textarea { min-height: 110px; resize: vertical; }
   .event-list { grid-template-columns: minmax(0, 1fr); }
   .calendar-links { columns: 1; }
   .stall-grid { gap: 8px; }
+}
+
+/* The smallest phones: keep the call button beside the logo */
+@media (max-width: 360px) {
+  .call-btn { padding: 7px 8px; font-size: 0.8rem; }
 }

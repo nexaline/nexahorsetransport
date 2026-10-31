@@ -5,6 +5,7 @@ Simple static website for Nexa Horse Transport (Sundre, Alberta; serving Canada 
 - `index.html`: home, services, instant quote calculator + booking request form, videos (embedded YouTube uploads playlist, newest first, no API key), contact
 - `events.html`: Events Calendar of upcoming horse shows, competitions, races and auctions (reads `events.json`)
 - `terms.html`: terms and conditions
+- `google-apps-script/Code.gs`: Google Apps Script web app that receives booking requests and emails them (with a route map picture) to nexahorsetransport@gmail.com
 - `privacy.html`: privacy policy (PIPEDA / Alberta PIPA, text messaging section at `#sms`)
 - `styles.css`: shared styles (mobile-friendly)
 
@@ -17,6 +18,18 @@ Trips with both ends in Canada are kept in Canada using pass-through waypoints (
 - Western Canada to NB, NS or PEI: all five, west to east
 
 The route is then checked against the `US_AREAS` boxes. If it still leaves Canada, the customer sees a note asking them to confirm the distance with us, including which part of the route is in the US and between which waypoints (also logged to the browser console). The note is included in the booking email.
+
+## Booking requests (Google Apps Script)
+
+The booking form POSTs each request to a Google Apps Script web app (`google-apps-script/Code.gs`), which emails it to nexahorsetransport@gmail.com with a map picture of the route (pickup A, drop-off B, driving route) from the Google Maps Static API. Setup, once, signed in as nexahorsetransport@gmail.com:
+
+1. At https://script.google.com create a new project and paste in `google-apps-script/Code.gs`.
+2. In Google Cloud Console create a **separate** API key restricted to the **Maps Static API** (and enable that API). In the Apps Script editor: Project Settings > Script Properties > add `STATIC_MAPS_KEY` with that key. This key is never stored in GitHub or the website.
+3. Optional: run `testBookingEmail()` in the editor to receive a sample email.
+4. Deploy > New deployment > Web app, Execute as **Me**, Who has access **Anyone**. Copy the Web app URL (ending in `/exec`) into `BOOKING_ENDPOINT` at the top of the script in `index.html`.
+5. After later code changes: Deploy > Manage deployments > Edit > New version (keeps the same URL).
+
+Spam protection: a hidden honeypot field, and submissions completed in under 3 seconds are ignored (checked in the page and again in the script).
 
 ## Events calendar
 

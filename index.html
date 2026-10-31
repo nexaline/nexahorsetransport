@@ -22,6 +22,7 @@
         <a href="terms.html">Terms</a>
         <a href="privacy.html">Privacy</a>
       </nav>
+      <a class="call-btn" href="tel:+18444916392" aria-label="Call us at 1-844-491-6392">Call us: 1-844-491-NEXA</a>
     </div>
   </header>
 
@@ -88,8 +89,8 @@
             <input id="phone" name="phone" type="tel" autocomplete="tel" required>
           </div>
           <div class="field full">
-            <label for="email">Email *</label>
-            <input id="email" name="email" type="email" autocomplete="email" required>
+            <label for="email">Email (optional)</label>
+            <input id="email" name="email" type="email" autocomplete="email">
           </div>
           <div class="field location" id="pickup-location">
             <label for="pickup">Pickup location *</label>
@@ -98,7 +99,7 @@
                 role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="pickup-list">
               <ul class="suggestions" id="pickup-list" role="listbox" hidden></ul>
             </div>
-            <button type="button" class="link-button pick-on-map" data-location="pickup">or pick on the map</button>
+            <button type="button" class="btn btn-secondary btn-small pick-on-map" data-location="pickup">Pick on the map</button>
             <p class="hint location-found" id="pickup-found" aria-live="polite"></p>
           </div>
           <div class="field location" id="dropoff-location">
@@ -108,7 +109,7 @@
                 role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="dropoff-list">
               <ul class="suggestions" id="dropoff-list" role="listbox" hidden></ul>
             </div>
-            <button type="button" class="link-button pick-on-map" data-location="dropoff">or pick on the map</button>
+            <button type="button" class="btn btn-secondary btn-small pick-on-map" data-location="dropoff">Pick on the map</button>
             <p class="hint location-found" id="dropoff-found" aria-live="polite"></p>
           </div>
           <div class="field full">
@@ -195,10 +196,16 @@
             <input id="sms-consent" name="smsConsent" type="checkbox">
             <label for="sms-consent">I agree to receive text messages from Nexa Horse Transport (Nexa Line Ltd.) at the phone number provided, about my quote, booking, and trip updates. Message frequency varies. Message and data rates may apply. Reply STOP to opt out, HELP for help. Consent is not a condition of booking. See our <a href="terms.html#sms" target="_blank">Terms</a> and <a href="privacy.html" target="_blank">Privacy Policy</a>.</label>
           </div>
-          <div class="field full">
-            <button type="submit" class="btn">Send Booking Request</button>
+          <!-- Spam trap: hidden from people, but bots fill it in. -->
+          <div class="hp-field" aria-hidden="true">
+            <label for="website">Leave this field empty</label>
+            <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
           </div>
-          <p class="form-note field full">Submitting opens your email app with your request filled in. Just press send.</p>
+          <div class="field full form-actions">
+            <button type="submit" class="btn" id="send-booking">Send Booking Request</button>
+            <a class="btn btn-call" href="tel:+18444916392" aria-label="Call us at 1-844-491-6392">Call us: 1-844-491-NEXA</a>
+          </div>
+          <p class="form-note field full">Your request goes straight to our team. We'll contact you to confirm your quote and booking.</p>
           <p class="form-status field full" id="form-status" role="status" aria-live="polite"></p>
         </form>
       </div>
@@ -252,8 +259,12 @@
   </footer>
 
   <script>
-    // Booking requests are sent to this address.
-    var BOOKING_EMAIL = "nexahorsetransport@gmail.com";
+    // ===== BOOKING FORM ENDPOINT =====
+    // Booking requests are POSTed to the Google Apps Script web app in google-apps-script/Code.gs, which emails
+    // them to nexahorsetransport@gmail.com. Paste its Web app URL (ending in /exec) between the quotes.
+    var BOOKING_ENDPOINT = "";
+    var MIN_FILL_MS = 3000; // forms completed faster than this are treated as spam
+    var formStartedAt = Date.now();
 
     // Prices in CAD, per horse, per km. Trips of 400 km or less use the "short" rates.
     var LONG_HAUL_KM = 400;
@@ -339,19 +350,6 @@
         li.appendChild(value);
         list.appendChild(li);
       });
-    }
-
-    function quoteText(q) {
-      if (!q) return ["Instant quote: not available"];
-      var out = ["INSTANT QUOTE (estimate)", "Driving distance: " + q.km + " km (" + distanceInput.dataset.source + ")"];
-      if (routeNote) out.push("Route note: " + routeNote);
-      q.lines.forEach(function (l) { out.push(l.text + " = " + money.format(l.amount)); });
-      if (q.minimumApplied) out.push("Minimum charge applied: " + money.format(MINIMUM_CHARGE));
-      out.push("Subtotal: " + money.format(q.subtotal));
-      out.push("GST (5%): " + money.format(q.gst));
-      out.push("Estimated total: " + money.format(q.total) + " CAD");
-      out.push(NOTICE);
-      return out;
     }
 
     // Google Maps Platform: Places API (New) suggests addresses, Routes API finds the driving distance.
@@ -659,19 +657,6 @@
       return { address: place.address || place.label };
     }
 
-    function locationLines(loc) {
-      var p = loc.place;
-      var lines = [loc.name + ": " + p.label];
-      if (p.lat != null) {
-        lines.push("  GPS: " + coordsText(p) + (p.approximate ? " (approximate, from the route)" : ""));
-        lines.push("  Navigate: https://www.google.com/maps/search/?api=1&query=" + p.lat.toFixed(6) + "," + p.lng.toFixed(6));
-      } else {
-        lines.push("  GPS: not available");
-      }
-      lines.push("  Entered as: " + p.entered);
-      return lines;
-    }
-
     // One map for both locations: pins A (pickup) and B (drop-off) and the route between them.
     var MAP_OPTIONS = { mapTypeControl: false, streetViewControl: false, fullscreenControl: false, clickableIcons: false };
     var WESTERN_CANADA = { lat: 53.5, lng: -112 };
@@ -907,6 +892,7 @@
           entersUS: sections.length > 0,
           usSections: sections,
           points: points,
+          polyline: (route.polyline && route.polyline.encodedPolyline) || "",
           originPlaceId: origin.placeId || (geo.origin && geo.origin.placeId),
           destinationPlaceId: destination.placeId || (geo.destination && geo.destination.placeId),
           vias: vias
@@ -972,6 +958,8 @@
     var lookupId = 0;
     var lastLookup = "";
     var routeNote = "";
+    // The last route found, sent with the booking so the email can show it on a map.
+    var currentRoute = null;
     var ROUTE_WARNING = "Google's route for this trip passes through the United States. Please contact Nexa Horse " +
       "Transport to confirm the distance for a route that stays in Canada.";
 
@@ -995,6 +983,7 @@
       var id = ++lookupId;
       setRouteNote("", false);
       drawRoute(null);
+      currentRoute = null;
       distanceStatus.textContent = "Calculating driving distance...";
       findRoute(from, to).then(function (route) {
         if (id !== lookupId) return;
@@ -1003,6 +992,7 @@
         if (to.lat == null && route.points.length) setApproximatePosition(to, route.points[route.points.length - 1]);
         LOCATIONS.forEach(showFound);
         drawRoute(route.points);
+        currentRoute = { key: key, polyline: route.polyline, vias: route.vias.map(function (v) { return v.address; }) };
         var names = route.vias.map(function (v) { return v.name; });
         var via = names.length > 1 ? names.slice(0, -1).join(", ") + " and " + names[names.length - 1] : names.join("");
         distanceInput.value = route.km;
@@ -1068,47 +1058,111 @@
     });
     updateQuote();
 
+    var formStatus = document.getElementById("form-status");
+    var sendButton = document.getElementById("send-booking");
+
+    function showStatus(kind, text, callLink) {
+      formStatus.className = "form-status field full " + kind;
+      formStatus.textContent = text;
+      if (callLink) {
+        var a = document.createElement("a");
+        a.href = "tel:+18444916392";
+        a.textContent = "1-844-491-NEXA";
+        formStatus.append(a, ".");
+      }
+    }
+
+    function placeForEmail(loc) {
+      var p = loc.place;
+      return { label: p.label, lat: p.lat, lng: p.lng, approximate: !!p.approximate, entered: p.entered };
+    }
+
+    function bookingData(f, q) {
+      var key = JSON.stringify([waypointFor(pickupLoc.place), waypointFor(dropoffLoc.place)]);
+      var route = currentRoute && currentRoute.key === key ? currentRoute : null;
+      return {
+        name: f.name.value.trim(),
+        phone: f.phone.value.trim(),
+        email: f.email.value.trim(),
+        date: f.date.value,
+        trip: f.trip.value,
+        details: f.details.value.trim(),
+        pickup: placeForEmail(pickupLoc),
+        dropoff: placeForEmail(dropoffLoc),
+        distanceKm: q.km,
+        distanceSource: distanceInput.dataset.source,
+        routeNote: routeNote,
+        route: route ? { polyline: route.polyline, vias: route.vias } : null,
+        stalls: STALLS.map(function (s) { return { type: s.label, count: stallCount(s.input) }; }),
+        horses: q.horses,
+        quote: {
+          lines: q.lines.map(function (l) { return { text: l.text, amount: money.format(l.amount) }; }),
+          minimumApplied: q.minimumApplied ? money.format(MINIMUM_CHARGE) : "",
+          subtotal: money.format(q.subtotal),
+          gst: money.format(q.gst),
+          total: money.format(q.total) + " CAD",
+          notice: NOTICE
+        },
+        termsAccepted: f.agree.checked,
+        smsConsent: f.smsConsent.checked,
+        website: f.website.value,
+        elapsedMs: Date.now() - formStartedAt,
+        submittedAt: new Date().toString()
+      };
+    }
+
+    function sent() {
+      showStatus("success", "Thank you! Your request was sent. We'll contact you soon to confirm.");
+      sendButton.textContent = "Request sent";
+      sendButton.disabled = true;
+    }
+
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       var f = e.target;
       var q = calcQuote();
       if (!q) {
-        document.getElementById("form-status").textContent = "Please enter at least one horse in a stall type.";
+        showStatus("", "Please enter at least one horse in a stall type.");
         document.getElementById("stall-standard").focus();
         return;
       }
       var missing = LOCATIONS.filter(function (loc) { return !loc.place; })[0];
       if (missing) {
-        document.getElementById("form-status").textContent = "Please enter the " + missing.name.toLowerCase() + " location.";
+        showStatus("", "Please enter the " + missing.name.toLowerCase() + " location.");
         missing.input.focus();
         return;
       }
-      var stalls = STALLS.map(function (s) { return s.label + ": " + stallCount(s.input); }).join(", ");
-      var lines = [
-        "Name: " + f.name.value,
-        "Phone: " + f.phone.value,
-        "Email: " + f.email.value,
-        ""
-      ].concat(locationLines(pickupLoc), locationLines(dropoffLoc), [
-        "",
-        "Preferred date: " + f.date.value,
-        "Number of horses: " + q.horses + " (" + stalls + ")",
-        "Trip type: " + f.trip.value,
-        "",
-        "Details:",
-        f.details.value || "(none)",
-        ""
-      ]).concat(quoteText(q), [
-        "",
-        "I have read and agree to the Terms & Conditions.",
-        "SMS consent: " + (f.smsConsent.checked ? "Yes" : "No")
-      ]);
-      var subject = "Booking request: " + pickupLoc.place.label + " to " + dropoffLoc.place.label;
-      window.location.href = "mailto:" + BOOKING_EMAIL +
-        "?subject=" + encodeURIComponent(subject) +
-        "&body=" + encodeURIComponent(lines.join("\n"));
-      document.getElementById("form-status").textContent =
-        "Thanks! Your email app should open now. If it doesn't, email us at " + BOOKING_EMAIL + ".";
+      var data = bookingData(f, q);
+      // Spam: the hidden field is filled in, or the form was completed too fast. Look sent, send nothing.
+      if (data.website || data.elapsedMs < MIN_FILL_MS) {
+        sent();
+        return;
+      }
+      if (!BOOKING_ENDPOINT) {
+        console.error("BOOKING_ENDPOINT is not set, so booking requests can't be sent.");
+        showStatus("error", "Sorry, something went wrong. Please call us at ", true);
+        return;
+      }
+      sendButton.disabled = true;
+      sendButton.textContent = "Sending...";
+      showStatus("", "Sending your request...");
+      // text/plain keeps this a "simple" request, which Google Apps Script accepts from other websites.
+      fetch(BOOKING_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(data)
+      }).then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      }).then(function (result) {
+        if (!result || !result.ok) throw new Error((result && result.error) || "not sent");
+        sent();
+      }).catch(function (err) {
+        console.error("Booking request failed:", err);
+        sendButton.disabled = false;
+        sendButton.textContent = "Send Booking Request";
+        showStatus("error", "Sorry, something went wrong. Please call us at ", true);
+      });
     });
   </script>
 </body>
