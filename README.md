@@ -2,12 +2,14 @@
 
 Simple static website for Nexa Horse Transport (Sundre, Alberta; serving Canada and the US).
 
-- `index.html`: home, services, instant quote calculator + booking request form, videos (embedded YouTube uploads playlist, newest first, no API key), contact
+- `index.html`: home (hero, trust bar, services, our trailer, 4-step instant quote and booking request form, videos, meet the team, FAQ; contact details are in the footer at `#contact`)
 - `events.html`: Events Calendar of upcoming horse shows, competitions, races and auctions (reads `events.json`)
 - `terms.html`: terms and conditions
 - `google-apps-script/Code.gs`: Google Apps Script web app that receives booking requests and emails them (with a route map picture) to nexahorsetransport@gmail.com
 - `privacy.html`: privacy policy (PIPEDA / Alberta PIPA, text messaging section at `#sms`)
-- `styles.css`: shared styles (mobile-friendly)
+- `styles.css`: shared styles (version 1.1 design: Archivo and Source Sans 3 fonts, brand colours as variables at the top, mobile-friendly)
+- `nexa-logo.svg` (full logo with frame), `nexa-logo-header.svg` (frameless, for the purple header and footer), `nexa-emblem.svg` (horse circle; hero and browser-tab icon)
+- `design/home-mockup-v1.1.html`: design reference for version 1.1 only; not part of the live site and not linked from it
 
 Quote rates live at the top of the script in `index.html` (`RATES`, `MINIMUM_CHARGE`, `GST_RATE`); the "See our rates" table in the booking section shows the same numbers, so update both together. Customers enter each location in one box (an address or postal / ZIP code with Google Places API (New) autocomplete, or GPS coordinates like `51.0447, -114.0719`), or pick it on the map; every location is turned into an address plus GPS coordinates (Places API (New), or the Geocoding API through the Maps JavaScript API), both of which go in the booking email. Driving distance comes from Google Routes API, and a single map under the location fields shows pin A (pickup), pin B (delivery) and the route; both pins can be dragged. The key is in `GOOGLE_MAPS_API_KEY` near the bottom of `index.html`; customers can type the distance in if the lookup fails.
 
@@ -31,6 +33,17 @@ The `release/v1.0` branch is never changed, so version 1.0 can always be restore
 **To roll back**, say *"Switch the website back to version 1.0"*. The rollback restores the files on `main` to exactly what they were in `v1.0` with a **new commit** (history is never deleted or rewritten), then pushes `main`. GitHub Pages then serves version 1.0 again. Moving forward again later works the same way, from the `v1.1` tag.
 
 Version tags are created with the **Tag a website version** workflow (Actions tab > Run workflow, give the tag name and the commit). It never moves or replaces an existing tag.
+
+## Adding photos
+
+Until real photos arrive, the site shows tasteful placeholders: the horse emblem in the hero, a branded panel for the trailer, and initial circles for the team. Each spot in `index.html` has a `PHOTO SPOT` comment with the exact `<img>` line to paste in. Save the photos with these names (the `photos/` folder is for images only):
+
+| Spot | File |
+|---|---|
+| Hero: truck and trailer on an Alberta road | `photos/hero-truck-trailer.jpg` |
+| Our trailer: inside, showing the stalls | `photos/trailer-inside.jpg` |
+| Meet the team: Justina (large, portrait) | `photos/team-justina.jpg` |
+| Meet the team: Mohammad (square) | `photos/team-mohammad.jpg` |
 
 ## Booking requests (Google Apps Script)
 

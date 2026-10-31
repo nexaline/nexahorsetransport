@@ -4,89 +4,139 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Nexa Horse Transport | Sundre, Alberta</title>
-  <meta name="description" content="Safe, professional horse transportation from Sundre, Alberta to destinations across Canada and the United States.">
-  <link rel="icon" href="nexa-logo.svg" type="image/svg+xml">
+  <meta name="description" content="Careful, unhurried horse transport from Sundre, Alberta across Canada and the United States, with regular checks, fresh water and hay, and updates from the road.">
+  <link rel="icon" href="nexa-emblem.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Fonts load without holding up the page: text shows at once in a system font, then switches. -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&amp;family=Source+Sans+3:wght@400;600&amp;display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&amp;family=Source+Sans+3:wght@400;600&amp;display=swap"></noscript>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to main content</a>
   <header class="site-header">
-    <div class="container">
-      <a href="index.html" class="logo"><img src="nexa-logo.svg" alt="Nexa Horse Transport" width="140" height="70"></a>
+    <div class="container header-inner">
+      <a href="index.html" class="logo"><img src="nexa-logo-header.svg" alt="Nexa Horse Transport" width="163" height="56"></a>
       <nav class="site-nav" aria-label="Main">
-        <a href="#home">Home</a>
         <a href="#services">Services</a>
+        <a href="#equipment">Our trailer</a>
         <a href="#booking">Book</a>
-        <a href="#videos">Videos</a>
-        <a href="events.html">Events</a>
-        <a href="#contact">Contact</a>
-        <a href="terms.html">Terms</a>
-        <a href="privacy.html">Privacy</a>
+        <a href="#about">About</a>
+        <a href="#faq">FAQ</a>
       </nav>
-      <a class="call-btn" href="tel:+18444916392" aria-label="Call us at 1-844-491-6392">Call us: 1-844-491-NEXA</a>
+      <a class="call-btn" href="tel:+18444916392" aria-label="Call 1-844-491-NEXA (1-844-491-6392)">Call 1-844-491-NEXA</a>
     </div>
   </header>
 
-  <main>
+  <main id="main">
     <section id="home" class="hero">
-      <div class="container">
-        <h1>Safe, Caring Horse Transport</h1>
-        <p>Based in Sundre, Alberta, Nexa Horse Transport takes horses on journeys across Canada and the United States, caring for every horse as if they were our own. Their comfort and safety always come first.</p>
-        <a href="#booking" class="btn">Request a Booking</a>
-        <ul class="highlights">
-          <li>Sundre, Alberta</li>
-          <li>Canada &amp; USA</li>
-          <li>Experienced horse handlers</li>
-          <li>No hidden fees</li>
-        </ul>
+      <div class="container hero-inner">
+        <div class="hero-text">
+          <p class="eyebrow">SUNDRE, ALBERTA &middot; CANADA &amp; USA</p>
+          <h1>Every Horse Matters.<br>Driven by Care.</h1>
+          <p class="hero-lead">Careful, unhurried horse transport across Canada and the United States, with regular checks, fresh water and hay, and updates from the road.</p>
+          <div class="hero-actions">
+            <a class="btn btn-large" href="#booking">Get an instant quote</a>
+            <a class="btn btn-large btn-outline-light" href="tel:+18444916392" aria-label="Call us at 1-844-491-6392">Call us</a>
+          </div>
+        </div>
+        <!-- PHOTO SPOT: when the hero photo is ready, save it as photos/hero-truck-trailer.jpg (truck and trailer on an
+             Alberta road, foothills behind) and replace the emblem image below with:
+             <img src="photos/hero-truck-trailer.jpg" alt="Nexa Horse Transport truck and trailer on an Alberta road" width="1200" height="900"> -->
+        <div class="hero-photo">
+          <img class="hero-emblem" src="nexa-emblem.svg" alt="" width="340" height="340">
+        </div>
       </div>
     </section>
 
-    <section id="services" class="section-alt">
+    <div class="trust-bar">
+      <div class="container trust-grid">
+        <div class="trust-item">
+          <svg class="line-icon" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19L9 5"/><path d="M20 19L15 5"/><path d="M12 6v2"/><path d="M12 11v2"/><path d="M12 16v2"/></svg>
+          <div><strong>Coast to coast</strong><span>Canada and USA</span></div>
+        </div>
+        <div class="trust-item">
+          <svg class="line-icon" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>
+          <div><strong>Clear prices</strong><span>Instant quote, no hidden fees</span></div>
+        </div>
+      </div>
+    </div>
+
+    <section id="services" class="section">
       <div class="container">
-        <h2>Our Services</h2>
-        <p class="lead">Whether it's across town or across the border, we'll get your horse there safely.</p>
-        <div class="cards">
-          <div class="card">
-            <h3>Local &amp; Regional Trips</h3>
-            <p>Trips around Sundre, Central Alberta and the rest of the province, including vet appointments, moving to a new home farm, and visits to trainers.</p>
+        <div class="section-heading">
+          <svg class="derafsh" width="34" height="34" viewBox="0 0 100 100" aria-hidden="true"><g fill="#E8141C"><ellipse cx="32" cy="32" rx="21" ry="8" transform="rotate(45 32 32)"/><ellipse cx="68" cy="68" rx="21" ry="8" transform="rotate(45 68 68)"/><ellipse cx="68" cy="32" rx="21" ry="8" transform="rotate(-45 68 32)"/><ellipse cx="32" cy="68" rx="21" ry="8" transform="rotate(-45 32 68)"/><circle cx="50" cy="8" r="6"/><circle cx="50" cy="92" r="6"/><circle cx="8" cy="50" r="6"/><circle cx="92" cy="50" r="6"/><circle cx="50" cy="50" r="6"/></g></svg>
+          <h2>How we can help</h2>
+        </div>
+        <p class="lead">From a short trip to the vet to a journey across the country, every horse gets the same care.</p>
+        <div class="service-grid">
+          <div class="service-card">
+            <svg class="line-icon" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.5-7-12a7 7 0 0114 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            <h3>Local and regional</h3>
+            <p>Vet visits, farm moves and trips to your trainer, around Sundre and across Alberta.</p>
           </div>
-          <div class="card">
-            <h3>Long-Distance Canada</h3>
-            <p>Coast-to-coast journeys across Canada, with planned rest stops, regular checks on your horse, and water and hay throughout the trip.</p>
+          <div class="service-card">
+            <svg class="line-icon" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20L9 4"/><path d="M20 20L15 4"/><path d="M12 6v2"/><path d="M12 11v2"/><path d="M12 16v2"/></svg>
+            <h3>Across Canada</h3>
+            <p>Coast-to-coast journeys with planned rest stops, fresh water and hay, and regular checks.</p>
           </div>
-          <div class="card">
-            <h3>Canada &ndash; US Transport</h3>
-            <p>Cross-border trips to and from the United States. We help you plan the health papers and border documents your horse needs.</p>
+          <div class="service-card">
+            <svg class="line-icon" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V4"/><path d="M4 4h12l-2 4 2 4H4"/></svg>
+            <h3>Canada and USA</h3>
+            <p>Cross-border trips, with help planning health papers and border documents.</p>
           </div>
-          <div class="card">
-            <h3>Shows, Events &amp; Sales</h3>
-            <p>Safe, on-time trips to competitions, clinics, rodeos and sales, so your horse arrives calm, rested and ready.</p>
+          <div class="service-card">
+            <svg class="line-icon" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v4a5 5 0 01-10 0V4z"/><path d="M7 6H4a3 3 0 003 4"/><path d="M17 6h3a3 3 0 01-3 4"/></svg>
+            <h3>Shows, events and sales</h3>
+            <p>Arrive rested and ready for competitions, clinics, rodeos and sales.</p>
           </div>
-          <div class="card">
-            <h3>New Purchases</h3>
-            <p>Welcoming a new horse from out of province or out of country? We'll pick them up and bring them safely home to you.</p>
+          <div class="service-card">
+            <svg class="line-icon" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 000-7.8z"/></svg>
+            <h3>Bringing a new horse home</h3>
+            <p>Bought a horse in another province or the US? We bring them safely to you.</p>
           </div>
-          <div class="card">
-            <h3>Emergency &amp; Vet Trips</h3>
-            <p>When your horse needs care, ask us about short-notice trips to veterinary clinics, subject to availability.</p>
+          <div class="service-card">
+            <svg class="line-icon" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/><rect x="3" y="3" width="18" height="18" rx="4"/></svg>
+            <h3>Emergency and vet trips</h3>
+            <p>Short-notice trips to the clinic when the truck and trailer are nearby.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <section id="booking">
-      <div class="container">
-        <h2>Instant Quote &amp; Booking Request</h2>
-        <p class="lead">Tell us about your trip to see an instant price estimate, with no hidden fees. Submitting this form is a request only; your booking and price are confirmed once we contact you.</p>
+    <section id="equipment" class="section">
+      <div class="container split">
+        <!-- PHOTO SPOT: when ready, save a photo of the inside of the trailer as photos/trailer-inside.jpg and replace
+             this panel with: <img class="split-photo" src="photos/trailer-inside.jpg" alt="Inside the trailer, showing the stalls" width="1200" height="900"> -->
+        <div class="split-photo photo-panel" aria-hidden="true">
+          <img src="nexa-emblem.svg" alt="" width="160" height="160">
+          <span>Four Star 6+1 straight-load trailer</span>
+        </div>
+        <div class="split-text">
+          <h2>What your horse travels in</h2>
+          <p class="lead">A 2026 Ford F-350 dually pulling a Four Star 6+1 straight-load trailer, kept to a commercial maintenance schedule.</p>
+          <ul class="stall-list">
+            <li><strong>Standard stall.</strong> For most horses, travelling side by side.</li>
+            <li><strong>Roomier stall.</strong> Extra width for larger horses.</li>
+            <li><strong>Box stall.</strong> Room to turn and lie down: ideal for mares with foals, stallions, or nervous travellers.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="booking" class="section section-white">
+      <div class="container container-narrow">
+        <h2 class="center">Get an instant quote</h2>
+        <p class="lead center">Four short steps. We'll contact you to confirm before anything is booked.</p>
 
         <form id="booking-form" class="booking-form">
           <ol class="step-progress field full" aria-label="Booking steps">
-            <li class="is-current" aria-current="step"><span class="step-dot">1</span> Trip</li>
-            <li><span class="step-dot">2</span> Horses</li>
-            <li><span class="step-dot">3</span> Dates</li>
-            <li><span class="step-dot">4</span> Your details</li>
+            <li class="is-current" aria-current="step"><span class="step-seg" aria-hidden="true"></span><span class="step-label">1 &middot; Trip</span></li>
+            <li><span class="step-seg" aria-hidden="true"></span><span class="step-label">2 &middot; Horses</span></li>
+            <li><span class="step-seg" aria-hidden="true"></span><span class="step-label">3 &middot; Dates</span></li>
+            <li><span class="step-seg" aria-hidden="true"></span><span class="step-label">4 &middot; Your details</span></li>
           </ol>
-          <div class="step-bar field full" aria-hidden="true"><span id="step-bar-fill" style="width:25%"></span></div>
           <div class="form-step" id="booking-step-1" data-step="1" role="group" aria-labelledby="booking-step-1-title">
           <h3 class="step-title field full" id="booking-step-1-title">Step 1 of 4: Your trip</h3>
           <div class="field location" id="pickup-location">
@@ -114,7 +164,7 @@
               <span id="map-hint-text"></span>
               <button type="button" class="link-button" id="map-hint-cancel">Cancel</button>
             </p>
-            <div class="route-map" id="route-map" aria-label="Map of the pickup (A), delivery (B) and route"></div>
+            <div class="route-map" id="route-map" role="region" aria-label="Map of the pickup (A), delivery (B) and route"></div>
             <p class="hint" id="map-status">Pin A is your horse's pickup and pin B the delivery. Drag either pin to fine-tune it.</p>
           </div>
           <div class="field full">
@@ -137,7 +187,7 @@
             </select>
           </div>
           <div class="field full step-nav">
-            <button type="button" class="btn step-next">Next: Horses</button>
+            <button type="button" class="btn step-next">Next: your horses</button>
           </div>
           </div>
           <div class="form-step" id="booking-step-2" data-step="2" role="group" aria-labelledby="booking-step-2-title" hidden>
@@ -189,7 +239,7 @@
 
           <div class="field full step-nav">
             <button type="button" class="btn btn-secondary step-back">Back</button>
-            <button type="button" class="btn step-next">Next: Dates</button>
+            <button type="button" class="btn step-next">Next: dates</button>
           </div>
           </div>
           <div class="form-step" id="booking-step-3" data-step="3" role="group" aria-labelledby="booking-step-3-title" hidden>
@@ -222,7 +272,7 @@
           </fieldset>
           <div class="field full step-nav">
             <button type="button" class="btn btn-secondary step-back">Back</button>
-            <button type="button" class="btn step-next">Next: Your details</button>
+            <button type="button" class="btn step-next">Next: your details</button>
           </div>
           </div>
           <div class="form-step" id="booking-step-4" data-step="4" role="group" aria-labelledby="booking-step-4-title" hidden>
@@ -266,7 +316,7 @@
       </div>
     </section>
 
-    <section id="videos" class="videos">
+    <section id="videos" class="section">
       <div class="container">
         <h2>Videos</h2>
         <p class="lead">See our journeys and some of the horses we've travelled with. The newest video plays first.</p>
@@ -282,36 +332,101 @@
       </div>
     </section>
 
-    <section id="contact" class="section-alt">
+    <section id="about" class="section section-white">
       <div class="container">
-        <h2>Contact Us</h2>
-        <p class="lead">Questions before you book? Reach out any time.</p>
-        <ul class="contact-list">
-          <li><strong>Location:</strong> Sundre, Alberta, Canada</li>
-          <li><strong>Service area:</strong> Canada &amp; the United States</li>
-          <li><strong>Phone:</strong> <a href="tel:+14036361639">+1 403 636 1639</a></li>
-          <li><strong>Toll-free:</strong> <a href="tel:+18444916392">1-844-491-NEXA (1-844-491-6392)</a></li>
-          <li><strong>Email:</strong> <a href="mailto:nexahorsetransport@gmail.com">nexahorsetransport@gmail.com</a></li>
-          <li><a class="social-link" href="https://www.facebook.com/profile.php?id=61592349386291" target="_blank" rel="noopener noreferrer"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"/></svg>Follow us on Facebook<span class="visually-hidden"> (opens in a new tab)</span></a></li>
-        </ul>
+        <h2>Meet the team</h2>
+        <p class="lead lead-large">Hands-on equine expertise, combined with aviation-inspired safety standards, for horse transport you can rely on.</p>
+        <div class="team-lead">
+          <!-- PHOTO SPOT: save Justina's photo as photos/team-justina.jpg and replace this circle with:
+               <img class="team-photo-large" src="photos/team-justina.jpg" alt="Justina with horses" width="800" height="1000"> -->
+          <div class="team-initials team-initials-large" aria-hidden="true">J</div>
+          <div class="team-text">
+            <p class="team-name">Justina</p>
+            <p class="team-title">EQUINE OPERATIONS DIRECTOR &amp; GENERAL MANAGER</p>
+            <p>An experienced horse trainer with more than 35 years around horses, Justina runs Nexa day to day: horse handling, trip coordination and the welfare of every horse in our care.</p>
+            <p>She reads a horse's comfort the way an owner does. The horse on our logo was her own, and every horse we carry gets the care she gave hers.</p>
+            <dl class="team-stats">
+              <div><dt>35+</dt><dd>years with horses</dd></div>
+              <div><dt>3+</dt><dd>years in professional horse transport</dd></div>
+              <div><dt>Daily</dt><dd>hands-on horse care</dd></div>
+            </dl>
+          </div>
+        </div>
+        <div class="team-card">
+          <!-- PHOTO SPOT: save Mohammad's photo as photos/team-mohammad.jpg and replace this circle with:
+               <img class="team-photo-small" src="photos/team-mohammad.jpg" alt="Mohammad Reza Samadian" width="400" height="400"> -->
+          <div class="team-initials" aria-hidden="true">MS</div>
+          <div class="team-text">
+            <p class="team-name team-name-small">Mohammad Reza Samadian</p>
+            <p class="team-title">FOUNDER &amp; PRESIDENT</p>
+            <p>A commercial pilot and flight instructor with thousands of flight hours, an IT professional and an entrepreneur with more than 15 years of international business experience. Mohammad leads Nexa's strategy and investment, and brings aviation's safety culture to every trip: risk assessment, preventive maintenance and careful planning.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" class="section">
+      <div class="container container-narrow">
+        <h2>Questions owners ask</h2>
+        <div class="faq">
+          <details open>
+            <summary>How do you care for my horse on long trips?</summary>
+            <p>Regular rest stops and fresh water around the clock. We don't feed grain on the road, and we ask you to send one bale of your horse's own hay, so there's one less change on a trip that already has a lot going on. You'll get at least 2 hours' notice before pickup and before delivery, and updates along the way.</p>
+          </details>
+          <details>
+            <summary>What is included in the price?</summary>
+            <p>Prices are in Canadian dollars, per horse, per kilometre, plus GST, with a minimum charge of $300 per trip. Vet, border, government and customs broker fees are extra and are charged at cost. Additional costs caused by delays at pickup or delivery, extra stops, layovers or border inspections may be charged. The instant quote is an estimate; your price is confirmed when we contact you.</p>
+          </details>
+          <details>
+            <summary>What papers does my horse need?</summary>
+            <p>Depending on the trip, your horse may need ownership papers or a brand inspection, a valid Equine Infectious Anemia (Coggins) test, health certificates, and any import or export permits. For travel between Canada and the US, documents must meet the requirements of the Canadian Food Inspection Agency (CFIA) and the US Department of Agriculture (USDA). We may also ask for proof of vaccinations or a recent veterinary check.</p>
+          </details>
+          <details>
+            <summary>How do cancellations work?</summary>
+            <p>Please give us as much notice as possible if you need to cancel or reschedule. Cancellations made less than 72 hours before scheduled pickup may forfeit the deposit. If we have to cancel or postpone for safety reasons, such as severe weather or road closures, we will reschedule or refund any deposit paid. See our <a href="terms.html">Terms &amp; Conditions</a> for the details.</p>
+          </details>
+          <details>
+            <summary>Can I get updates while my horse is on the road?</summary>
+            <p>Yes. If you agree to text messages on the booking form, we send pickup and delivery updates for your trip by text (message frequency varies; reply STOP to opt out). If your horse becomes ill or injured during the trip, we will try to contact you right away.</p>
+          </details>
+        </div>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
-    <div class="container">
-      <div class="footer-info">
-        <span>&copy; <span id="year">2026</span> Nexa Horse Transport &middot; Sundre, Alberta</span>
-        <span class="footer-owner">Nexa Horse Transport is a brand of Nexa Line Ltd., an Alberta corporation.</span>
+    <div class="footer-fringe" aria-hidden="true"></div>
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <img src="nexa-logo-header.svg" alt="Nexa Horse Transport" width="174" height="60">
+        <p>Nexa Horse Transport is a brand of Nexa Line Ltd., an Alberta corporation.</p>
       </div>
-      <div class="footer-links">
+      <div class="footer-col" id="contact">
+        <p class="footer-heading">Contact</p>
+        <a href="tel:+18444916392">1-844-491-NEXA (1-844-491-6392)</a>
+        <a href="tel:+14036361639">+1 403 636 1639</a>
+        <a href="mailto:nexahorsetransport@gmail.com">nexahorsetransport@gmail.com</a>
+        <span>Sundre, Alberta · serving Canada &amp; the United States</span>
+      </div>
+      <div class="footer-col">
+        <p class="footer-heading">Follow us</p>
         <a class="social-link" href="https://www.facebook.com/profile.php?id=61592349386291" target="_blank" rel="noopener noreferrer"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"/></svg>Facebook<span class="visually-hidden"> (opens in a new tab)</span></a>
+        <a class="social-link" href="https://www.instagram.com/nexahorsetransport" target="_blank" rel="noopener noreferrer"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 0 1-1.38-.9 3.7 3.7 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63a5.9 5.9 0 0 0-2.13 1.38A5.9 5.9 0 0 0 .63 4.14C.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.31.79.72 1.46 1.38 2.13a5.9 5.9 0 0 0 2.13 1.38c.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56a5.9 5.9 0 0 0 2.13-1.38 5.9 5.9 0 0 0 1.38-2.13c.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91a5.9 5.9 0 0 0-1.38-2.13A5.9 5.9 0 0 0 19.86.63C19.1.33 18.22.13 16.95.07 15.67.01 15.26 0 12 0zm0 5.84a6.16 6.16 0 1 0 0 12.32 6.16 6.16 0 0 0 0-12.32zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.4-11.85a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88z"/></svg>Instagram<span class="visually-hidden"> (opens in a new tab)</span></a>
         <a class="social-link" href="https://www.youtube.com/@nexahorsetransport" target="_blank" rel="noopener noreferrer"><svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>YouTube<span class="visually-hidden"> (opens in a new tab)</span></a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-heading">More</p>
+        <a href="events.html">Events calendar</a>
+        <a href="#videos">Videos</a>
         <a href="terms.html">Terms &amp; Conditions</a>
         <a href="privacy.html">Privacy Policy</a>
       </div>
     </div>
+    <div class="container footer-bottom">
+      <span>&copy; <span id="year">2026</span> Nexa Horse Transport &middot; Sundre, Alberta</span>
+    </div>
   </footer>
+  <a class="call-bar" href="tel:+18444916392" aria-label="Call us: 1-844-491-NEXA (1-844-491-6392)"><span>Call us: 1-844-491-NEXA</span></a>
 
   <script>
     // ===== BOOKING FORM ENDPOINT =====
@@ -1253,7 +1368,6 @@
         li.className = i + 1 < n ? "is-done" : i + 1 === n ? "is-current" : "";
         if (i + 1 === n) li.setAttribute("aria-current", "step"); else li.removeAttribute("aria-current");
       });
-      document.getElementById("step-bar-fill").style.width = (n * 25) + "%";
       if (n !== 1) stopPicking();
       if (n === 1 && routeMap) {
         // The map was hidden while another step showed: let it re-measure, then fit the pins and route again.
