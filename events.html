@@ -69,7 +69,7 @@
           </div>
         </form>
 
-        <p class="events-count" id="events-count" aria-live="polite">Loading events...</p>
+        <p class="events-count" id="events-count" aria-live="polite">Finding upcoming events...</p>
         <div class="event-list" id="event-list"></div>
 
         <section class="more-calendars" aria-labelledby="more-calendars-heading">
@@ -172,10 +172,10 @@
       return a;
     }
 
-    // Opens the quote form with this event's location as the drop-off.
+    // Opens the quote form with this event's location as the delivery location.
     function bookingLink(e) {
       var params = new URLSearchParams({
-        dropoff: placeText(e, true),
+        delivery: placeText(e, true),
         event: e.name + " (" + formatDates(e) + ")"
       });
       return "index.html?" + params.toString() + "#booking";
@@ -288,7 +288,7 @@
       render();
       showSources(data.sources || [], data.updated);
     }).catch(function () {
-      count.textContent = "The events calendar couldn't be loaded right now. Please try again later.";
+      count.textContent = "The events calendar isn't available right now. Please try again later.";
     });
 
     filters.search.addEventListener("input", render);

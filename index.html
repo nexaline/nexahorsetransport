@@ -30,7 +30,7 @@
     <section id="home" class="hero">
       <div class="container">
         <h1>Safe, Caring Horse Transport</h1>
-        <p>Based in Sundre, Alberta, Nexa Horse Transport moves horses across Canada and the United States, with the comfort and safety of every horse as our first priority.</p>
+        <p>Based in Sundre, Alberta, Nexa Horse Transport takes horses on journeys across Canada and the United States, caring for every horse as if they were our own. Their comfort and safety always come first.</p>
         <a href="#booking" class="btn">Request a Booking</a>
         <ul class="highlights">
           <li>Sundre, Alberta</li>
@@ -47,12 +47,12 @@
         <p class="lead">Whether it's across town or across the border, we'll get your horse there safely.</p>
         <div class="cards">
           <div class="card">
-            <h3>Local &amp; Regional Hauls</h3>
-            <p>Trips around Sundre, Central Alberta and the rest of the province, including vet appointments, farm moves and trainer drop-offs.</p>
+            <h3>Local &amp; Regional Trips</h3>
+            <p>Trips around Sundre, Central Alberta and the rest of the province, including vet appointments, moving to a new home farm, and visits to trainers.</p>
           </div>
           <div class="card">
             <h3>Long-Distance Canada</h3>
-            <p>Coast-to-coast transport across Canada, with planned rest stops, regular checks, and water and hay throughout the trip.</p>
+            <p>Coast-to-coast journeys across Canada, with planned rest stops, regular checks on your horse, and water and hay throughout the trip.</p>
           </div>
           <div class="card">
             <h3>Canada &ndash; US Transport</h3>
@@ -60,15 +60,15 @@
           </div>
           <div class="card">
             <h3>Shows, Events &amp; Sales</h3>
-            <p>Reliable delivery to competitions, clinics, rodeos and sales, so your horse arrives on time and ready.</p>
+            <p>Safe, on-time trips to competitions, clinics, rodeos and sales, so your horse arrives calm, rested and ready.</p>
           </div>
           <div class="card">
             <h3>New Purchases</h3>
-            <p>Bought a horse from out of province or out of country? We'll pick it up and bring it home.</p>
+            <p>Welcoming a new horse from out of province or out of country? We'll pick them up and bring them safely home to you.</p>
           </div>
           <div class="card">
             <h3>Emergency &amp; Vet Trips</h3>
-            <p>Ask us about short-notice transport to veterinary clinics, subject to availability.</p>
+            <p>When your horse needs care, ask us about short-notice trips to veterinary clinics, subject to availability.</p>
           </div>
         </div>
       </div>
@@ -104,7 +104,7 @@
             <p class="hint location-found" id="pickup-found" aria-live="polite"></p>
           </div>
           <div class="field location" id="dropoff-location">
-            <label for="dropoff">Drop-off location *</label>
+            <label for="dropoff">Delivery location *</label>
             <div class="autocomplete">
               <input id="dropoff" name="dropoff" type="text" placeholder="Address, postal/ZIP code, or GPS coordinates" autocomplete="off"
                 role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="dropoff-list">
@@ -118,8 +118,8 @@
               <span id="map-hint-text"></span>
               <button type="button" class="link-button" id="map-hint-cancel">Cancel</button>
             </p>
-            <div class="route-map" id="route-map" aria-label="Map of the pickup (A), drop-off (B) and route"></div>
-            <p class="hint" id="map-status">Pin A is the pickup and pin B the drop-off. Drag either pin to fine-tune it.</p>
+            <div class="route-map" id="route-map" aria-label="Map of the pickup (A), delivery (B) and route"></div>
+            <p class="hint" id="map-status">Pin A is your horse's pickup and pin B the delivery. Drag either pin to fine-tune it.</p>
           </div>
           <fieldset class="field full stalls">
             <legend>How many horses need each stall type? *</legend>
@@ -144,7 +144,7 @@
               <input id="distance" name="distance" type="number" min="1" step="1" inputmode="numeric" required>
               <button type="button" id="calc-distance" class="btn btn-secondary">Calculate distance</button>
             </div>
-            <p class="hint" id="distance-status" aria-live="polite">Enter your pickup and drop-off locations and we'll work out the driving distance for you. You can also type it in.</p>
+            <p class="hint" id="distance-status" aria-live="polite">Enter your pickup and delivery locations and we'll work out the driving distance for you. You can also type it in.</p>
             <p class="route-note" id="route-note" role="alert" hidden></p>
           </div>
 
@@ -186,14 +186,14 @@
             </div>
           </fieldset>
           <fieldset class="field full date-window">
-            <legend>Drop-off window</legend>
+            <legend>Delivery window</legend>
             <div class="date-pair">
               <div class="field">
-                <label for="dropoff-earliest">Earliest drop-off date</label>
+                <label for="dropoff-earliest">Earliest delivery date</label>
                 <input id="dropoff-earliest" name="dropoffEarliest" type="date">
               </div>
               <div class="field">
-                <label for="dropoff-latest">Latest drop-off date</label>
+                <label for="dropoff-latest">Latest delivery date</label>
                 <input id="dropoff-latest" name="dropoffLatest" type="date">
               </div>
             </div>
@@ -238,7 +238,7 @@
     <section id="videos" class="videos">
       <div class="container">
         <h2>Videos</h2>
-        <p class="lead">See our trips and the horses we move. The newest video plays first.</p>
+        <p class="lead">See our journeys and some of the horses we've travelled with. The newest video plays first.</p>
         <div class="video-frame">
           <iframe src="https://www.youtube-nocookie.com/embed/videoseries?list=UU9yieAWDze3zGksAt6_hRFw"
             title="Nexa Horse Transport videos" loading="lazy"
@@ -533,7 +533,7 @@
     var LOCATIONS = ["pickup", "dropoff"].map(function (key) {
       return {
         key: key,
-        name: key === "pickup" ? "Pickup" : "Drop-off",
+        name: key === "pickup" ? "Pickup" : "Delivery",
         pinLabel: key === "pickup" ? "A" : "B",
         place: null,
         version: 0,
@@ -681,7 +681,7 @@
       return { address: place.address || place.label };
     }
 
-    // One map for both locations: pins A (pickup) and B (drop-off) and the route between them.
+    // One map for both locations: pins A (pickup) and B (delivery) and the route between them.
     var MAP_OPTIONS = { mapTypeControl: false, streetViewControl: false, fullscreenControl: false, clickableIcons: false };
     var WESTERN_CANADA = { lat: 53.5, lng: -112 };
     var routeMap = null;
@@ -874,7 +874,7 @@
     // Sault Ste. Marie and Sudbury (46.40, -84.20 to 43.00, -82.42)". Returns [] when it stays in Canada.
     function usSections(points, vias) {
       var marks = vias.map(function (v) { return { name: v.name, index: nearestPoint(points, v) }; });
-      var stops = [{ name: "the pickup", index: 0 }].concat(marks, [{ name: "the drop-off", index: points.length - 1 }]);
+      var stops = [{ name: "the pickup", index: 0 }].concat(marks, [{ name: "the delivery location", index: points.length - 1 }]);
       var sections = [];
       var current = null;
       points.forEach(function (p, i) {
@@ -998,7 +998,7 @@
       var from = pickupLoc.place;
       var to = dropoffLoc.place;
       if (!from || !to) {
-        if (force) distanceStatus.textContent = "Please enter both a pickup and a drop-off location.";
+        if (force) distanceStatus.textContent = "Please enter both a pickup and a delivery location.";
         return;
       }
       var key = JSON.stringify([waypointFor(from), waypointFor(to)]);
@@ -1058,10 +1058,11 @@
     });
     document.getElementById("map-hint-cancel").addEventListener("click", stopPicking);
 
-    // Arriving from "Book transport to this event" on the Events page: the event's place is the drop-off.
+    // Arriving from "Book transport to this event" on the Events page: the event's place is the delivery location.
     var arriving = new URLSearchParams(window.location.search);
-    if (arriving.get("dropoff")) {
-      dropoffLoc.input.value = arriving.get("dropoff").slice(0, 200);
+    var arrivingPlace = arriving.get("delivery") || arriving.get("dropoff");
+    if (arrivingPlace) {
+      dropoffLoc.input.value = arrivingPlace.slice(0, 200);
       updateLocation(dropoffLoc);
       if (arriving.get("event")) {
         var details = document.getElementById("details");
@@ -1147,7 +1148,7 @@
       sendButton.disabled = true;
     }
 
-    // ----- Pickup and drop-off date windows -----
+    // ----- Pickup and delivery date windows -----
     var DATES = {
       pickupEarliest: document.getElementById("pickup-earliest"),
       pickupLatest: document.getElementById("pickup-latest"),
@@ -1174,13 +1175,13 @@
         errors.pickupLatest = "The latest pickup date can't be before the earliest pickup date.";
       }
       if (!errors.dropoffEarliest && v.dropoffEarliest && v.pickupEarliest && v.dropoffEarliest < v.pickupEarliest) {
-        errors.dropoffEarliest = "Drop-off can't be before pickup.";
+        errors.dropoffEarliest = "Delivery can't be before pickup.";
       }
       if (!errors.dropoffLatest && v.dropoffLatest && v.dropoffEarliest && v.dropoffLatest < v.dropoffEarliest) {
-        errors.dropoffLatest = "The latest drop-off date can't be before the earliest drop-off date.";
+        errors.dropoffLatest = "The latest delivery date can't be before the earliest delivery date.";
       }
       if (!errors.dropoffLatest && v.dropoffLatest && v.pickupEarliest && v.dropoffLatest < v.pickupEarliest) {
-        errors.dropoffLatest = "Drop-off can't be before pickup.";
+        errors.dropoffLatest = "Delivery can't be before pickup.";
       }
       Object.keys(DATES).forEach(function (k) {
         DATES[k].setCustomValidity(errors[k] || "");

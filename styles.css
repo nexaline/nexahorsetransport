@@ -478,7 +478,7 @@ textarea { min-height: 110px; resize: vertical; }
 
 .stall-grid .field { justify-content: flex-end; }
 
-/* Pickup and drop-off date windows: two dates side by side */
+/* Pickup and delivery date windows: two dates side by side */
 .date-window {
   margin: 0;
   padding: 0;

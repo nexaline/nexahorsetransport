@@ -2,7 +2,7 @@
  * Nexa Horse Transport – booking request web app (Google Apps Script).
  *
  * The booking form on nexahorsetransport.ca POSTs its data here as JSON. This script emails the request
- * to TO_EMAIL with a map picture of the route (pickup A, drop-off B and the driving route).
+ * to TO_EMAIL with a map picture of the route (pickup A, delivery B and the driving route).
  *
  * SETUP (once, signed in to Google as nexahorsetransport@gmail.com):
  *  1. Go to https://script.google.com, click "New project", and replace the code with this file.
@@ -194,18 +194,18 @@ function bookingRows(data) {
       ["Pickup", clean(pickup.label, 300)],
       ["Pickup GPS", gpsText(pickup)],
       ["Pickup entered as", clean(pickup.entered, 200)],
-      ["Drop-off", clean(dropoff.label, 300)],
-      ["Drop-off GPS", gpsText(dropoff)],
-      ["Drop-off entered as", clean(dropoff.entered, 200)],
+      ["Delivery", clean(dropoff.label, 300)],
+      ["Delivery GPS", gpsText(dropoff)],
+      ["Delivery entered as", clean(dropoff.entered, 200)],
       ["Earliest pickup date", clean(dates.pickupEarliest, 20) || "(not given)"],
       ["Latest pickup date", clean(dates.pickupLatest, 20) || "(not given)"],
-      ["Earliest drop-off date", clean(dates.dropoffEarliest, 20) || "(not given)"],
-      ["Latest drop-off date", clean(dates.dropoffLatest, 20) || "(not given)"],
+      ["Earliest delivery date", clean(dates.dropoffEarliest, 20) || "(not given)"],
+      ["Latest delivery date", clean(dates.dropoffLatest, 20) || "(not given)"],
       ["Trip type", clean(data.trip, 80)],
       ["Driving distance", (Number(data.distanceKm) || 0) + " km (" + clean(data.distanceSource, 60) + ")"],
       ["Route note", clean(data.routeNote, 600)]
     ]],
-    ["Horses", [
+    ["Your horses", [
       ["Number of horses", String(Number(data.horses) || 0)],
       ["Per stall type", stalls]
     ]],
@@ -238,7 +238,7 @@ function bookingHtml(data, map, mapsLink) {
 
   html += '<h3 style="color:#6A2C91;margin:16px 0 6px;">Route map</h3>';
   if (map.blob) {
-    html += '<img src="cid:routeMap" alt="Map of the route from pickup (A) to drop-off (B)" width="640" style="max-width:100%;height:auto;border:2px solid #6A2C91;border-radius:6px;">';
+    html += '<img src="cid:routeMap" alt="Map of the route from pickup (A) to delivery (B)" width="640" style="max-width:100%;height:auto;border:2px solid #6A2C91;border-radius:6px;">';
   }
   if (map.note) html += '<p style="margin:6px 0;color:#5E5568;">' + esc(map.note) + "</p>";
   if (mapsLink) {
