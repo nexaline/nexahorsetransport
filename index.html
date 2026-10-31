@@ -80,19 +80,15 @@
         <p class="lead">Tell us about your trip to see an instant price estimate, with no hidden fees. Submitting this form is a request only; your booking and price are confirmed once we contact you.</p>
 
         <form id="booking-form" class="booking-form">
-          <div class="field">
-            <label for="name">Full name *</label>
-            <input id="name" name="name" type="text" autocomplete="name" required>
-          </div>
-          <div class="field">
-            <label for="phone">Phone</label>
-            <input id="phone" name="phone" type="tel" autocomplete="tel" aria-describedby="contact-hint">
-          </div>
-          <div class="field full">
-            <label for="email">Email</label>
-            <input id="email" name="email" type="email" autocomplete="email" aria-describedby="contact-hint">
-            <p class="hint" id="contact-hint">Please give a phone number, an email address, or both, so we can reach you. *</p>
-          </div>
+          <ol class="step-progress field full" aria-label="Booking steps">
+            <li class="is-current" aria-current="step"><span class="step-dot">1</span> Trip</li>
+            <li><span class="step-dot">2</span> Horses</li>
+            <li><span class="step-dot">3</span> Dates</li>
+            <li><span class="step-dot">4</span> Your details</li>
+          </ol>
+          <div class="step-bar field full" aria-hidden="true"><span id="step-bar-fill" style="width:25%"></span></div>
+          <div class="form-step" id="booking-step-1" data-step="1" role="group" aria-labelledby="booking-step-1-title">
+          <h3 class="step-title field full" id="booking-step-1-title">Step 1 of 4: Your trip</h3>
           <div class="field location" id="pickup-location">
             <label for="pickup">Pickup location *</label>
             <div class="autocomplete">
@@ -121,6 +117,31 @@
             <div class="route-map" id="route-map" aria-label="Map of the pickup (A), delivery (B) and route"></div>
             <p class="hint" id="map-status">Pin A is your horse's pickup and pin B the delivery. Drag either pin to fine-tune it.</p>
           </div>
+          <div class="field full">
+            <label for="distance">Driving distance (km) *</label>
+            <div class="distance-row">
+              <input id="distance" name="distance" type="number" min="1" step="1" inputmode="numeric" required>
+              <button type="button" id="calc-distance" class="btn btn-secondary">Calculate distance</button>
+            </div>
+            <p class="hint" id="distance-status" aria-live="polite">Enter your pickup and delivery locations and we'll work out the driving distance for you. You can also type it in.</p>
+            <p class="route-note" id="route-note" role="alert" hidden></p>
+          </div>
+
+          <div class="field full">
+            <label for="trip">Trip type</label>
+            <select id="trip" name="trip">
+              <option>Local / within Alberta</option>
+              <option>Within Canada</option>
+              <option>Canada &ndash; US (cross-border)</option>
+              <option>Within the US</option>
+            </select>
+          </div>
+          <div class="field full step-nav">
+            <button type="button" class="btn step-next">Next: Horses</button>
+          </div>
+          </div>
+          <div class="form-step" id="booking-step-2" data-step="2" role="group" aria-labelledby="booking-step-2-title" hidden>
+          <h3 class="step-title field full" id="booking-step-2-title">Step 2 of 4: Your horses</h3>
           <fieldset class="field full stalls">
             <legend>How many horses need each stall type? *</legend>
             <div class="stall-grid">
@@ -139,15 +160,9 @@
             </div>
           </fieldset>
           <div class="field full">
-            <label for="distance">Driving distance (km) *</label>
-            <div class="distance-row">
-              <input id="distance" name="distance" type="number" min="1" step="1" inputmode="numeric" required>
-              <button type="button" id="calc-distance" class="btn btn-secondary">Calculate distance</button>
-            </div>
-            <p class="hint" id="distance-status" aria-live="polite">Enter your pickup and delivery locations and we'll work out the driving distance for you. You can also type it in.</p>
-            <p class="route-note" id="route-note" role="alert" hidden></p>
+            <label for="details">Horse details &amp; special requirements</label>
+            <textarea id="details" name="details" placeholder="Breed, age, size, temperament, any health or handling needs, flexibility on dates..."></textarea>
           </div>
-
           <div class="quote field full" id="quote">
             <div class="quote-price">
               <h3>Instant Quote <span class="badge">No hidden fees</span></h3>
@@ -172,6 +187,13 @@
             <p>Prices are in Canadian dollars, plus 5% GST. Minimum charge $300 per trip.</p>
           </details>
 
+          <div class="field full step-nav">
+            <button type="button" class="btn btn-secondary step-back">Back</button>
+            <button type="button" class="btn step-next">Next: Dates</button>
+          </div>
+          </div>
+          <div class="form-step" id="booking-step-3" data-step="3" role="group" aria-labelledby="booking-step-3-title" hidden>
+          <h3 class="step-title field full" id="booking-step-3-title">Step 3 of 4: Dates</h3>
           <fieldset class="field full date-window">
             <legend>Pickup window</legend>
             <div class="date-pair">
@@ -198,18 +220,25 @@
               </div>
             </div>
           </fieldset>
-          <div class="field full">
-            <label for="trip">Trip type</label>
-            <select id="trip" name="trip">
-              <option>Local / within Alberta</option>
-              <option>Within Canada</option>
-              <option>Canada &ndash; US (cross-border)</option>
-              <option>Within the US</option>
-            </select>
+          <div class="field full step-nav">
+            <button type="button" class="btn btn-secondary step-back">Back</button>
+            <button type="button" class="btn step-next">Next: Your details</button>
+          </div>
+          </div>
+          <div class="form-step" id="booking-step-4" data-step="4" role="group" aria-labelledby="booking-step-4-title" hidden>
+          <h3 class="step-title field full" id="booking-step-4-title">Step 4 of 4: Your details</h3>
+          <div class="field">
+            <label for="name">Full name *</label>
+            <input id="name" name="name" type="text" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" type="tel" autocomplete="tel" aria-describedby="contact-hint">
           </div>
           <div class="field full">
-            <label for="details">Horse details &amp; special requirements</label>
-            <textarea id="details" name="details" placeholder="Breed, age, size, temperament, any health or handling needs, flexibility on dates..."></textarea>
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="email" aria-describedby="contact-hint">
+            <p class="hint" id="contact-hint">Please give a phone number, an email address, or both, so we can reach you. *</p>
           </div>
           <div class="field full checkbox">
             <input id="agree" name="agree" type="checkbox" required>
@@ -226,11 +255,13 @@
             <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
           </div>
           <div class="field full form-actions">
+            <button type="button" class="btn btn-secondary step-back">Back</button>
             <button type="submit" class="btn" id="send-booking">Send Booking Request</button>
             <a class="btn btn-call" href="tel:+18444916392" aria-label="Call us at 1-844-491-6392">Call us: 1-844-491-NEXA</a>
           </div>
           <p class="form-note field full">Your request goes straight to our team. We'll contact you to confirm your quote and booking.</p>
           <p class="form-status field full" id="form-status" role="status" aria-live="polite"></p>
+          </div>
         </form>
       </div>
     </section>
@@ -1202,9 +1233,97 @@
     });
     checkDates();
 
+    // ----- Booking steps: 1 Trip, 2 Horses, 3 Dates, 4 Your details. Only the last step sends. -----
+    var STEPS = [].slice.call(document.querySelectorAll(".form-step"));
+    var stepItems = [].slice.call(document.querySelectorAll(".step-progress li"));
+    var currentStep = 1;
+    // Each step is checked when moving on (the browser can't point at a field inside a hidden step).
+    form.noValidate = true;
+    STEPS.slice(0, -1).forEach(function (stepEl) {
+      var p = document.createElement("p");
+      p.className = "form-status error step-error field full";
+      p.setAttribute("role", "alert");
+      stepEl.insertBefore(p, stepEl.querySelector(".step-nav"));
+    });
+
+    function showStep(n) {
+      currentStep = n;
+      STEPS.forEach(function (stepEl) { stepEl.hidden = Number(stepEl.dataset.step) !== n; });
+      stepItems.forEach(function (li, i) {
+        li.className = i + 1 < n ? "is-done" : i + 1 === n ? "is-current" : "";
+        if (i + 1 === n) li.setAttribute("aria-current", "step"); else li.removeAttribute("aria-current");
+      });
+      document.getElementById("step-bar-fill").style.width = (n * 25) + "%";
+      if (n !== 1) stopPicking();
+      if (n === 1 && routeMap) {
+        // The map was hidden while another step showed: let it re-measure, then fit the pins and route again.
+        window.google.maps.event.trigger(routeMap, "resize");
+        updateMapMarkers();
+      }
+      var title = document.getElementById("booking-step-" + n + "-title");
+      title.setAttribute("tabindex", "-1");
+      title.focus({ preventScroll: true });
+      form.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    // The first problem in a step, using the same rules as the full form, or null.
+    function stepProblem(n) {
+      var stepEl = STEPS[n - 1];
+      if (n === 1) {
+        var missingPlace = LOCATIONS.filter(function (loc) { return !loc.place; })[0];
+        if (missingPlace) return { el: missingPlace.input, msg: "Please enter the " + missingPlace.name.toLowerCase() + " location." };
+      }
+      if (n === 3) checkDates();
+      var invalid = [].slice.call(stepEl.querySelectorAll("input, select, textarea")).filter(function (el) {
+        return !el.closest(".hp-field") && !el.checkValidity();
+      })[0];
+      if (invalid) return { el: invalid, msg: invalid.validationMessage };
+      if (n === 2 && !calcQuote()) {
+        return { el: document.getElementById("stall-standard"), msg: "Please enter at least one horse in a stall type." };
+      }
+      if (n === 4 && !form.phone.value.trim() && !form.email.value.trim()) {
+        return { el: form.phone, msg: "Please give a phone number or an email address (or both) so we can reach you." };
+      }
+      return null;
+    }
+
+    function showProblem(n, problem) {
+      if (n === STEPS.length) showStatus("error", problem.msg);
+      else STEPS[n - 1].querySelector(".step-error").textContent = problem.msg;
+      problem.el.focus();
+    }
+
+    function nextStep() {
+      var problem = stepProblem(currentStep);
+      if (problem) {
+        showProblem(currentStep, problem);
+        return;
+      }
+      STEPS[currentStep - 1].querySelector(".step-error").textContent = "";
+      showStep(currentStep + 1);
+    }
+
+    document.querySelectorAll(".step-next").forEach(function (b) { b.addEventListener("click", nextStep); });
+    document.querySelectorAll(".step-back").forEach(function (b) {
+      b.addEventListener("click", function () { showStep(currentStep - 1); });
+    });
+
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       var f = e.target;
+      // Enter in an earlier step moves on instead of sending.
+      if (currentStep < STEPS.length) {
+        nextStep();
+        return;
+      }
+      for (var n = 1; n <= STEPS.length; n++) {
+        var problem = stepProblem(n);
+        if (problem) {
+          if (n !== currentStep) showStep(n);
+          showProblem(n, problem);
+          return;
+        }
+      }
       if (!f.phone.value.trim() && !f.email.value.trim()) {
         showStatus("error", "Please give a phone number or an email address (or both) so we can reach you.");
         f.phone.focus();
