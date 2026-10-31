@@ -27,10 +27,11 @@ The route is then checked against the `US_AREAS` boxes. If it still leaves Canad
 |---|---|---|
 | **v1.0** | The previous design (the site as it was before the 1.1 redesign) | tag `v1.0` and branch `release/v1.0` (commit `cc89498`) |
 | **v1.1** | The new design (built on branch `v1.1`, then merged into `main`) | tag `v1.1` |
+| **v1.2** | The booking in 4 steps plus a summary, following `design/booking-*.html` (built on branch `v1.2`) | tag `v1.2` |
 
 The `release/v1.0` branch is never changed, so version 1.0 can always be restored exactly.
 
-**To roll back**, say *"Switch the website back to version 1.0"*. The rollback restores the files on `main` to exactly what they were in `v1.0` with a **new commit** (history is never deleted or rewritten), then pushes `main`. GitHub Pages then serves version 1.0 again. Moving forward again later works the same way, from the `v1.1` tag.
+**To roll back**, say *"Switch the website back to version 1.0"*. The rollback restores the files on `main` to exactly what they were in `v1.0` with a **new commit** (history is never deleted or rewritten), then pushes `main`. GitHub Pages then serves version 1.0 again. Switching to version 1.1 (or moving forward again later) works the same way, from the `v1.1` or `v1.2` tag. If you roll the website back to before v1.2, the new `Code.gs` can stay: it handles both the old and the new booking forms.
 
 Version tags are created with the **Tag a website version** workflow (Actions tab > Run workflow, give the tag name and the commit). It never moves or replaces an existing tag.
 
@@ -46,6 +47,15 @@ Until real photos arrive, the site shows tasteful placeholders: the horse emblem
 | Meet the team: Mohammad (square) | `photos/team-mohammad.jpg` |
 
 ## Booking requests (Google Apps Script)
+
+The booking (`#booking` on `index.html`) has four steps, then a summary:
+
+1. **Trip**: pickup and delivery. The route map shows the trip, and the distance, Canada-only route and trip type ("Local / within Alberta", "Within Canada", "Canada – US (cross-border)", "Within the US") are found automatically. The trip type is sent in the hidden `trip` field. If the distance can't be calculated, "Distance not right? Enter it yourself" opens for a manual distance.
+2. **Horses**: stall counts, plus one optional card per horse (height in hands, weight in kg, age, sex, foal/young horse; fields `horse1Height` … `horse1Foal`, sent as `horseDetails`). Up to 12 cards.
+3. **Dates**: pickup and delivery windows.
+4. **Quote and contact**: the price appears here for the first time, next to the map.
+
+The one route map moves with the customer from step to step. After sending, a summary screen shows a copy of the request with **Download PDF** and **Download image**: a drawing of the route with pins A and B, made in the browser (no Google picture, no extra library). The booking email still has the real Google Static Maps picture.
 
 The booking form POSTs each request to a Google Apps Script web app (`google-apps-script/Code.gs`), which emails it to nexahorsetransport@gmail.com with a map picture of the route (pickup A, delivery B, driving route) from the Google Maps Static API. Setup, once, signed in as nexahorsetransport@gmail.com:
 

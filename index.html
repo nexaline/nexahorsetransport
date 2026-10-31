@@ -125,194 +125,248 @@
       </div>
     </section>
 
-    <section id="booking" class="section section-white">
-      <div class="container container-narrow">
+    <section id="booking" class="section">
+      <div class="container container-booking">
+        <div id="booking-flow">
         <h2 class="center">Get an instant quote</h2>
         <p class="lead center">Four short steps. We'll contact you to confirm before anything is booked.</p>
 
         <form id="booking-form" class="booking-form">
-          <ol class="step-progress field full" aria-label="Booking steps">
-            <li class="is-current" aria-current="step"><span class="step-seg" aria-hidden="true"></span><span class="step-label">1 &middot; Trip</span></li>
-            <li><span class="step-seg" aria-hidden="true"></span><span class="step-label">2 &middot; Horses</span></li>
-            <li><span class="step-seg" aria-hidden="true"></span><span class="step-label">3 &middot; Dates</span></li>
-            <li><span class="step-seg" aria-hidden="true"></span><span class="step-label">4 &middot; Your details</span></li>
+          <ol class="step-progress" aria-label="Booking steps">
+            <li class="is-current" aria-current="step"><button type="button" class="step-jump" data-step="1" disabled><span class="step-seg" aria-hidden="true"></span><span class="step-label">1 &middot; Trip</span></button></li>
+            <li><button type="button" class="step-jump" data-step="2" disabled><span class="step-seg" aria-hidden="true"></span><span class="step-label">2 &middot; Horses</span></button></li>
+            <li><button type="button" class="step-jump" data-step="3" disabled><span class="step-seg" aria-hidden="true"></span><span class="step-label">3 &middot; Dates</span></button></li>
+            <li><button type="button" class="step-jump" data-step="4" disabled><span class="step-seg" aria-hidden="true"></span><span class="step-label">4 &middot; Your details</span></button></li>
           </ol>
+
+          <!-- Step 1: Trip -->
           <div class="form-step" id="booking-step-1" data-step="1" role="group" aria-labelledby="booking-step-1-title">
-          <h3 class="step-title field full" id="booking-step-1-title">Step 1 of 4: Your trip</h3>
-          <div class="field location" id="pickup-location">
-            <label for="pickup">Pickup location *</label>
-            <div class="autocomplete">
-              <input id="pickup" name="pickup" type="text" placeholder="Address, postal/ZIP code, or GPS coordinates" autocomplete="off"
-                role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="pickup-list">
-              <ul class="suggestions" id="pickup-list" role="listbox" hidden></ul>
+            <div class="step-card">
+              <h3 class="step-title" id="booking-step-1-title">Where is your horse going?</h3>
+              <div class="location-pair">
+              <div class="field location" id="pickup-location">
+                <label for="pickup">Pickup location</label>
+                <div class="autocomplete">
+                  <input id="pickup" name="pickup" type="text" placeholder="Address, postal/ZIP code, or GPS coordinates" autocomplete="off"
+                    role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="pickup-list">
+                  <ul class="suggestions" id="pickup-list" role="listbox" hidden></ul>
+                </div>
+                <button type="button" class="btn btn-secondary btn-small pick-on-map" data-location="pickup">Pick on the map</button>
+                <p class="hint location-found" id="pickup-found" aria-live="polite"></p>
+              </div>
+              <div class="field location" id="dropoff-location">
+                <label for="dropoff">Delivery location</label>
+                <div class="autocomplete">
+                  <input id="dropoff" name="dropoff" type="text" placeholder="Address, postal/ZIP code, or GPS coordinates" autocomplete="off"
+                    role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="dropoff-list">
+                  <ul class="suggestions" id="dropoff-list" role="listbox" hidden></ul>
+                </div>
+                <button type="button" class="btn btn-secondary btn-small pick-on-map" data-location="dropoff">Pick on the map</button>
+                <p class="hint location-found" id="dropoff-found" aria-live="polite"></p>
+              </div>
+              </div>
+              <p class="hint">Type an address, postal/ZIP code or GPS coordinates, or pick the spot on the map.</p>
+              <!-- The one route map. Its block moves into the map spot of whichever step is showing. -->
+              <div class="map-slot" data-map-slot="1">
+                <div class="map-block" id="map-block">
+                  <p class="map-hint" id="map-hint" aria-live="polite" hidden>
+                    <span id="map-hint-text"></span>
+                    <button type="button" class="link-button" id="map-hint-cancel">Cancel</button>
+                  </p>
+                  <div class="route-map" id="route-map" role="region" aria-label="Map of the pickup (A), delivery (B) and route"></div>
+                  <p class="hint" id="map-status">Pin A is your horse's pickup and pin B the delivery. Drag either pin to fine-tune it.</p>
+                </div>
+              </div>
+              <div class="trip-facts" id="trip-facts" aria-live="polite">
+                <span id="fact-distance">Enter both locations to see the driving distance.</span>
+                <span id="fact-route" hidden></span>
+                <span id="fact-type" hidden></span>
+              </div>
+              <p class="route-note" id="route-note" role="alert" hidden></p>
+              <input type="hidden" id="trip" name="trip" value="">
+              <details class="distance-manual" id="distance-manual">
+                <summary>Distance not right? Enter it yourself</summary>
+                <div class="field">
+                  <label for="distance">Driving distance (km)</label>
+                  <div class="distance-row">
+                    <input id="distance" name="distance" type="number" min="1" step="1" inputmode="numeric" required>
+                    <button type="button" id="calc-distance" class="btn btn-secondary btn-small">Calculate distance</button>
+                  </div>
+                  <p class="hint" id="distance-status" aria-live="polite">We work out the driving distance for you. You can also type it in.</p>
+                </div>
+              </details>
             </div>
-            <button type="button" class="btn btn-secondary btn-small pick-on-map" data-location="pickup">Pick on the map</button>
-            <p class="hint location-found" id="pickup-found" aria-live="polite"></p>
-          </div>
-          <div class="field location" id="dropoff-location">
-            <label for="dropoff">Delivery location *</label>
-            <div class="autocomplete">
-              <input id="dropoff" name="dropoff" type="text" placeholder="Address, postal/ZIP code, or GPS coordinates" autocomplete="off"
-                role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="dropoff-list">
-              <ul class="suggestions" id="dropoff-list" role="listbox" hidden></ul>
+            <div class="step-nav">
+              <button type="button" class="btn step-next">Next: your horses</button>
             </div>
-            <button type="button" class="btn btn-secondary btn-small pick-on-map" data-location="dropoff">Pick on the map</button>
-            <p class="hint location-found" id="dropoff-found" aria-live="polite"></p>
-          </div>
-          <div class="field full">
-            <p class="map-hint" id="map-hint" aria-live="polite" hidden>
-              <span id="map-hint-text"></span>
-              <button type="button" class="link-button" id="map-hint-cancel">Cancel</button>
-            </p>
-            <div class="route-map" id="route-map" role="region" aria-label="Map of the pickup (A), delivery (B) and route"></div>
-            <p class="hint" id="map-status">Pin A is your horse's pickup and pin B the delivery. Drag either pin to fine-tune it.</p>
-          </div>
-          <div class="field full">
-            <label for="distance">Driving distance (km) *</label>
-            <div class="distance-row">
-              <input id="distance" name="distance" type="number" min="1" step="1" inputmode="numeric" required>
-              <button type="button" id="calc-distance" class="btn btn-secondary">Calculate distance</button>
-            </div>
-            <p class="hint" id="distance-status" aria-live="polite">Enter your pickup and delivery locations and we'll work out the driving distance for you. You can also type it in.</p>
-            <p class="route-note" id="route-note" role="alert" hidden></p>
+            <p class="step-footnote">No price yet. Your full quote appears in step 4.</p>
           </div>
 
-          <div class="field full">
-            <label for="trip">Trip type</label>
-            <select id="trip" name="trip">
-              <option>Local / within Alberta</option>
-              <option>Within Canada</option>
-              <option>Canada &ndash; US (cross-border)</option>
-              <option>Within the US</option>
-            </select>
-          </div>
-          <div class="field full step-nav">
-            <button type="button" class="btn step-next">Next: your horses</button>
-          </div>
-          </div>
+          <!-- Step 2: Horses -->
           <div class="form-step" id="booking-step-2" data-step="2" role="group" aria-labelledby="booking-step-2-title" hidden>
-          <h3 class="step-title field full" id="booking-step-2-title">Step 2 of 4: Your horses</h3>
-          <fieldset class="field full stalls">
-            <legend>How many horses need each stall type? *</legend>
-            <div class="stall-grid">
+            <div class="step-card">
+              <h3 class="step-title" id="booking-step-2-title">Tell us about your horses</h3>
+              <fieldset class="stalls">
+                <legend>How many horses need each stall type?</legend>
+                <div class="stall-cards">
+                  <div class="stall-card">
+                    <label for="stall-standard">Standard stall</label>
+                    <span class="stall-desc">Most horses</span>
+                    <input id="stall-standard" name="stallStandard" type="number" min="0" max="20" step="1" value="1" inputmode="numeric">
+                  </div>
+                  <div class="stall-card">
+                    <label for="stall-roomier">Roomier stall</label>
+                    <span class="stall-desc">Larger horses</span>
+                    <input id="stall-roomier" name="stallRoomier" type="number" min="0" max="20" step="1" value="0" inputmode="numeric">
+                  </div>
+                  <div class="stall-card">
+                    <label for="stall-box">Box stall</label>
+                    <span class="stall-desc">Mares with foals, stallions</span>
+                    <input id="stall-box" name="stallBox" type="number" min="0" max="20" step="1" value="0" inputmode="numeric">
+                  </div>
+                </div>
+              </fieldset>
+              <!-- One card per horse (all optional), built by the script from the stall counts. -->
+              <div class="horse-cards" id="horse-cards"></div>
               <div class="field">
-                <label for="stall-standard">Standard stall</label>
-                <input id="stall-standard" name="stallStandard" type="number" min="0" max="20" step="1" value="1" inputmode="numeric">
-              </div>
-              <div class="field">
-                <label for="stall-roomier">Roomier stall</label>
-                <input id="stall-roomier" name="stallRoomier" type="number" min="0" max="20" step="1" value="0" inputmode="numeric">
-              </div>
-              <div class="field">
-                <label for="stall-box">Box stall</label>
-                <input id="stall-box" name="stallBox" type="number" min="0" max="20" step="1" value="0" inputmode="numeric">
+                <label for="details">Horse details &amp; special requirements</label>
+                <textarea id="details" name="details" placeholder="Breed, temperament, loading experience, health or handling needs&hellip;"></textarea>
               </div>
             </div>
-          </fieldset>
-          <div class="field full">
-            <label for="details">Horse details &amp; special requirements</label>
-            <textarea id="details" name="details" placeholder="Breed, age, size, temperament, any health or handling needs, flexibility on dates..."></textarea>
-          </div>
-          <div class="quote field full" id="quote">
-            <div class="quote-price">
-              <h3>Instant Quote <span class="badge">No hidden fees</span></h3>
-              <p class="quote-total" id="quote-total">Enter your trip details to see a price</p>
-              <ul class="quote-lines" id="quote-lines"></ul>
+            <div class="step-card route-card">
+              <div class="route-card-head"><span class="route-card-title">Your route</span><span class="route-summary"></span></div>
+              <div class="map-slot" data-map-slot="2"></div>
             </div>
-            <p class="quote-notice" id="quote-notice"><strong>Please note:</strong> This is an automatic estimate only. Your price is not confirmed until Nexa Horse Transport contacts you to confirm. Vet, border, government and customs broker fees are extra, at cost.</p>
+            <div class="step-nav">
+              <button type="button" class="btn btn-secondary step-back">&larr; Back</button>
+              <button type="button" class="btn step-next">Next: dates</button>
+            </div>
           </div>
 
-          <details class="rates field full">
-            <summary>See our rates</summary>
-            <table>
-              <thead>
-                <tr><th>Per horse, per km</th><th>400 km or less</th><th>Over 400 km</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>Standard stall</td><td>$2.00</td><td>$1.20</td></tr>
-                <tr><td>Roomier stall</td><td>$2.20</td><td>$1.40</td></tr>
-                <tr><td>Box stall</td><td>$3.00</td><td>$2.00</td></tr>
-              </tbody>
-            </table>
-            <p>Prices are in Canadian dollars, plus 5% GST. Minimum charge $300 per trip.</p>
-          </details>
-
-          <div class="field full step-nav">
-            <button type="button" class="btn btn-secondary step-back">Back</button>
-            <button type="button" class="btn step-next">Next: dates</button>
-          </div>
-          </div>
+          <!-- Step 3: Dates -->
           <div class="form-step" id="booking-step-3" data-step="3" role="group" aria-labelledby="booking-step-3-title" hidden>
-          <h3 class="step-title field full" id="booking-step-3-title">Step 3 of 4: Dates</h3>
-          <fieldset class="field full date-window">
-            <legend>Pickup window</legend>
-            <div class="date-pair">
-              <div class="field">
-                <label for="pickup-earliest">Earliest pickup date *</label>
-                <input id="pickup-earliest" name="pickupEarliest" type="date" required>
-              </div>
-              <div class="field">
-                <label for="pickup-latest">Latest pickup date</label>
-                <input id="pickup-latest" name="pickupLatest" type="date">
-              </div>
+            <div class="step-card">
+              <h3 class="step-title" id="booking-step-3-title">When would suit you?</h3>
+              <p class="step-intro">A window of dates helps us plan the smoothest trip for your horse.</p>
+              <fieldset class="date-window">
+                <legend>Pickup</legend>
+                <div class="date-pair">
+                  <div class="field">
+                    <label for="pickup-earliest">Earliest pickup date</label>
+                    <input id="pickup-earliest" name="pickupEarliest" type="date" required>
+                  </div>
+                  <div class="field">
+                    <label for="pickup-latest">Latest pickup date <span class="optional">(optional)</span></label>
+                    <input id="pickup-latest" name="pickupLatest" type="date">
+                  </div>
+                </div>
+              </fieldset>
+              <fieldset class="date-window">
+                <legend>Delivery</legend>
+                <div class="date-pair">
+                  <div class="field">
+                    <label for="dropoff-earliest">Earliest delivery date <span class="optional">(optional)</span></label>
+                    <input id="dropoff-earliest" name="dropoffEarliest" type="date">
+                  </div>
+                  <div class="field">
+                    <label for="dropoff-latest">Latest delivery date <span class="optional">(optional)</span></label>
+                    <input id="dropoff-latest" name="dropoffLatest" type="date">
+                  </div>
+                </div>
+              </fieldset>
             </div>
-          </fieldset>
-          <fieldset class="field full date-window">
-            <legend>Delivery window</legend>
-            <div class="date-pair">
-              <div class="field">
-                <label for="dropoff-earliest">Earliest delivery date</label>
-                <input id="dropoff-earliest" name="dropoffEarliest" type="date">
-              </div>
-              <div class="field">
-                <label for="dropoff-latest">Latest delivery date</label>
-                <input id="dropoff-latest" name="dropoffLatest" type="date">
-              </div>
+            <div class="step-card route-card">
+              <div class="route-card-head"><span class="route-card-title">Your route</span><span class="route-summary"></span></div>
+              <div class="map-slot" data-map-slot="3"></div>
             </div>
-          </fieldset>
-          <div class="field full step-nav">
-            <button type="button" class="btn btn-secondary step-back">Back</button>
-            <button type="button" class="btn step-next">Next: your details</button>
+            <div class="step-nav">
+              <button type="button" class="btn btn-secondary step-back">&larr; Back</button>
+              <button type="button" class="btn step-next">Next: see your quote</button>
+            </div>
           </div>
-          </div>
+
+          <!-- Step 4: Quote and contact details -->
           <div class="form-step" id="booking-step-4" data-step="4" role="group" aria-labelledby="booking-step-4-title" hidden>
-          <h3 class="step-title field full" id="booking-step-4-title">Step 4 of 4: Your details</h3>
-          <div class="field">
-            <label for="name">Full name *</label>
-            <input id="name" name="name" type="text" autocomplete="name" required>
-          </div>
-          <div class="field">
-            <label for="phone">Phone</label>
-            <input id="phone" name="phone" type="tel" autocomplete="tel" aria-describedby="contact-hint">
-          </div>
-          <div class="field full">
-            <label for="email">Email</label>
-            <input id="email" name="email" type="email" autocomplete="email" aria-describedby="contact-hint">
-            <p class="hint" id="contact-hint">Please give a phone number, an email address, or both, so we can reach you. *</p>
-          </div>
-          <div class="field full checkbox">
-            <input id="agree" name="agree" type="checkbox" required>
-            <label for="agree">I have read and agree to the <a href="terms.html" target="_blank">Terms &amp; Conditions</a>. *</label>
-          </div>
-          <div class="field full checkbox sms-consent">
-            <input id="sms-consent" name="smsConsent" type="checkbox">
-            <label for="sms-consent">I agree to receive text messages from Nexa Horse Transport (Nexa Line Ltd.) at the phone number provided, about my quote, booking, and trip updates. Message frequency varies. Message and data rates may apply. Reply STOP to opt out, HELP for help. Consent is not a condition of booking. See our <a href="terms.html#sms" target="_blank">Terms</a> and <a href="privacy.html" target="_blank">Privacy Policy</a>.</label>
-          </div>
-          <p class="hint sms-hint field full">Text messages only apply if you give a phone number.</p>
-          <!-- Spam trap: hidden from people, but bots fill it in. -->
-          <div class="hp-field" aria-hidden="true">
-            <label for="website">Leave this field empty</label>
-            <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
-          </div>
-          <div class="field full form-actions">
-            <button type="button" class="btn btn-secondary step-back">Back</button>
-            <button type="submit" class="btn" id="send-booking">Send Booking Request</button>
-            <a class="btn btn-call" href="tel:+18444916392" aria-label="Call us at 1-844-491-6392">Call us: 1-844-491-NEXA</a>
-          </div>
-          <p class="form-note field full">Your request goes straight to our team. We'll contact you to confirm your quote and booking.</p>
-          <p class="form-status field full" id="form-status" role="status" aria-live="polite"></p>
+            <div class="step-card">
+              <h3 class="step-title" id="booking-step-4-title">Your quote</h3>
+              <div class="quote-layout">
+                <div class="map-slot" data-map-slot="4"></div>
+                <div class="quote" id="quote">
+                  <div class="quote-rows" id="quote-trip"></div>
+                  <div class="quote-rows" id="quote-lines"></div>
+                  <div class="quote-total-row"><span>Total</span><span class="quote-total" id="quote-total">&ndash;</span></div>
+                  <span class="quote-fees">No hidden fees. Vet, border, government and customs broker fees are extra, at cost.</span>
+                </div>
+              </div>
+              <p class="quote-notice" id="quote-notice"><strong>Please note:</strong> This is an automatic estimate only. Your price is not confirmed until Nexa Horse Transport contacts you to confirm. Vet, border, government and customs broker fees are extra, at cost.</p>
+            </div>
+            <div class="step-card">
+              <h3 class="step-title-small">How can we reach you?</h3>
+              <div class="field">
+                <label for="name">Full name</label>
+                <input id="name" name="name" type="text" autocomplete="name" required>
+              </div>
+              <div class="contact-pair">
+                <div class="field">
+                  <label for="phone">Phone</label>
+                  <input id="phone" name="phone" type="tel" autocomplete="tel" aria-describedby="contact-hint">
+                </div>
+                <div class="field">
+                  <label for="email">Email</label>
+                  <input id="email" name="email" type="email" autocomplete="email" aria-describedby="contact-hint">
+                </div>
+              </div>
+              <p class="hint contact-hint" id="contact-hint">A phone number or an email is enough. Both is great.</p>
+              <div class="field checkbox">
+                <input id="agree" name="agree" type="checkbox" required>
+                <label for="agree">I have read and agree to the <a href="terms.html" target="_blank">Terms &amp; Conditions</a>.</label>
+              </div>
+              <div class="field checkbox sms-consent">
+                <input id="sms-consent" name="smsConsent" type="checkbox">
+                <label for="sms-consent">I agree to receive text messages from Nexa Horse Transport (Nexa Line Ltd.) at the phone number provided, about my quote, booking, and trip updates. Message frequency varies. Message and data rates may apply. Reply STOP to opt out, HELP for help. Consent is not a condition of booking. See our <a href="terms.html#sms" target="_blank">Terms</a> and <a href="privacy.html" target="_blank">Privacy Policy</a>.</label>
+              </div>
+              <!-- Spam trap: hidden from people, but bots fill it in. -->
+              <div class="hp-field" aria-hidden="true">
+                <label for="website">Leave this field empty</label>
+                <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
+              </div>
+            </div>
+            <div class="step-nav">
+              <button type="button" class="btn btn-secondary step-back">&larr; Back</button>
+              <button type="submit" class="btn" id="send-booking">Send booking request</button>
+            </div>
+            <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
+            <p class="step-footnote">Questions? Call <a href="tel:+18444916392">1-844-491-NEXA</a></p>
           </div>
         </form>
+        </div>
+
+        <!-- Shown after the request is sent: a copy of what was sent, to download. -->
+        <div class="booking-summary" id="booking-summary" tabindex="-1" hidden>
+          <div class="summary-head">
+            <div class="summary-check" aria-hidden="true"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFE100" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+            <h2 id="summary-title">Thank you! Your request was sent.</h2>
+            <p>We'll contact you soon to confirm your quote and dates. Here's a copy of your request.</p>
+          </div>
+          <div class="summary-card">
+            <div class="summary-bar">
+              <img src="nexa-logo-header.svg" alt="Nexa Horse Transport" width="116" height="40">
+              <span id="summary-date"></span>
+            </div>
+            <div class="summary-body">
+              <div class="summary-route" id="summary-route"></div>
+              <div class="summary-grid">
+                <div class="summary-col" id="summary-trip"></div>
+                <div class="summary-col" id="summary-quote"></div>
+              </div>
+            </div>
+          </div>
+          <div class="summary-actions">
+            <button type="button" class="btn btn-call" id="download-pdf"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>Download PDF</button>
+            <button type="button" class="btn btn-secondary" id="download-image"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/></svg>Download image</button>
+          </div>
+          <p class="step-footnote">Questions? Call <a href="tel:+18444916392">1-844-491-NEXA</a></p>
+        </div>
       </div>
     </section>
 
@@ -496,31 +550,85 @@
       };
     }
 
+    var kmFormat = new Intl.NumberFormat("en-CA");
+    var dayFormat = new Intl.DateTimeFormat("en-CA", { month: "short", day: "numeric", year: "numeric" });
+
+    // "Calgary" from "Calgary, AB, Canada" or "Near Calgary, AB, Canada"; "Pin A"/"Pin B" for bare coordinates.
+    function shortPlace(loc) {
+      var p = loc.place;
+      if (!p || !p.label) return loc.key === "pickup" ? "Pickup" : "Delivery";
+      var name = p.label.replace(/^Near /, "").split(",")[0].trim();
+      return /^-?\d/.test(name) ? (loc.key === "pickup" ? "Pin A" : "Pin B") : name;
+    }
+
+    function localDate(iso) {
+      var p = iso.split("-");
+      return new Date(+p[0], +p[1] - 1, +p[2]);
+    }
+
+    // "Nov 10, 2026", or "Nov 10 – 14, 2026" for a window.
+    function dateRange(first, last) {
+      if (!first && !last) return "";
+      if (!first || !last || first === last) return dayFormat.format(localDate(first || last));
+      return dayFormat.formatRange ? dayFormat.formatRange(localDate(first), localDate(last))
+        : dayFormat.format(localDate(first)) + " – " + dayFormat.format(localDate(last));
+    }
+
+    function quoteRow(label, value, className, sub) {
+      var row = document.createElement("div");
+      row.className = "quote-row" + (className ? " " + className : "");
+      var l = document.createElement("span");
+      l.textContent = label;
+      if (sub) {
+        var small = document.createElement("span");
+        small.className = "quote-sub";
+        small.textContent = sub;
+        l.appendChild(document.createElement("br"));
+        l.appendChild(small);
+      }
+      var v = document.createElement(className === "quote-route" ? "strong" : "span");
+      v.textContent = value;
+      row.append(l, v);
+      return row;
+    }
+
+    // The quote panel in step 4. The price itself comes from calcQuote(), exactly as before.
     function updateQuote() {
       var q = calcQuote();
-      var total = document.getElementById("quote-total");
+      refreshTripInfo();
+      var tripRows = document.getElementById("quote-trip");
       var list = document.getElementById("quote-lines");
+      var total = document.getElementById("quote-total");
+      tripRows.innerHTML = "";
       list.innerHTML = "";
+      var km = q ? q.km : Math.round(parseFloat(distanceInput.value));
+      tripRows.appendChild(quoteRow(shortPlace(pickupLoc) + " \u2192 " + shortPlace(dropoffLoc), km > 0 ? kmFormat.format(km) + " km" : "", "quote-route"));
+      if (form.trip.value) tripRows.appendChild(quoteRow("Trip type", form.trip.value, "quote-muted"));
+      var pickupDates = dateRange(DATES_PE().value, DATES_PL().value);
+      if (pickupDates) tripRows.appendChild(quoteRow("Pickup", pickupDates, "quote-muted"));
+      var deliveryDates = dateRange(DATES_DE().value, DATES_DL().value);
+      if (deliveryDates) tripRows.appendChild(quoteRow("Delivery", deliveryDates, "quote-muted"));
       if (!q) {
-        total.textContent = "Enter your trip details to see a price";
+        total.textContent = "\u2013";
+        list.appendChild(quoteRow("Complete steps 1 and 2 to see your price.", "", "quote-muted"));
         return;
       }
-      total.textContent = money.format(q.total) + " CAD";
-      var rows = q.lines.map(function (l) { return [l.text, money.format(l.amount)]; });
-      if (q.minimumApplied) rows.push(["Minimum charge applied", money.format(MINIMUM_CHARGE)]);
-      rows.push(["Subtotal", money.format(q.subtotal)]);
-      rows.push(["GST (5%)", money.format(q.gst)]);
-      rows.forEach(function (r) {
-        var li = document.createElement("li");
-        var label = document.createElement("span");
-        var value = document.createElement("span");
-        label.textContent = r[0];
-        value.textContent = r[1];
-        li.appendChild(label);
-        li.appendChild(value);
-        list.appendChild(li);
+      var i = 0;
+      STALLS.forEach(function (s) {
+        var count = stallCount(s.input);
+        if (!count) return;
+        var line = q.lines[i++];
+        list.appendChild(quoteRow(count + " \u00d7 " + s.label, money.format(line.amount), "",
+          money.format(RATES[q.tier][s.key]) + "/km \u00d7 " + kmFormat.format(q.km) + " km"));
       });
+      if (q.minimumApplied) list.appendChild(quoteRow("Minimum charge applied", money.format(MINIMUM_CHARGE)));
+      list.appendChild(quoteRow("GST (5%)", money.format(q.gst), "quote-muted"));
+      total.textContent = money.format(q.total) + " CAD";
     }
+    function DATES_PE() { return document.getElementById("pickup-earliest"); }
+    function DATES_PL() { return document.getElementById("pickup-latest"); }
+    function DATES_DE() { return document.getElementById("dropoff-earliest"); }
+    function DATES_DL() { return document.getElementById("dropoff-latest"); }
 
     // Google Maps Platform: Places API (New) suggests addresses, Routes API finds the driving distance.
     // This key is visible to anyone viewing the page, so restrict it to this website in Google Cloud Console.
@@ -1119,9 +1227,62 @@
             // when neither end of the route is in the US.
             var endInUS = function (p, point) { return p.country ? p.country !== "CA" : !!(point && usArea(point)); };
             r.domestic = !endInUS(a, r.points[0]) && !endInUS(b, r.points[r.points.length - 1]);
+            r.places = [a, b];
             return r;
           });
         });
+      });
+    }
+
+    // ----- Trip facts under the map, the detected trip type, and the "Your route" summaries -----
+    var lastRoute = null;   // the latest route found, while it still matches the two locations
+    var tripState = "empty"; // empty, pending, ok or failed
+
+    var TRIP_TYPES = { local: "Local / within Alberta", canada: "Within Canada", cross: "Canada \u2013 US (cross-border)", us: "Within the US" };
+
+    // The trip type from the two places' countries and provinces; "" if it can't be told yet.
+    function detectTripType() {
+      var a = (lastRoute && lastRoute.places && lastRoute.places[0]) || pickupLoc.place;
+      var b = (lastRoute && lastRoute.places && lastRoute.places[1]) || dropoffLoc.place;
+      if (!a || !b || !a.country || !b.country) return "";
+      if (a.country === "CA" && b.country === "CA") return a.province === "AB" && b.province === "AB" ? TRIP_TYPES.local : TRIP_TYPES.canada;
+      if (a.country === "US" && b.country === "US") return TRIP_TYPES.us;
+      if ((a.country === "CA" || a.country === "US") && (b.country === "CA" || b.country === "US")) return TRIP_TYPES.cross;
+      return "";
+    }
+
+    function setFact(id, html) {
+      var el = document.getElementById(id);
+      el.hidden = !html;
+      el.innerHTML = html || "";
+    }
+
+    function escapeHtml(text) {
+      return String(text).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; });
+    }
+
+    function refreshTripInfo() {
+      form.trip.value = detectTripType();
+      var km = Math.round(parseFloat(distanceInput.value));
+      var manual = distanceInput.dataset.source !== "calculated automatically";
+      if (tripState === "pending") setFact("fact-distance", "Calculating the driving distance&hellip;");
+      else if (km > 0) setFact("fact-distance", "<strong>" + kmFormat.format(km) + " km</strong> by road" + (manual ? " <span class=\"fact-muted\">(entered by you)</span>" : ""));
+      else if (tripState === "failed") setFact("fact-distance", "We couldn't find the driving distance automatically. Please enter it below.");
+      else setFact("fact-distance", "Enter both locations to see the driving distance.");
+      var routeText = "";
+      if (lastRoute && tripState === "ok" && !manual && !(lastRoute.domestic && lastRoute.entersUS) && form.trip.value && form.trip.value !== TRIP_TYPES.cross && form.trip.value !== TRIP_TYPES.us) {
+        var names = lastRoute.vias.map(function (v) { return v.name; });
+        routeText = "Route stays in Canada" + (names.length ? " (via " + escapeHtml(names.join(", ")) + ")" : "");
+      }
+      setFact("fact-route", routeText);
+      setFact("fact-type", form.trip.value ? "Trip type: <strong>" + escapeHtml(form.trip.value) + "</strong> <span class=\"fact-muted\">(detected automatically)</span>" : "");
+      var horses = STALLS.reduce(function (n, s) { return n + stallCount(s.input); }, 0);
+      var parts = [escapeHtml(shortPlace(pickupLoc)) + " \u2192 " + escapeHtml(shortPlace(dropoffLoc))];
+      if (km > 0) parts.push("<strong>" + kmFormat.format(km) + " km</strong>");
+      if (form.trip.value) parts.push(escapeHtml(form.trip.value));
+      document.querySelectorAll(".route-summary").forEach(function (el) {
+        var withHorses = el.closest("#booking-step-3") && horses ? [horses + (horses === 1 ? " horse" : " horses")] : [];
+        el.innerHTML = parts.concat(withHorses).join(" &middot; ");
       });
     }
 
@@ -1154,6 +1315,9 @@
       setRouteNote("", false);
       drawRoute(null);
       currentRoute = null;
+      lastRoute = null;
+      tripState = "pending";
+      refreshTripInfo();
       distanceStatus.textContent = "Calculating driving distance...";
       findRoute(from, to).then(function (route) {
         if (id !== lookupId) return;
@@ -1162,7 +1326,9 @@
         if (to.lat == null && route.points.length) setApproximatePosition(to, route.points[route.points.length - 1]);
         LOCATIONS.forEach(showFound);
         drawRoute(route.points);
-        currentRoute = { key: key, polyline: route.polyline, vias: route.vias.map(function (v) { return v.address; }) };
+        currentRoute = { key: key, polyline: route.polyline, points: route.points, vias: route.vias.map(function (v) { return v.address; }) };
+        lastRoute = route;
+        tripState = "ok";
         var names = route.vias.map(function (v) { return v.name; });
         var via = names.length > 1 ? names.slice(0, -1).join(", ") + " and " + names[names.length - 1] : names.join("");
         distanceInput.value = route.km;
@@ -1178,8 +1344,11 @@
       }).catch(function (err) {
         if (id !== lookupId) return;
         lastLookup = "";
-        distanceInput.value = "";
+        // Keep a distance the customer typed in; only clear one we calculated for other locations.
+        if (distanceInput.dataset.source === "calculated automatically") distanceInput.value = "";
         setRouteNote("", false);
+        tripState = "failed";
+        document.getElementById("distance-manual").open = true;
         updateQuote();
         var reason = err && err.message && err.message.indexOf("couldn't") !== -1 ? err.message : "We couldn't calculate the distance automatically.";
         distanceStatus.textContent = reason + " Please check the locations or type the driving distance in km.";
@@ -1224,9 +1393,92 @@
       setRouteNote("", false);
       updateQuote();
     });
+    // ----- Horse details (step 2): an optional card for each horse -----
+    var MAX_HORSE_CARDS = 12;
+    var horseCards = document.getElementById("horse-cards");
+    // Keyed by stall type and number within it, so what's typed survives changes to the counts.
+    var horseValues = {};
+
+    function horseList() {
+      var list = [];
+      STALLS.forEach(function (s) {
+        for (var i = 1; i <= stallCount(s.input); i++) list.push({ key: s.key + "-" + i, stall: s.label });
+      });
+      return list;
+    }
+
+    function renderHorseCards() {
+      var list = horseList();
+      horseCards.innerHTML = "";
+      STALLS.forEach(function (s) {
+        document.getElementById(s.input).closest(".stall-card").classList.toggle("is-selected", stallCount(s.input) > 0);
+      });
+      list.slice(0, MAX_HORSE_CARDS).forEach(function (h, i) {
+        var n = i + 1;
+        var v = horseValues[h.key] || (horseValues[h.key] = { height: "", weight: "", age: "", sex: "", foal: "No" });
+        var card = document.createElement("div");
+        card.className = "horse-card";
+        card.dataset.key = h.key;
+        card.innerHTML =
+          '<div class="horse-card-head"><span class="horse-card-title"></span><span class="hint">All optional</span></div>' +
+          '<div class="horse-grid-3">' +
+            '<div class="field"><label for="horse-' + n + '-height">Height (hands)</label><input id="horse-' + n + '-height" name="horse' + n + 'Height" data-field="height" type="text" inputmode="decimal" placeholder="e.g. 15.2" autocomplete="off"></div>' +
+            '<div class="field"><label for="horse-' + n + '-weight">Weight (kg)</label><input id="horse-' + n + '-weight" name="horse' + n + 'Weight" data-field="weight" type="text" inputmode="numeric" placeholder="e.g. 500" autocomplete="off"></div>' +
+            '<div class="field"><label for="horse-' + n + '-age">Age (years)</label><input id="horse-' + n + '-age" name="horse' + n + 'Age" data-field="age" type="text" inputmode="decimal" placeholder="e.g. 8" autocomplete="off"></div>' +
+          '</div>' +
+          '<div class="horse-grid-2">' +
+            '<div class="field"><label for="horse-' + n + '-sex">Sex</label><select id="horse-' + n + '-sex" name="horse' + n + 'Sex" data-field="sex">' +
+              '<option value="">Choose&hellip;</option><option>Mare</option><option>Gelding</option><option>Stallion</option></select></div>' +
+            '<fieldset class="field horse-foal"><legend>Foal or young horse?</legend><div class="radio-row">' +
+              '<label><input type="radio" name="horse' + n + 'Foal" value="Yes" data-field="foal"> Yes</label>' +
+              '<label><input type="radio" name="horse' + n + 'Foal" value="No" data-field="foal"> No</label>' +
+            '</div></fieldset>' +
+          '</div>';
+        card.querySelector(".horse-card-title").textContent = "Horse " + n + " \u00b7 " + h.stall;
+        ["height", "weight", "age", "sex"].forEach(function (f) { card.querySelector('[data-field="' + f + '"]').value = v[f]; });
+        card.querySelector('input[value="' + (v.foal === "Yes" ? "Yes" : "No") + '"]').checked = true;
+        horseCards.appendChild(card);
+      });
+      if (list.length > MAX_HORSE_CARDS) {
+        var more = document.createElement("p");
+        more.className = "hint";
+        more.textContent = "For more than " + MAX_HORSE_CARDS + " horses, please add the others' details in the box below.";
+        horseCards.appendChild(more);
+      }
+    }
+
+    function saveHorseValue(e) {
+      var el = e.target;
+      var card = el.closest(".horse-card");
+      if (!card || !el.dataset.field) return;
+      horseValues[card.dataset.key][el.dataset.field] = el.type === "radio" ? el.value : el.value;
+    }
+    horseCards.addEventListener("input", saveHorseValue);
+    horseCards.addEventListener("change", saveHorseValue);
+
+    // What's sent: one entry per horse card, in order.
+    function horseDetailsData() {
+      return horseList().slice(0, MAX_HORSE_CARDS).map(function (h, i) {
+        var v = horseValues[h.key] || {};
+        return {
+          horse: i + 1,
+          stall: h.stall,
+          height: (v.height || "").trim(),
+          weight: (v.weight || "").trim(),
+          age: (v.age || "").trim(),
+          sex: v.sex || "",
+          foalOrYoung: v.foal || "No"
+        };
+      });
+    }
+
     STALLS.forEach(function (s) {
-      document.getElementById(s.input).addEventListener("input", updateQuote);
+      document.getElementById(s.input).addEventListener("input", function () {
+        renderHorseCards();
+        updateQuote();
+      });
     });
+    renderHorseCards();
     updateQuote();
 
     var formStatus = document.getElementById("form-status");
@@ -1271,6 +1523,7 @@
         route: route ? { polyline: route.polyline, vias: route.vias } : null,
         stalls: STALLS.map(function (s) { return { type: s.label, count: stallCount(s.input) }; }),
         horses: q.horses,
+        horseDetails: horseDetailsData(),
         quote: {
           lines: q.lines.map(function (l) { return { text: l.text, amount: money.format(l.amount) }; }),
           minimumApplied: q.minimumApplied ? money.format(MINIMUM_CHARGE) : "",
@@ -1288,10 +1541,10 @@
       };
     }
 
-    function sent() {
-      showStatus("success", "Thank you! Your request was sent. We'll contact you soon to confirm.");
+    function sent(data) {
       sendButton.textContent = "Request sent";
       sendButton.disabled = true;
+      showSummary(data);
     }
 
     // ----- Pickup and delivery date windows -----
@@ -1340,7 +1593,7 @@
     }
 
     Object.keys(DATES).forEach(function (k) {
-      DATES[k].addEventListener("input", checkDates);
+      DATES[k].addEventListener("input", function () { checkDates(); updateQuote(); });
       DATES[k].addEventListener("change", function () {
         checkDates();
         if (!DATES[k].checkValidity()) DATES[k].reportValidity();
@@ -1351,6 +1604,8 @@
     // ----- Booking steps: 1 Trip, 2 Horses, 3 Dates, 4 Your details. Only the last step sends. -----
     var STEPS = [].slice.call(document.querySelectorAll(".form-step"));
     var stepItems = [].slice.call(document.querySelectorAll(".step-progress li"));
+    var stepLabels = stepItems.map(function (li) { return li.querySelector(".step-label").textContent; });
+    var mapBlock = document.getElementById("map-block");
     var currentStep = 1;
     // Each step is checked when moving on (the browser can't point at a field inside a hidden step).
     form.noValidate = true;
@@ -1365,15 +1620,24 @@
       currentStep = n;
       STEPS.forEach(function (stepEl) { stepEl.hidden = Number(stepEl.dataset.step) !== n; });
       stepItems.forEach(function (li, i) {
-        li.className = i + 1 < n ? "is-done" : i + 1 === n ? "is-current" : "";
+        var done = i + 1 < n;
+        li.className = done ? "is-done" : i + 1 === n ? "is-current" : "";
         if (i + 1 === n) li.setAttribute("aria-current", "step"); else li.removeAttribute("aria-current");
+        // Finished steps can be clicked to go back to them.
+        var jump = li.querySelector(".step-jump");
+        jump.disabled = !done;
+        li.querySelector(".step-label").textContent = (done ? "\u2713 " : "") + stepLabels[i];
       });
       if (n !== 1) stopPicking();
-      if (n === 1 && routeMap) {
-        // The map was hidden while another step showed: let it re-measure, then fit the pins and route again.
+      // The one route map moves into this step's map spot, then re-measures and fits the pins and route.
+      var slot = STEPS[n - 1].querySelector(".map-slot");
+      if (slot && mapBlock.parentNode !== slot) slot.appendChild(mapBlock);
+      if (routeMap) {
         window.google.maps.event.trigger(routeMap, "resize");
+        keepMapView = false;
         updateMapMarkers();
       }
+      updateQuote();
       var title = document.getElementById("booking-step-" + n + "-title");
       title.setAttribute("tabindex", "-1");
       title.focus({ preventScroll: true });
@@ -1404,6 +1668,8 @@
     function showProblem(n, problem) {
       if (n === STEPS.length) showStatus("error", problem.msg);
       else STEPS[n - 1].querySelector(".step-error").textContent = problem.msg;
+      var closed = problem.el.closest("details");
+      if (closed) closed.open = true;
       problem.el.focus();
     }
 
@@ -1420,6 +1686,12 @@
     document.querySelectorAll(".step-next").forEach(function (b) { b.addEventListener("click", nextStep); });
     document.querySelectorAll(".step-back").forEach(function (b) {
       b.addEventListener("click", function () { showStep(currentStep - 1); });
+    });
+    document.querySelectorAll(".step-jump").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var target = Number(b.dataset.step);
+        if (target < currentStep) showStep(target);
+      });
     });
 
     form.addEventListener("submit", function (e) {
@@ -1464,7 +1736,7 @@
       var data = bookingData(f, q);
       // Spam: the hidden field is filled in, or the form was completed too fast. Look sent, send nothing.
       if (data.website || data.elapsedMs < MIN_FILL_MS) {
-        sent();
+        sent(data);
         return;
       }
       if (!BOOKING_ENDPOINT) {
@@ -1497,7 +1769,7 @@
           return result;
         });
       }).then(function () {
-        sent();
+        sent(data);
       }).catch(function (err) {
         // A TypeError ("Failed to fetch") means the browser got no readable reply at all: a network problem,
         // or a reply without CORS permission (for example a Google sign-in page).
@@ -1506,6 +1778,325 @@
         sendButton.textContent = "Send Booking Request";
         showStatus("error", "Sorry, something went wrong. Please call us at ", true);
       });
+    });
+
+    // ----- After sending: a summary of the request, to download as a PDF or an image -----
+    var lastSent = null;
+
+    // "Calgary, AB" from "Calgary, AB, Canada" (or "Near Calgary, AB, Canada"); coordinates stay as they are.
+    function placeLine(place, fallback) {
+      if (!place || !place.label) return fallback;
+      var parts = place.label.replace(/^Near /, "").split(",").map(function (x) { return x.trim(); });
+      if (/^-?\d/.test(parts[0])) return place.label;
+      return parts.slice(0, Math.min(2, parts.length)).join(", ");
+    }
+
+    function placeName(place, fallback) {
+      var line = placeLine(place, fallback);
+      return /^-?\d/.test(line) ? fallback : line.split(",")[0];
+    }
+
+    function horseLine(h) {
+      var bits = [];
+      if (h.height) bits.push(h.height + " hands");
+      if (h.weight) bits.push(h.weight + " kg");
+      if (h.age) bits.push(h.age + (h.age === "1" ? " year" : " years"));
+      if (h.sex) bits.push(h.sex);
+      if (h.foalOrYoung === "Yes") bits.push("foal or young horse");
+      return bits.length ? "Horse " + h.horse + ": " + bits.join(" · ") : "";
+    }
+
+    // Everything the summary, the PDF and the image show, worked out once from the data that was sent.
+    function summaryContent(data) {
+      var dates = data.dates || {};
+      var stallLines = [];
+      var i = 0;
+      data.stalls.forEach(function (st) {
+        if (!st.count) return;
+        stallLines.push({ label: st.count + " × " + st.type, amount: data.quote.lines[i++].amount });
+      });
+      return {
+        date: dayFormat.format(new Date()),
+        trip: [placeLine(data.pickup, "Pickup") + " → " + placeLine(data.dropoff, "Delivery"),
+          kmFormat.format(data.distanceKm) + " km" + (data.trip ? " · " + data.trip : "")],
+        dates: ["Pickup: " + (dateRange(dates.pickupEarliest, dates.pickupLatest) || "to be arranged")]
+          .concat(dates.dropoffEarliest || dates.dropoffLatest ? ["Delivery: " + dateRange(dates.dropoffEarliest, dates.dropoffLatest)] : []),
+        horses: stallLines.map(function (l) { return l.label; })
+          .concat((data.horseDetails || []).map(horseLine).filter(String)),
+        quote: stallLines.concat(data.quote.minimumApplied ? [{ label: "Minimum charge applied", amount: data.quote.minimumApplied }] : [])
+          .concat([{ label: "GST (5%)", amount: data.quote.gst, muted: true }]),
+        total: data.quote.total,
+        note: "Automatic estimate. Your price is confirmed when we contact you.",
+        a: placeName(data.pickup, "Pickup"),
+        b: placeName(data.dropoff, "Delivery")
+      };
+    }
+
+    // The route drawn into a w x h box: the route's own points, or a straight line between the pins.
+    function routeShape(data, w, h, pad) {
+      var pts = data.route && data.route.polyline ? decodePolyline(data.route.polyline) : [];
+      var a = data.pickup && data.pickup.lat != null ? [data.pickup.lat, data.pickup.lng] : pts[0];
+      var b = data.dropoff && data.dropoff.lat != null ? [data.dropoff.lat, data.dropoff.lng] : pts[pts.length - 1];
+      if (!a || !b) return null;
+      if (pts.length < 2) pts = [a, b];
+      var all = pts.concat([a, b]);
+      var lats = all.map(function (p) { return p[0]; }), lngs = all.map(function (p) { return p[1]; });
+      var minLat = Math.min.apply(null, lats), maxLat = Math.max.apply(null, lats);
+      var minLng = Math.min.apply(null, lngs), maxLng = Math.max.apply(null, lngs);
+      var k = Math.cos(((minLat + maxLat) / 2) * Math.PI / 180);
+      var spanX = Math.max((maxLng - minLng) * k, 0.02), spanY = Math.max(maxLat - minLat, 0.02);
+      var scale = Math.min((w - 2 * pad) / spanX, (h - 2 * pad) / spanY);
+      // Centre the drawing in the box.
+      var offX = (w - (maxLng - minLng) * k * scale) / 2;
+      var offY = (h - (maxLat - minLat) * scale) / 2;
+      var xy = function (p) { return [offX + (p[1] - minLng) * k * scale, offY + (maxLat - p[0]) * scale]; };
+      return { line: pts.map(xy), a: xy(a), b: xy(b) };
+    }
+
+    function routeSvg(data, c) {
+      var g = routeShape(data, 900, 300, 70);
+      if (!g) return "";
+      var d = g.line.map(function (p, i) { return (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); }).join(" ");
+      var pin = function (p, letter, fill, name) {
+        return '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="16" fill="' + fill + '"/>' +
+          '<text x="' + p[0].toFixed(1) + '" y="' + (p[1] + 6).toFixed(1) + '" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="800" font-size="16" fill="#FFFFFF">' + letter + '</text>' +
+          '<text x="' + p[0].toFixed(1) + '" y="' + (p[1] + 38).toFixed(1) + '" text-anchor="middle" font-family="Source Sans 3, sans-serif" font-size="16" fill="#3D1758">' + escapeHtml(name) + '</text>';
+      };
+      return '<svg viewBox="0 0 900 300" width="100%" role="img" aria-label="Drawing of the route from ' + escapeHtml(c.a) + ' to ' + escapeHtml(c.b) + '">' +
+        '<rect width="900" height="300" rx="12" fill="#EAF0E4"/>' +
+        '<path d="' + d + '" fill="none" stroke="#6A2C91" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>' +
+        pin(g.a, "A", "#6A2C91", c.a) + pin(g.b, "B", "#E8141C", c.b) + '</svg>';
+    }
+
+    function addText(parent, tag, cls, text) {
+      var e = document.createElement(tag);
+      if (cls) e.className = cls;
+      e.textContent = text;
+      parent.appendChild(e);
+      return e;
+    }
+
+    function showSummary(data) {
+      lastSent = data;
+      var c = summaryContent(data);
+      document.getElementById("summary-date").textContent = "Booking request · " + c.date;
+      document.getElementById("summary-route").innerHTML = routeSvg(data, c);
+      var trip = document.getElementById("summary-trip");
+      trip.innerHTML = "";
+      addText(trip, "span", "summary-label", "Trip");
+      addText(trip, "span", "", c.trip[0]);
+      addText(trip, "span", "summary-muted", c.trip[1]);
+      addText(trip, "span", "summary-label", "Dates");
+      c.dates.forEach(function (t) { addText(trip, "span", "", t); });
+      addText(trip, "span", "summary-label", "Horses");
+      c.horses.forEach(function (t, i) { addText(trip, "span", i < data.stalls.filter(function (s) { return s.count; }).length ? "" : "summary-muted", t); });
+      var quote = document.getElementById("summary-quote");
+      quote.innerHTML = "";
+      addText(quote, "span", "summary-label", "Quote");
+      c.quote.forEach(function (r) {
+        var row = addText(quote, "div", "quote-row" + (r.muted ? " quote-muted" : ""), "");
+        addText(row, "span", "", r.label);
+        addText(row, "span", "", r.amount);
+      });
+      var total = addText(quote, "div", "quote-total-row", "");
+      addText(total, "span", "", "Total");
+      addText(total, "span", "quote-total", c.total);
+      addText(quote, "span", "summary-muted summary-small", c.note);
+      document.getElementById("booking-flow").hidden = true;
+      var box = document.getElementById("booking-summary");
+      box.hidden = false;
+      box.scrollIntoView({ behavior: "smooth", block: "start" });
+      box.focus({ preventScroll: true });
+    }
+
+    // ----- Downloads: the summary card drawn onto a canvas -----
+    function loadImage(src) {
+      return new Promise(function (resolve) {
+        var img = new Image();
+        img.onload = function () { resolve(img); };
+        img.onerror = function () { resolve(null); };
+        img.src = src;
+      });
+    }
+
+    function wrapLines(ctx, text, width) {
+      var words = String(text).split(" "), lines = [], line = "";
+      words.forEach(function (w) {
+        var test = line ? line + " " + w : w;
+        if (ctx.measureText(test).width > width && line) { lines.push(line); line = w; } else line = test;
+      });
+      if (line) lines.push(line);
+      return lines;
+    }
+
+    function drawSummary(data) {
+      var c = summaryContent(data);
+      var W = 1000, SCALE = 2, HEAD = "Archivo, Arial, sans-serif", BODY = "'Source Sans 3', Arial, sans-serif";
+      var canvas = document.createElement("canvas");
+      canvas.width = W * SCALE;
+      canvas.height = 2400 * SCALE;
+      var ctx = canvas.getContext("2d");
+      ctx.scale(SCALE, SCALE);
+      return Promise.all([document.fonts ? document.fonts.ready : null, loadImage("nexa-logo-header.svg")]).then(function (r) {
+        var logo = r[1];
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, W, 2400);
+        // Header bar
+        ctx.fillStyle = "#6A2C91";
+        ctx.fillRect(0, 0, W, 84);
+        ctx.fillStyle = "#E8141C";
+        ctx.fillRect(0, 84, W, 4);
+        if (logo) ctx.drawImage(logo, 40, 18, 48 * logo.width / logo.height, 48);
+        ctx.fillStyle = "#F3ECF8";
+        ctx.font = "16px " + BODY;
+        ctx.textAlign = "right";
+        ctx.fillText("Booking request · " + c.date, W - 40, 50);
+        ctx.textAlign = "left";
+        // Route drawing
+        var y = 116;
+        var g = routeShape(data, W - 80, 300, 70);
+        if (g) {
+          ctx.fillStyle = "#EAF0E4";
+          ctx.beginPath();
+          ctx.roundRect ? ctx.roundRect(40, y, W - 80, 300, 12) : ctx.rect(40, y, W - 80, 300);
+          ctx.fill();
+          ctx.strokeStyle = "#6A2C91";
+          ctx.lineWidth = 6;
+          ctx.lineCap = "round";
+          ctx.lineJoin = "round";
+          ctx.beginPath();
+          g.line.forEach(function (p, i) { (i ? ctx.lineTo : ctx.moveTo).call(ctx, 40 + p[0], y + p[1]); });
+          ctx.stroke();
+          [[g.a, "A", "#6A2C91", c.a], [g.b, "B", "#E8141C", c.b]].forEach(function (pin) {
+            var px = 40 + pin[0][0], py = y + pin[0][1];
+            ctx.fillStyle = pin[2];
+            ctx.beginPath();
+            ctx.arc(px, py, 16, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#FFFFFF";
+            ctx.font = "800 16px " + HEAD;
+            ctx.textAlign = "center";
+            ctx.fillText(pin[1], px, py + 6);
+            ctx.fillStyle = "#3D1758";
+            ctx.font = "16px " + BODY;
+            ctx.fillText(pin[3], px, py + 38);
+            ctx.textAlign = "left";
+          });
+          y += 300 + 36;
+        }
+        // Left column: trip, dates, horses
+        var colW = (W - 80 - 40) / 2, leftX = 40, rightX = 40 + colW + 40;
+        var ly = y, ry = y;
+        var label = function (text, x, yy) { ctx.fillStyle = "#3D1758"; ctx.font = "700 18px " + HEAD; ctx.fillText(text, x, yy); return yy + 28; };
+        var line = function (text, x, yy, muted) {
+          ctx.fillStyle = muted ? "#5B5560" : "#222222";
+          ctx.font = "17px " + BODY;
+          wrapLines(ctx, text, colW).forEach(function (l) { ctx.fillText(l, x, yy); yy += 24; });
+          return yy + 4;
+        };
+        ly = label("Trip", leftX, ly);
+        ly = line(c.trip[0], leftX, ly);
+        ly = line(c.trip[1], leftX, ly, true) + 10;
+        ly = label("Dates", leftX, ly);
+        c.dates.forEach(function (t) { ly = line(t, leftX, ly); });
+        ly += 10;
+        ly = label("Horses", leftX, ly);
+        var stallRows = data.stalls.filter(function (s) { return s.count; }).length;
+        c.horses.forEach(function (t, i) { ly = line(t, leftX, ly, i >= stallRows); });
+        // Right column: quote
+        ry = label("Quote", rightX, ry);
+        c.quote.forEach(function (r) {
+          ctx.fillStyle = r.muted ? "#5B5560" : "#222222";
+          ctx.font = "17px " + BODY;
+          ctx.fillText(r.label, rightX, ry);
+          ctx.textAlign = "right";
+          ctx.fillText(r.amount, rightX + colW, ry);
+          ctx.textAlign = "left";
+          ry += 30;
+        });
+        ctx.fillStyle = "#F4EEF8";
+        ctx.beginPath();
+        ctx.roundRect ? ctx.roundRect(rightX, ry - 4, colW, 52, 10) : ctx.rect(rightX, ry - 4, colW, 52);
+        ctx.fill();
+        ctx.fillStyle = "#3D1758";
+        ctx.font = "700 18px " + HEAD;
+        ctx.fillText("Total", rightX + 14, ry + 28);
+        ctx.font = "800 24px " + HEAD;
+        ctx.textAlign = "right";
+        ctx.fillText(c.total, rightX + colW - 14, ry + 30);
+        ctx.textAlign = "left";
+        ry += 76;
+        ctx.fillStyle = "#5B5560";
+        ctx.font = "15px " + BODY;
+        wrapLines(ctx, c.note, colW).forEach(function (l) { ctx.fillText(l, rightX, ry); ry += 21; });
+        // Footer
+        var fy = Math.max(ly, ry) + 30;
+        ctx.fillStyle = "#EAE2D3";
+        ctx.fillRect(40, fy, W - 80, 1);
+        ctx.fillStyle = "#5B5560";
+        ctx.font = "15px " + BODY;
+        ctx.fillText("Nexa Horse Transport · 1-844-491-NEXA (1-844-491-6392) · nexahorsetransport@gmail.com · nexahorsetransport.ca", 40, fy + 30);
+        var height = fy + 56;
+        var out = document.createElement("canvas");
+        out.width = W * SCALE;
+        out.height = height * SCALE;
+        out.getContext("2d").drawImage(canvas, 0, 0);
+        return out;
+      });
+    }
+
+    // A one-page PDF (Letter size) holding the summary picture. Written directly, so no extra library is loaded.
+    function pdfFromCanvas(canvas) {
+      var jpeg = atob(canvas.toDataURL("image/jpeg", 0.92).split(",")[1]);
+      var img = new Uint8Array(jpeg.length);
+      for (var i = 0; i < jpeg.length; i++) img[i] = jpeg.charCodeAt(i);
+      var pageW = 612, pageH = 792, margin = 36;
+      var scale = Math.min((pageW - 2 * margin) / canvas.width, (pageH - 2 * margin) / canvas.height);
+      var w = canvas.width * scale, h = canvas.height * scale, x = (pageW - w) / 2, y = pageH - margin - h;
+      var content = "q " + w.toFixed(2) + " 0 0 " + h.toFixed(2) + " " + x.toFixed(2) + " " + y.toFixed(2) + " cm /Im0 Do Q";
+      var enc = new TextEncoder(), parts = [], length = 0, offsets = [];
+      var add = function (chunk) { var b = typeof chunk === "string" ? enc.encode(chunk) : chunk; parts.push(b); length += b.length; };
+      var obj = function (n, body) { offsets[n] = length; add(n + " 0 obj\n"); body(); add("\nendobj\n"); };
+      add("%PDF-1.4\n");
+      obj(1, function () { add("<< /Type /Catalog /Pages 2 0 R >>"); });
+      obj(2, function () { add("<< /Type /Pages /Kids [3 0 R] /Count 1 >>"); });
+      obj(3, function () { add("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + pageW + " " + pageH + "] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>"); });
+      obj(4, function () {
+        add("<< /Type /XObject /Subtype /Image /Width " + canvas.width + " /Height " + canvas.height +
+          " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + img.length + " >>\nstream\n");
+        add(img);
+        add("\nendstream");
+      });
+      obj(5, function () { add("<< /Length " + content.length + " >>\nstream\n" + content + "\nendstream"); });
+      var xref = length;
+      add("xref\n0 6\n0000000000 65535 f \n" + [1, 2, 3, 4, 5].map(function (n) { return String(offsets[n]).padStart(10, "0") + " 00000 n \n"; }).join(""));
+      add("trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n" + xref + "\n%%EOF\n");
+      return new Blob(parts, { type: "application/pdf" });
+    }
+
+    function saveFile(blob, name) {
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 10000);
+    }
+
+    function downloadName(ext) {
+      return "nexa-booking-request-" + todayIso() + "." + ext;
+    }
+
+    document.getElementById("download-image").addEventListener("click", function () {
+      if (!lastSent) return;
+      drawSummary(lastSent).then(function (canvas) {
+        canvas.toBlob(function (blob) { saveFile(blob, downloadName("png")); }, "image/png");
+      });
+    });
+    document.getElementById("download-pdf").addEventListener("click", function () {
+      if (!lastSent) return;
+      drawSummary(lastSent).then(function (canvas) { saveFile(pdfFromCanvas(canvas), downloadName("pdf")); });
     });
   </script>
 </body>

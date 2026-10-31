@@ -280,19 +280,12 @@ img.split-photo { object-fit: cover; }
 }
 .stall-list strong { font-family: var(--font-head); color: var(--deep); }
 
-/* ---------- Booking form ---------- */
-.booking-form {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px 20px;
-  padding: 28px;
-  background: var(--cream);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-}
+/* ---------- Booking (steps 1-4 and the summary; see design/booking-*.html) ---------- */
+.container-booking { max-width: 940px; }
+
+.booking-form { display: flex; flex-direction: column; gap: 0; }
 
 .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.field.full { grid-column: 1 / -1; }
 
 label { font-weight: 600; }
 
@@ -301,7 +294,7 @@ select,
 textarea {
   width: 100%;
   min-height: 48px;
-  padding: 12px 16px;
+  padding: 12px 15px;
   border: 1px solid var(--input-border);
   border-radius: var(--radius);
   font: inherit;
@@ -317,40 +310,65 @@ textarea:focus { outline: 2px solid var(--purple); border-color: var(--purple); 
 textarea { min-height: 110px; resize: vertical; }
 
 .hint { margin: 0; font-size: 0.9rem; color: var(--muted); }
+.optional { font-weight: 400; color: var(--muted); }
 
-/* Steps: 1 Trip, 2 Horses, 3 Dates, 4 Your details */
+/* Progress: 1 Trip, 2 Horses, 3 Dates, 4 Your details */
 .step-progress {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
-  margin: 0 0 6px;
+  margin: 0 0 28px;
   padding: 0;
   list-style: none;
 }
-.step-progress li { text-align: center; }
-.step-seg { display: block; height: 6px; margin-bottom: 10px; border-radius: 3px; background: var(--seg-off); }
+.step-jump {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+.step-jump:disabled { cursor: default; }
+.step-seg { display: block; height: 6px; margin-bottom: 8px; border-radius: 3px; background: var(--seg-off); }
 .step-label { font-weight: 600; font-size: 0.95rem; color: var(--muted); }
 .step-progress .is-done .step-seg,
 .step-progress .is-current .step-seg { background: var(--purple); }
+.step-progress .is-done .step-label { color: var(--purple); }
+.step-progress .is-done .step-jump:hover .step-label { text-decoration: underline; }
 .step-progress .is-current .step-label { font-family: var(--font-head); font-weight: 700; color: var(--deep); }
 
-.form-step {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px 20px;
-}
+.form-step { display: flex; flex-direction: column; }
 .form-step[hidden] { display: none; }
 
-.step-title { margin: 0; font-size: 1.25rem; }
+.step-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 28px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+.step-card + .step-card { margin-top: 22px; }
+
+.step-title { margin: 0; font-size: 1.375rem; }
 .step-title:focus { outline: none; }
+.step-title-small { margin: 0; font-size: 1.375rem; }
+.step-intro { margin: -8px 0 0; color: var(--body); }
 
-.step-nav { flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
-.step-nav .step-next:only-child { margin-left: auto; }
+.step-nav { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-top: 24px; }
+.step-nav .step-next:only-child,
+.step-nav [type=submit] { margin-left: auto; }
+.step-error { margin-top: 16px; }
+.step-footnote { margin: 18px 0 0; text-align: center; font-size: 0.875rem; color: var(--muted); }
 
-/* Locations and map */
+/* Step 1: Trip */
+.location-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 .autocomplete { position: relative; }
-
 .suggestions {
   position: absolute;
   top: 100%;
@@ -369,9 +387,7 @@ textarea { min-height: 110px; resize: vertical; }
 .suggestions [role=option]:hover,
 .suggestions [aria-selected=true] { background: var(--tint); }
 .suggestions .powered-by { padding: 4px 14px 2px; text-align: right; font-size: 0.75rem; color: var(--muted); }
-
 .location-found:empty { display: none; }
-
 .pick-on-map { align-self: flex-start; }
 
 .map-hint {
@@ -391,91 +407,110 @@ textarea { min-height: 110px; resize: vertical; }
 .route-map {
   width: 100%;
   height: 300px;
-  border: 1px solid var(--line);
   border-radius: 12px;
-  background: var(--white);
+  background: #EAF0E4;
   overflow: hidden; /* nothing inside the map (including Google's own messages) can widen the page */
 }
 .route-map.picking { outline: 3px solid var(--purple); outline-offset: 2px; }
-.route-map.unavailable { height: auto; padding: 14px; border-style: dashed; color: var(--muted); font-size: 0.95rem; }
+.route-map.unavailable { height: auto; padding: 14px; color: var(--muted); font-size: 0.95rem; }
+#map-status { margin-top: 8px; }
+.map-slot:not([data-map-slot="1"]) #map-status { display: none; }
+.map-slot[data-map-slot="2"] .route-map,
+.map-slot[data-map-slot="3"] .route-map { height: 260px; }
+.map-slot[data-map-slot="4"] .route-map { height: 100%; min-height: 300px; }
 
+.trip-facts { display: flex; flex-wrap: wrap; gap: 10px 26px; padding: 16px 18px; background: var(--tint); border-radius: 10px; }
+.trip-facts strong { color: var(--deep); }
+.trip-facts [hidden] { display: none; }
+.fact-muted { color: #6E6676; }
+
+.route-note { margin: 0; padding: 10px 14px; background: var(--warning-bg); border-left: 5px solid var(--red); border-radius: 8px; color: var(--warning-text); font-weight: 600; }
+
+.distance-manual summary { min-height: 44px; display: flex; align-items: center; color: var(--purple); font-weight: 600; cursor: pointer; }
+.distance-manual[open] summary { margin-bottom: 8px; }
 .distance-row { display: flex; flex-wrap: wrap; gap: 10px; }
 .distance-row input { flex: 1 1 140px; width: auto; min-width: 0; }
 
-.route-note {
-  margin: 0;
-  padding: 10px 14px;
-  background: var(--warning-bg);
-  border-left: 5px solid var(--red);
-  border-radius: 8px;
-  color: var(--warning-text);
-  font-weight: 600;
-}
+/* Step 2: Horses */
+.stalls, .date-window, .horse-foal { margin: 0; padding: 0; border: 0; min-width: 0; }
+.stalls legend, .date-window legend, .horse-foal legend { padding: 0; margin-bottom: 10px; font-weight: 600; }
+.stall-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.stall-card { display: flex; flex-direction: column; gap: 8px; padding: 14px; border: 1px solid var(--seg-off); border-radius: 12px; background: var(--white); }
+.stall-card.is-selected { border: 1.5px solid var(--purple); background: #F7F2FA; }
+.stall-card label { font-family: var(--font-head); font-weight: 700; color: var(--deep); }
+.stall-desc { font-size: 0.875rem; color: var(--muted); }
+.stall-card input { width: 96px; min-height: 44px; padding: 8px 12px; }
 
-/* Horses */
-.stalls, .date-window { margin: 0; padding: 0; border: 0; min-width: 0; }
-.stalls legend, .date-window legend { padding: 0; margin-bottom: 8px; font-weight: 600; }
-.stall-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.stall-grid .field { justify-content: flex-end; }
-.stall-grid label, .date-pair label { font-weight: 400; }
+.horse-cards { display: flex; flex-direction: column; gap: 14px; }
+.horse-cards:empty { display: none; }
+.horse-card { display: flex; flex-direction: column; gap: 14px; padding: 18px; background: var(--cream); border: 1px solid var(--line); border-radius: 12px; }
+.horse-card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.horse-card-title { font-family: var(--font-head); font-weight: 700; color: var(--deep); }
+.horse-card label, .horse-foal legend { font-size: 0.95rem; }
+.horse-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.horse-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.horse-card input[type=text], .horse-card select { min-height: 44px; padding: 8px 12px; }
+.radio-row { display: flex; gap: 22px; min-height: 44px; align-items: center; }
+.radio-row label { display: flex; align-items: center; gap: 8px; font-weight: 400; }
+.radio-row input { width: 22px; height: 22px; min-height: 0; margin: 0; accent-color: var(--purple); }
+
+.route-card { gap: 14px; }
+.route-card-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; }
+.route-card-title { font-family: var(--font-head); font-weight: 700; color: var(--deep); }
+.route-summary { color: var(--body); }
+.route-summary strong { color: var(--deep); }
+
+/* Step 3: Dates */
 .date-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; }
 
-/* Instant quote */
-.quote {
-  display: grid;
-  gap: 16px;
-  padding: 22px;
-  background: var(--white);
-  border: 2px solid var(--purple);
-  border-radius: 14px;
-}
-.quote h3 { margin: 0 0 6px; font-size: 1.15rem; }
-.badge {
-  display: inline-block;
-  margin-left: 6px;
-  padding: 2px 10px;
-  border-radius: 999px;
-  background: var(--yellow);
-  color: var(--deep);
-  font-size: 0.8rem;
-  font-weight: 700;
-  vertical-align: middle;
-}
-.quote-total { margin: 0 0 10px; font-family: var(--font-head); font-size: 1.7rem; font-weight: 800; line-height: 1.25; color: var(--purple); }
-.quote-lines { margin: 0; padding: 0; list-style: none; font-size: 0.95rem; }
-.quote-lines li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; border-bottom: 1px dashed var(--line); }
-.quote-lines li span:last-child { white-space: nowrap; }
-.quote-notice, .notice {
-  margin: 0;
-  padding: 14px 16px;
-  background: var(--note-bg);
-  border-left: 5px solid var(--red);
-  border-radius: 8px;
-  font-size: 0.95rem;
-}
+/* Step 4: Quote and contact */
+.quote-layout { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 22px; align-items: stretch; }
+.quote { display: flex; flex-direction: column; gap: 10px; font-size: 1rem; }
+.quote-rows { display: flex; flex-direction: column; gap: 10px; }
+#quote-lines { padding-top: 14px; border-top: 1px solid var(--line); }
+.quote-row { display: flex; justify-content: space-between; gap: 12px; }
+.quote-row > span:last-child { white-space: nowrap; text-align: right; }
+.quote-route strong { color: var(--deep); }
+.quote-muted { color: var(--muted); }
+.quote-sub { font-size: 0.875rem; color: #6E6676; }
+.quote-total-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 12px 14px; background: var(--tint); border-radius: 10px; }
+.quote-total-row > span:first-child { font-family: var(--font-head); font-weight: 700; color: var(--deep); }
+.quote-total { font-family: var(--font-head); font-weight: 800; font-size: 1.6rem; color: var(--deep); white-space: nowrap; }
+.quote-fees { font-size: 0.875rem; color: var(--muted); }
+.quote-notice { margin: 0; padding: 12px 14px; background: var(--note-bg); border-radius: 10px; font-size: 0.95rem; color: #3D3500; }
 
-.rates summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; color: var(--purple); font-weight: 600; }
-.rates table { width: 100%; margin-top: 6px; border-collapse: collapse; font-size: 0.95rem; background: var(--white); }
-.rates th, .rates td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; }
-.rates p { margin: 8px 0 0; font-size: 0.9rem; color: var(--muted); }
-
-/* Your details */
+.contact-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.contact-hint { margin-top: -8px; }
 .checkbox { flex-direction: row; align-items: flex-start; gap: 12px; }
 .checkbox input { flex: none; width: 24px; height: 24px; min-height: 0; margin: 1px 0 0; accent-color: var(--purple); }
-.checkbox label { font-weight: 400; margin: 0; }
-.sms-consent label { font-size: 0.95rem; }
-.sms-hint { margin-top: -8px; }
+.checkbox label { font-weight: 400; margin: 0; font-size: 0.95rem; }
 
-.form-actions { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 12px; }
-
-.form-note { margin: 0; font-size: 0.9rem; color: var(--muted); }
-
-.form-status { margin: 0; font-weight: 600; color: var(--purple); }
+.form-status { margin: 16px 0 0; font-weight: 600; color: var(--purple); }
 .form-status:empty { display: none; }
 .form-status.success,
 .form-status.error { padding: 12px 14px; border-radius: 8px; color: var(--text); }
 .form-status.success { background: var(--tint); border-left: 5px solid var(--purple); }
 .form-status.error { background: var(--warning-bg); border-left: 5px solid var(--red); color: var(--warning-text); }
+
+/* Summary after sending */
+.booking-summary:focus { outline: none; }
+.summary-head { margin: 0 0 28px; text-align: center; }
+.summary-check { display: grid; place-items: center; width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 50%; background: var(--purple); }
+.summary-head h2 { margin: 0 0 8px; font-size: 2.1rem; }
+.summary-head p { max-width: 560px; margin: 0 auto; color: var(--body); }
+.summary-card { overflow: hidden; background: var(--white); border: 1px solid var(--line); border-radius: 16px; }
+.summary-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; padding: 16px 24px; background: var(--purple); color: #F3ECF8; font-size: 0.95rem; }
+.summary-bar img { display: block; height: 40px; width: auto; }
+.summary-body { display: flex; flex-direction: column; gap: 20px; padding: 24px; }
+.summary-route svg { display: block; width: 100%; height: auto; }
+.summary-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.summary-col { display: flex; flex-direction: column; gap: 8px; }
+.summary-label { margin-top: 8px; font-family: var(--font-head); font-weight: 700; color: var(--deep); }
+.summary-col .summary-label:first-child { margin-top: 0; }
+.summary-muted { color: var(--muted); }
+.summary-small { font-size: 0.875rem; }
+.summary-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin-top: 26px; }
+.summary-actions .btn { gap: 10px; }
 
 /* Spam trap: kept off screen so only bots fill it in */
 .hp-field { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
@@ -654,12 +689,19 @@ textarea { min-height: 110px; resize: vertical; }
   .section { padding: 56px 0; }
   #equipment { padding-top: 16px; }
   .service-grid { grid-template-columns: minmax(0, 1fr); }
-  .booking-form { grid-template-columns: minmax(0, 1fr); padding: 18px; }
-  .form-step { grid-template-columns: minmax(0, 1fr); }
+  .step-card { padding: 18px; }
+  .location-pair, .contact-pair, .quote-layout, .summary-grid, .horse-grid-2 { grid-template-columns: minmax(0, 1fr); }
+  .stall-cards { grid-template-columns: minmax(0, 1fr); }
+  .stall-card { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+  .stall-card .stall-desc { order: 3; flex-basis: 100%; }
+  .horse-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
   .step-label { font-size: 0.8rem; }
-  .step-nav .btn, .form-actions .btn { flex: 1 1 100%; }
-  .step-nav .step-next { order: -1; }
-  .route-map { height: 260px; }
+  .step-nav .btn { flex: 1 1 100%; }
+  .step-nav .step-next, .step-nav [type=submit] { order: -1; margin-left: 0; }
+  .route-map { height: 240px; }
+  .map-slot[data-map-slot="4"] .route-map { min-height: 220px; height: 220px; }
+  .summary-head h2 { font-size: 1.6rem; }
+  .summary-actions .btn { flex: 1 1 100%; }
   .team-lead { gap: 28px; }
   .team-initials-large { flex-basis: 100%; max-width: 240px; margin: 0 auto; font-size: 4.5rem; }
   .team-card { padding: 20px; gap: 20px; }
@@ -701,5 +743,5 @@ textarea { min-height: 110px; resize: vertical; }
 /* Narrow phones: one date per row so the date boxes aren't cut off */
 @media (max-width: 420px) {
   .date-pair { grid-template-columns: minmax(0, 1fr); }
-  .stall-grid { gap: 8px; }
+  .horse-grid-3 { grid-template-columns: minmax(0, 1fr); }
 }

@@ -201,14 +201,14 @@ function bookingRows(data) {
       ["Latest pickup date", clean(dates.pickupLatest, 20) || "(not given)"],
       ["Earliest delivery date", clean(dates.dropoffEarliest, 20) || "(not given)"],
       ["Latest delivery date", clean(dates.dropoffLatest, 20) || "(not given)"],
-      ["Trip type", clean(data.trip, 80)],
+      ["Trip type", clean(data.trip, 80) ? clean(data.trip, 80) + " (detected automatically)" : "(not detected)"],
       ["Driving distance", (Number(data.distanceKm) || 0) + " km (" + clean(data.distanceSource, 60) + ")"],
       ["Route note", clean(data.routeNote, 600)]
     ]],
     ["Your horses", [
       ["Number of horses", String(Number(data.horses) || 0)],
       ["Per stall type", stalls]
-    ]],
+    ].concat(horseRows(data.horseDetails))],
     ["Details", [
       ["Horse details & special requirements", clean(data.details, 3000) || "(none)"]
     ]],
@@ -217,6 +217,20 @@ function bookingRows(data) {
       ["SMS consent", data.smsConsent && clean(data.phone, 40) ? "Yes" : "No"]
     ]]
   ];
+}
+
+// One row per horse from the booking form's optional horse details (height, weight, age, sex, foal or young horse).
+function horseRows(details) {
+  return (Array.isArray(details) ? details : []).slice(0, 20).map(function (h, i) {
+    h = h || {};
+    var bits = [];
+    if (clean(h.height, 20)) bits.push(clean(h.height, 20) + " hands");
+    if (clean(h.weight, 20)) bits.push(clean(h.weight, 20) + " kg");
+    if (clean(h.age, 20)) bits.push(clean(h.age, 20) + " years old");
+    if (clean(h.sex, 20)) bits.push(clean(h.sex, 20));
+    bits.push("Foal or young horse: " + (clean(h.foalOrYoung, 5) === "Yes" ? "Yes" : "No"));
+    return ["Horse " + (Number(h.horse) || i + 1) + " (" + clean(h.stall, 40) + ")", bits.join(" \u00b7 ")];
+  });
 }
 
 function quoteRows(quote) {
@@ -317,6 +331,7 @@ function testBookingEmail() {
     route: { polyline: "", vias: [] },
     stalls: [{ type: "Standard stall", count: 1 }, { type: "Roomier stall", count: 0 }, { type: "Box stall", count: 0 }],
     horses: 1,
+    horseDetails: [{ horse: 1, stall: "Standard stall", height: "15.2", weight: "500", age: "8", sex: "Mare", foalOrYoung: "No" }],
     quote: { lines: [{ text: "1 x Standard stall @ $2.00/km x 110 km", amount: "$220.00" }], minimumApplied: "$300.00",
       subtotal: "$300.00", gst: "$15.00", total: "$315.00 CAD", notice: "This is an automatic estimate only." },
     smsConsent: false, termsAccepted: true, submittedAt: new Date().toString()
