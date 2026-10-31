@@ -19,6 +19,19 @@ Trips with both ends in Canada are kept in Canada using pass-through waypoints (
 
 The route is then checked against the `US_AREAS` boxes. If it still leaves Canada, the customer sees a note asking them to confirm the distance with us, including which part of the route is in the US and between which waypoints (also logged to the browser console). The note is included in the booking email.
 
+## Versions & rollback
+
+| Version | What it is | Saved as |
+|---|---|---|
+| **v1.0** | The previous design (the site as it was before the 1.1 redesign) | tag `v1.0` and branch `release/v1.0` (commit `cc89498`) |
+| **v1.1** | The new design (built on branch `v1.1`, then merged into `main`) | tag `v1.1` |
+
+The `release/v1.0` branch is never changed, so version 1.0 can always be restored exactly.
+
+**To roll back**, say *"Switch the website back to version 1.0"*. The rollback restores the files on `main` to exactly what they were in `v1.0` with a **new commit** (history is never deleted or rewritten), then pushes `main`. GitHub Pages then serves version 1.0 again. Moving forward again later works the same way, from the `v1.1` tag.
+
+Version tags are created with the **Tag a website version** workflow (Actions tab > Run workflow, give the tag name and the commit). It never moves or replaces an existing tag.
+
 ## Booking requests (Google Apps Script)
 
 The booking form POSTs each request to a Google Apps Script web app (`google-apps-script/Code.gs`), which emails it to nexahorsetransport@gmail.com with a map picture of the route (pickup A, delivery B, driving route) from the Google Maps Static API. Setup, once, signed in as nexahorsetransport@gmail.com:
