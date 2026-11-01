@@ -1,0 +1,10 @@
+{
+  "appId": "ca.nexahorsetransport.team",
+  "appName": "Nexa Team",
+  "webDir": "www",
+  "server": {
+    "url": "https://nexahorsetransport.ca/app/",
+    "androidScheme": "https"
+  },
+  "android": { "backgroundColor": "#6A2C91" }
+}
