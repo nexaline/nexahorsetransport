@@ -11,7 +11,7 @@
   <!-- Fonts load without holding up the page: text shows at once in a system font, then switches. -->
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&amp;family=Source+Sans+3:wght@400;600&amp;display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&amp;family=Source+Sans+3:wght@400;600&amp;display=swap"></noscript>
-  <link rel="stylesheet" href="styles.css?v=1.6">
+  <link rel="stylesheet" href="styles.css?v=1.8">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
@@ -111,11 +111,19 @@
 
     <section id="equipment" class="section">
       <div class="container split">
-        <!-- PHOTO SPOT: when ready, save a photo of the inside of the trailer as photos/trailer-inside.jpg and replace
-             this panel with: <img class="split-photo" src="photos/trailer-inside.jpg" alt="Inside the trailer, showing the stalls" width="1200" height="900"> -->
-        <div class="split-photo photo-panel" aria-hidden="true">
-          <img src="nexa-emblem.svg" alt="" width="160" height="160">
-          <span>Four Star 6+1 straight-load trailer</span>
+        <div class="split-photo hero-slideshow inside-slideshow" aria-roledescription="carousel" aria-label="Inside our trailer">
+          <img class="hero-slide is-active" src="photos/trailer-inside-1.jpg?v=1.8" alt="Inside the trailer: the centre aisle, rubber floor mats and padded walls" width="800" height="1000" loading="lazy">
+          <img class="hero-slide" src="photos/trailer-inside-2.jpg?v=1.8" alt="Inside the trailer: the stall dividers open, with barred windows for fresh air" width="800" height="1000" loading="lazy">
+          <img class="hero-slide" src="photos/trailer-inside-3.jpg?v=1.8" alt="Inside the trailer: individual straight-load stalls with padded chest bars" width="800" height="1000" loading="lazy">
+          <img class="hero-slide" src="photos/trailer-inside-4.jpg?v=1.8" alt="The roomy box stall at the back of the trailer, next to the loading ramp" width="800" height="1000" loading="lazy">
+          <img class="hero-slide" src="photos/trailer-inside-5.jpg?v=1.8" alt="The trailer from behind with the rear ramp down, ready for loading" width="800" height="1000" loading="lazy">
+          <div class="hero-dots">
+            <button type="button" class="hero-dot is-active" aria-label="Show photo 1 of 5" aria-current="true"></button>
+            <button type="button" class="hero-dot" aria-label="Show photo 2 of 5"></button>
+            <button type="button" class="hero-dot" aria-label="Show photo 3 of 5"></button>
+            <button type="button" class="hero-dot" aria-label="Show photo 4 of 5"></button>
+            <button type="button" class="hero-dot" aria-label="Show photo 5 of 5"></button>
+          </div>
         </div>
         <div class="split-text">
           <h2>What your horse travels in</h2>
@@ -2382,10 +2390,8 @@
     });
   </script>
   <script>
-    /* Hero slideshow: our truck and trailer, changes every 5 seconds */
-    (function () {
-      var box = document.querySelector(".hero-slideshow");
-      if (!box) return;
+    /* Slideshows (truck and trailer at the top, inside of the trailer): change every 5 seconds */
+    document.querySelectorAll(".hero-slideshow").forEach(function (box) {
       var slides = box.querySelectorAll(".hero-slide"), dots = box.querySelectorAll(".hero-dot"), i = 0, timer;
       function show(n) {
         slides[i].classList.remove("is-active"); dots[i].classList.remove("is-active"); dots[i].removeAttribute("aria-current");
@@ -2403,7 +2409,7 @@
       });
       box.addEventListener("mouseenter", stop); box.addEventListener("mouseleave", start);
       if (!window.matchMedia || !window.matchMedia("(prefers-reduced-motion: reduce)").matches) start();
-    })();
+    });
   </script>
 </body>
 </html>
