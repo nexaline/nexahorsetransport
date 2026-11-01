@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+  :root { --purple:#6A2C91; --deep:#3D1758; --yellow:#FFE100; --red:#E8141C; --bg:#FBF8F2; --line:#EAE2D3; --body:#4A4450; --muted:#6B6570; --tint:#F4EEF8; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:#222; font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  header { background:var(--purple); color:#fff; padding:14px 16px; border-bottom:3px solid var(--red); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  header h1 { margin:0; font-size:1.25rem; }
+  header small { color:#EBDDF5; }
+  main { max-width:1000px; margin:0 auto; padding:16px; }
+  button, select, input, textarea { font:inherit; }
+  .btn { background:var(--purple); color:#fff; border:0; border-radius:10px; padding:10px 16px; font-weight:700; cursor:pointer; }
+  .btn.light { background:#fff; color:var(--purple); border:2px solid var(--purple); padding:8px 14px; }
+  .btn.yellow { background:var(--yellow); color:var(--deep); }
+  .btn:disabled { opacity:.5; cursor:default; }
+  .search { display:flex; gap:8px; margin-bottom:12px; }
+  .search input { flex:1; min-width:0; padding:12px 14px; border:2px solid var(--line); border-radius:10px; background:#fff; }
+  .search input:focus, input:focus, select:focus, textarea:focus { outline:2px solid var(--purple); outline-offset:1px; }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+  .chip { border:1px solid var(--line); background:#fff; border-radius:999px; padding:6px 12px; cursor:pointer; color:var(--deep); font-size:.92rem; }
+  .chip.on { background:var(--deep); color:#fff; border-color:var(--deep); }
+  .card { background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:10px; }
+  .row { cursor:pointer; display:grid; grid-template-columns:1fr auto; gap:4px 12px; }
+  .row:hover { border-color:var(--purple); }
+  .ref { font-weight:800; color:var(--deep); }
+  .muted { color:var(--muted); font-size:.92rem; }
+  .status { display:inline-block; padding:2px 10px; border-radius:999px; font-size:.82rem; font-weight:700; background:var(--tint); color:var(--deep); white-space:nowrap; align-self:start; justify-self:end; }
+  .s-New { background:#FFE9EA; color:#A30E14; } .s-Confirmed { background:#E3F5E5; color:#1C6B2A; }
+  .s-Completed { background:#E8E8E8; color:#444; } .s-Cancelled { background:#F2F2F2; color:#888; text-decoration:line-through; }
+  .s-Contacted, .s-Estimate.sent { background:#FFF7CC; color:#6B5600; }
+  h2 { color:var(--deep); margin:4px 0 12px; font-size:1.3rem; }
+  h3 { color:var(--deep); margin:0 0 10px; font-size:1.05rem; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px 16px; }
+  label { display:block; font-size:.85rem; font-weight:700; color:var(--deep); margin-bottom:3px; }
+  input[type=text], input[type=date], select, textarea { width:100%; padding:9px 11px; border:1px solid #CFC6B8; border-radius:8px; background:#fff; }
+  textarea { min-height:80px; resize:vertical; }
+  dl { margin:0; display:grid; grid-template-columns:max-content 1fr; gap:4px 14px; }
+  dt { color:var(--muted); font-size:.9rem; } dd { margin:0; white-space:pre-wrap; word-break:break-word; }
+  .top { display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .actions { display:flex; flex-wrap:wrap; gap:8px; }
+  .actions a { text-decoration:none; }
+  .note { border-left:4px solid var(--purple); padding:8px 12px; background:var(--tint); border-radius:0 8px 8px 0; margin-bottom:8px; }
+  .note.Update { border-left-color:#B9AFC2; background:#F7F5F9; }
+  .note p { margin:4px 0 0; white-space:pre-wrap; word-break:break-word; }
+  .msg { position:fixed; left:50%; bottom:20px; transform:translateX(-50%); background:var(--deep); color:#fff; padding:10px 18px; border-radius:10px; display:none; z-index:9; max-width:90vw; }
+  .msg.err { background:var(--red); }
+  .empty { text-align:center; color:var(--muted); padding:30px 0; }
+  .horse { border-top:1px solid var(--line); padding-top:10px; margin-top:10px; }
+  .horse:first-of-type { border-top:0; padding-top:0; margin-top:0; }
+  @media (max-width:600px) { dl { grid-template-columns:1fr; } dt { margin-top:6px; } }
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Nexa Dashboard</h1><small>Bookings &middot; customers &middot; horses</small></div>
+  <small id="who"></small>
+</header>
+<main>
+  <section id="listView">
+    <div class="search">
+      <input id="q" type="search" placeholder="Search: reference (NX-2026-0001), name, phone, email or horse" aria-label="Search bookings">
+      <button class="btn light" id="refresh" type="button">Refresh</button>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div id="list"><p class="empty">Loading bookings&hellip;</p></div>
+  </section>
+  <section id="detailView" hidden></section>
+</main>
+<div class="msg" id="msg" role="status"></div>
+
+<script>
+var USER = <?= userEmail ?>;
+var state = { bookings: [], statuses: [], filter: "Open", data: null };
+var OPEN = { "New":1, "Contacted":1, "Estimate sent":1, "Confirmed":1 };
+
+document.getElementById("who").textContent = USER;
+
+function el(tag, attrs, children) {
+  var e = document.createElement(tag);
+  Object.keys(attrs || {}).forEach(function (k) {
+    if (k === "text") e.textContent = attrs[k];
+    else if (k === "class") e.className = attrs[k];
+    else if (k.slice(0, 2) === "on") e.addEventListener(k.slice(2), attrs[k]);
+    else e.setAttribute(k, attrs[k]);
+  });
+  (children || []).forEach(function (c) { if (c) e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+  return e;
+}
+function show(text, isErr) {
+  var m = document.getElementById("msg");
+  m.textContent = text; m.className = "msg" + (isErr ? " err" : ""); m.style.display = "block";
+  clearTimeout(show.t); show.t = setTimeout(function () { m.style.display = "none"; }, isErr ? 6000 : 2500);
+}
+function call(fn, args, done) {
+  var r = google.script.run.withSuccessHandler(done).withFailureHandler(function (e) { show(e && e.message || "Something went wrong.", true); });
+  r[fn].apply(r, args);
+}
+function statusTag(s) { return el("span", { class: "status s-" + String(s || "New").replace(/ /g, "."), text: s || "New" }); }
+
+// ---------- list ----------
+function loadList() {
+  call("listBookings", [], function (res) {
+    state.bookings = res.bookings; state.statuses = res.statuses;
+    drawChips(); drawList();
+    var ref = (location.hash || "").slice(1);
+    if (ref) openBooking(decodeURIComponent(ref));
+  });
+}
+function drawChips() {
+  var box = document.getElementById("chips"); box.innerHTML = "";
+  ["Open", "All"].concat(state.statuses).forEach(function (s) {
+    var n = state.bookings.filter(function (b) { return match(b, s, ""); }).length;
+    box.appendChild(el("button", { type: "button", class: "chip" + (state.filter === s ? " on" : ""),
+      text: s + " (" + n + ")", onclick: function () { state.filter = s; drawChips(); drawList(); } }));
+  });
+}
+function match(b, filter, q) {
+  if (filter === "Open" && !OPEN[b.status]) return false;
+  if (filter !== "Open" && filter !== "All" && b.status !== filter) return false;
+  if (!q) return true;
+  var hay = [b.ref, b.name, b.phone, b.email, b.horseNames, b.pickup, b.delivery].join(" ").toLowerCase();
+  var digits = q.replace(/\D/g, "");
+  return hay.indexOf(q) !== -1 || (digits.length >= 4 && String(b.phone).replace(/\D/g, "").indexOf(digits) !== -1);
+}
+function drawList() {
+  var q = document.getElementById("q").value.trim().toLowerCase();
+  var box = document.getElementById("list"); box.innerHTML = "";
+  // a full reference number searches every status
+  var filter = /^nx-\d{4}-\d+$/.test(q) ? "All" : state.filter;
+  var items = state.bookings.filter(function (b) { return match(b, filter, q); });
+  if (!items.length) { box.appendChild(el("p", { class: "empty", text: "No bookings found." })); return; }
+  items.forEach(function (b) {
+    box.appendChild(el("div", { class: "card row", tabindex: "0", role: "button",
+      onclick: function () { openBooking(b.ref); },
+      onkeydown: function (e) { if (e.key === "Enter") openBooking(b.ref); } }, [
+      el("div", {}, [el("span", { class: "ref", text: b.ref }), " · ", el("strong", { text: b.name || "(no name)" })]),
+      statusTag(b.status),
+      el("div", { class: "muted", text: (b.pickup || "?") + " → " + (b.delivery || "?") }),
+      el("div", { class: "muted", text: b.total ? b.total : "" }),
+      el("div", { class: "muted", text: [b.horses ? b.horses + " horse(s)" + (b.horseNames ? ": " + b.horseNames : "") : "",
+        b.pickupDate ? "Pickup " + b.pickupDate : "", b.phone || b.email].filter(Boolean).join(" · ") }),
+      el("div", { class: "muted", text: b.received })
+    ]));
+  });
+}
+document.getElementById("q").addEventListener("input", drawList);
+document.getElementById("refresh").addEventListener("click", function () { show("Refreshing…"); loadList(); });
+
+// ---------- one booking ----------
+function openBooking(ref) {
+  location.hash = encodeURIComponent(ref);
+  call("getBooking", [ref], drawBooking);
+}
+function backToList() {
+  history.replaceState(null, "", location.pathname + location.search);
+  document.getElementById("detailView").hidden = true;
+  document.getElementById("listView").hidden = false;
+  loadList();
+}
+function field(b, name, type) {
+  var id = "f-" + name.replace(/\W+/g, "-");
+  var input;
+  if (type === "status") {
+    input = el("select", { id: id, "data-field": name });
+    state.data.statuses.forEach(function (s) { var o = el("option", { value: s, text: s }); if ((b[name] || "New") === s) o.selected = true; input.appendChild(o); });
+  } else if (type === "area") {
+    input = el("textarea", { id: id, "data-field": name }); input.value = b[name] || "";
+  } else {
+    input = el("input", { id: id, type: type || "text", "data-field": name }); input.value = b[name] || "";
+  }
+  return el("div", {}, [el("label", { for: id, text: name }), input]);
+}
+function info(pairs) {
+  var dl = el("dl");
+  pairs.forEach(function (p) { if (p[1]) { dl.appendChild(el("dt", { text: p[0] })); dl.appendChild(el("dd", { text: p[1] })); } });
+  return dl;
+}
+function drawBooking(data) {
+  state.data = data;
+  var b = data.booking;
+  var view = document.getElementById("detailView");
+  view.innerHTML = ""; view.hidden = false;
+  document.getElementById("listView").hidden = true;
+  window.scrollTo(0, 0);
+  var name = [b["First name"], b["Last name"]].join(" ").trim() || b["Full name"];
+  var phone = String(b["Phone"] || "").replace(/[^\d+]/g, "");
+
+  view.appendChild(el("div", { class: "top" }, [
+    el("button", { type: "button", class: "btn light", text: "← All bookings", onclick: backToList }),
+    el("div", { class: "actions" }, [
+      phone ? el("a", { class: "btn yellow", href: "tel:" + phone, text: "Call " + b["Phone"] }) : null,
+      b["Email"] ? el("a", { class: "btn light", href: "mailto:" + b["Email"] + "?subject=" + encodeURIComponent("Your Nexa booking " + b["Reference"]), text: "Email" }) : null
+    ])
+  ]));
+  view.appendChild(el("h2", {}, [b["Reference"] + " · " + (name || "(no name)") + " ", statusTag(b["Status"])]));
+  view.appendChild(el("p", { class: "muted", text: "Received " + b["Received"] + (b["Last updated"] ? " · Last updated " + b["Last updated"] + " by " + b["Updated by"] : "") }));
+
+  // Request as sent (read only)
+  view.appendChild(el("div", { class: "card" }, [el("h3", { text: "Request as sent" }), info([
+    ["Trip", (b["Pickup"] || "?") + " → " + (b["Delivery"] || "?")],
+    ["Distance", b["Distance (km)"] ? b["Distance (km)"] + " km" + (b["Trip type (detected)"] ? " · " + b["Trip type (detected)"] : "") : ""],
+    ["Pickup window", [b["Earliest pickup"], b["Latest pickup"]].filter(Boolean).join(" to ")],
+    ["Delivery window", [b["Earliest delivery"], b["Latest delivery"]].filter(Boolean).join(" to ")],
+    ["Stalls", ["Standard stalls", "Roomier stalls", "Box stalls"].filter(function (k) { return Number(b[k]); }).map(function (k) { return b[k] + " × " + k.replace(" stalls", ""); }).join(", ")],
+    ["Details", b["Other details"]],
+    ["Estimate", b["Estimate lines"]],
+    ["Estimated total", b["Estimated total"]],
+    ["Texts allowed", b["SMS consent"]]
+  ])]));
+
+  // Edit
+  var form = el("div", { class: "card" }, [el("h3", { text: "Booking and customer (you can edit)" })]);
+  var g1 = el("div", { class: "grid" }, [
+    field(b, "Status", "status"), field(b, "Confirmed price"), field(b, "Confirmed pickup date"), field(b, "Confirmed delivery date"),
+    field(b, "First name"), field(b, "Last name"), field(b, "Phone"), field(b, "Email"),
+    field(b, "Pickup"), field(b, "Delivery"),
+    field(b, "Earliest pickup"), field(b, "Latest pickup"), field(b, "Earliest delivery"), field(b, "Latest delivery")
+  ]);
+  form.appendChild(g1);
+  form.appendChild(el("div", { style: "margin-top:10px" }, [field(b, "Other details", "area")]));
+  form.appendChild(el("div", { style: "margin-top:10px" }, [field(b, "Internal notes", "area")]));
+  var save = el("button", { type: "button", class: "btn", text: "Save changes", style: "margin-top:12px" });
+  save.addEventListener("click", function () {
+    var changes = {};
+    form.querySelectorAll("[data-field]").forEach(function (i) { changes[i.getAttribute("data-field")] = i.value; });
+    save.disabled = true;
+    call("saveBooking", [b["Reference"], changes], function (res) { show("Saved."); drawBooking(res); });
+    setTimeout(function () { save.disabled = false; }, 4000);
+  });
+  form.appendChild(save);
+  view.appendChild(form);
+
+  // Horses
+  var hc = el("div", { class: "card" }, [el("h3", { text: "Horses (" + data.horses.length + ")" })]);
+  if (!data.horses.length) hc.appendChild(el("p", { class: "muted", text: "No horse details were sent." }));
+  data.horses.forEach(function (h) {
+    var box = el("div", { class: "horse" }, [el("p", { style: "margin:0 0 6px", text: "Horse " + h["Horse"] + (h["Stall"] ? " · " + h["Stall"] : "") + (h["Foal or young horse"] === "Yes" ? " · foal / young horse" : "") })]);
+    var grid = el("div", { class: "grid" });
+    data.horseEditable.forEach(function (k) { grid.appendChild(field(h, k)); });
+    box.appendChild(grid);
+    var hs = el("button", { type: "button", class: "btn light", text: "Save horse " + h["Horse"], style: "margin-top:8px" });
+    hs.addEventListener("click", function () {
+      var changes = {};
+      grid.querySelectorAll("[data-field]").forEach(function (i) { changes[i.getAttribute("data-field")] = i.value; });
+      call("saveHorse", [b["Reference"], h["Horse"], changes], function (res) { show("Horse saved."); drawBooking(res); });
+    });
+    box.appendChild(hs);
+    hc.appendChild(box);
+  });
+  view.appendChild(hc);
+
+  // Communication log
+  var cc = el("div", { class: "card" }, [el("h3", { text: "Calls, emails and notes" })]);
+  var type = el("select", { id: "n-type" }); data.noteTypes.forEach(function (t) { type.appendChild(el("option", { value: t, text: t })); });
+  var dir = el("select", { id: "n-dir" }); data.directions.forEach(function (t) { dir.appendChild(el("option", { value: t, text: t })); });
+  var text = el("textarea", { id: "n-text", placeholder: "What was said? e.g. Customer called, wants pickup on the 12th instead." });
+  var add = el("button", { type: "button", class: "btn", text: "Add to log", style: "margin-top:8px" });
+  add.addEventListener("click", function () {
+    if (!text.value.trim()) { show("Please write the note first.", true); return; }
+    add.disabled = true;
+    call("addNote", [b["Reference"], type.value, dir.value, text.value], function (res) { show("Added."); drawBooking(res); });
+    setTimeout(function () { add.disabled = false; }, 4000);
+  });
+  cc.appendChild(el("div", { class: "grid" }, [
+    el("div", {}, [el("label", { for: "n-type", text: "Type" }), type]),
+    el("div", {}, [el("label", { for: "n-dir", text: "Who" }), dir])
+  ]));
+  cc.appendChild(el("div", { style: "margin-top:8px" }, [el("label", { for: "n-text", text: "Note" }), text]));
+  cc.appendChild(add);
+  var log = el("div", { style: "margin-top:16px" });
+  if (!data.notes.length) log.appendChild(el("p", { class: "muted", text: "Nothing logged yet." }));
+  data.notes.forEach(function (n) {
+    log.appendChild(el("div", { class: "note " + (n["Type"] === "Update" ? "Update" : "") }, [
+      el("div", { class: "muted", text: n["Date"] + " · " + n["Type"] + " · " + n["Direction"] + " · " + n["By"] }),
+      el("p", { text: n["Note"] })
+    ]));
+  });
+  cc.appendChild(log);
+  view.appendChild(cc);
+}
+
+loadList();
+</script>
+</body>
+</html>
