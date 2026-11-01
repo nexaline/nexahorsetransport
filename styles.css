@@ -592,7 +592,7 @@ select[aria-invalid="true"]:focus { outline: 2px solid var(--error); border-colo
 .team-photo-frame { display: block; flex: 0 1 360px; width: 100%; max-width: 360px; height: auto; align-self: center; }
 .team-photo-square { display: block; width: 100%; max-width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: cover; object-position: center 30%;
   border: 3px solid var(--yellow); border-radius: 18px; background: var(--tint); }
-.team-photo-small { flex: none; width: 140px; height: 140px; object-fit: cover; border-radius: 50%; }
+.team-photo-small { display: block; flex: none; width: 140px; height: 140px; max-width: 140px; aspect-ratio: 1 / 1; object-fit: cover; object-position: center top; border-radius: 50%; border: 3px solid #FFE100; }
 
 .team-stats { display: flex; flex-wrap: wrap; gap: 28px; margin: 22px 0 0; padding-top: 20px; border-top: 1px solid var(--line); }
 .team-stats div { display: flex; flex-direction: column; gap: 4px; min-width: 120px; }
