@@ -21,7 +21,7 @@
       <nav class="site-nav" aria-label="Main">
         <a href="#services">Services</a>
         <a href="#equipment">Our trailer</a>
-        <a href="#booking">Book</a>
+        <a href="#booking">Booking / Estimate</a>
         <a href="#about">About</a>
         <a href="#faq">FAQ</a>
       </nav>
@@ -37,7 +37,7 @@
           <h1>Every Horse Matters.<br>Driven by Care.</h1>
           <p class="hero-lead">Careful, unhurried horse transport across Canada and the United States, with regular checks, fresh water and hay, and updates from the road.</p>
           <div class="hero-actions">
-            <a class="btn btn-large" href="#booking">Get an instant quote</a>
+            <a class="btn btn-large" href="#booking">Booking / Estimate</a>
             <a class="btn btn-large btn-outline-light" href="tel:+18444916392" aria-label="Call us at 1-844-491-6392">Call us</a>
           </div>
         </div>
@@ -58,7 +58,7 @@
         </div>
         <div class="trust-item">
           <svg class="line-icon" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>
-          <div><strong>Clear prices</strong><span>Instant quote, no hidden fees</span></div>
+          <div><strong>Clear prices</strong><span>Instant estimate, no hidden fees</span></div>
         </div>
       </div>
     </div>
@@ -128,11 +128,12 @@
     <section id="booking" class="section">
       <div class="container container-booking">
         <div id="booking-flow">
-        <h2 class="center">Get an instant quote</h2>
-        <p class="lead center">Four short steps. We'll contact you to confirm before anything is booked.</p>
+        <h2 class="center">Booking / Estimate</h2>
+        <p class="lead center">Four short steps to request an estimate. Nothing is confirmed until we call you.</p>
+        <p class="req-note center">Boxes marked <span class="req">*</span> are required.</p>
 
         <form id="booking-form" class="booking-form">
-          <ol class="step-progress" aria-label="Booking steps">
+          <ol class="step-progress" aria-label="Booking / Estimate steps">
             <li class="is-current" aria-current="step"><button type="button" class="step-jump" data-step="1" disabled><span class="step-seg" aria-hidden="true"></span><span class="step-label">1 &middot; Trip</span></button></li>
             <li><button type="button" class="step-jump" data-step="2" disabled><span class="step-seg" aria-hidden="true"></span><span class="step-label">2 &middot; Horses</span></button></li>
             <li><button type="button" class="step-jump" data-step="3" disabled><span class="step-seg" aria-hidden="true"></span><span class="step-label">3 &middot; Dates</span></button></li>
@@ -145,20 +146,20 @@
               <h3 class="step-title" id="booking-step-1-title">Where is your horse going?</h3>
               <div class="location-pair">
               <div class="field location" id="pickup-location">
-                <label for="pickup">Pickup location</label>
+                <label for="pickup">Pickup location <span class="req" aria-hidden="true">*</span></label>
                 <div class="autocomplete">
                   <input id="pickup" name="pickup" type="text" placeholder="Address, postal/ZIP code, or GPS coordinates" autocomplete="off"
-                    role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="pickup-list">
+                    role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="pickup-list" aria-required="true">
                   <ul class="suggestions" id="pickup-list" role="listbox" hidden></ul>
                 </div>
                 <button type="button" class="btn btn-secondary btn-small pick-on-map" data-location="pickup">Pick on the map</button>
                 <p class="hint location-found" id="pickup-found" aria-live="polite"></p>
               </div>
               <div class="field location" id="dropoff-location">
-                <label for="dropoff">Delivery location</label>
+                <label for="dropoff">Delivery location <span class="req" aria-hidden="true">*</span></label>
                 <div class="autocomplete">
                   <input id="dropoff" name="dropoff" type="text" placeholder="Address, postal/ZIP code, or GPS coordinates" autocomplete="off"
-                    role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="dropoff-list">
+                    role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="dropoff-list" aria-required="true">
                   <ul class="suggestions" id="dropoff-list" role="listbox" hidden></ul>
                 </div>
                 <button type="button" class="btn btn-secondary btn-small pick-on-map" data-location="dropoff">Pick on the map</button>
@@ -187,7 +188,7 @@
               <details class="distance-manual" id="distance-manual">
                 <summary>Distance not right? Enter it yourself</summary>
                 <div class="field">
-                  <label for="distance">Driving distance (km)</label>
+                  <label for="distance">Driving distance (km) <span class="req" aria-hidden="true">*</span></label>
                   <div class="distance-row">
                     <input id="distance" name="distance" type="number" min="1" step="1" inputmode="numeric" required>
                     <button type="button" id="calc-distance" class="btn btn-secondary btn-small">Calculate distance</button>
@@ -199,7 +200,7 @@
             <div class="step-nav">
               <button type="button" class="btn step-next">Next: your horses</button>
             </div>
-            <p class="step-footnote">No price yet. Your full quote appears in step 4.</p>
+            <p class="step-footnote">No price yet. Your estimate appears in step 4.</p>
           </div>
 
           <!-- Step 2: Horses -->
@@ -207,7 +208,7 @@
             <div class="step-card">
               <h3 class="step-title" id="booking-step-2-title">Tell us about your horses</h3>
               <fieldset class="stalls">
-                <legend>How many horses need each stall type?</legend>
+                <legend>How many horses need each stall type? <span class="req" aria-hidden="true">*</span></legend>
                 <div class="stall-cards">
                   <div class="stall-card">
                     <label for="stall-standard">Standard stall</label>
@@ -226,11 +227,11 @@
                   </div>
                 </div>
               </fieldset>
-              <!-- One card per horse (all optional), built by the script from the stall counts. -->
+              <!-- One card per horse, built by the script from the stall counts. -->
               <div class="horse-cards" id="horse-cards"></div>
               <div class="field">
-                <label for="details">Horse details &amp; special requirements</label>
-                <textarea id="details" name="details" placeholder="Breed, temperament, loading experience, health or handling needs&hellip;"></textarea>
+                <label for="details">Other details &amp; special requirements <span class="optional">(optional)</span></label>
+                <textarea id="details" name="details" placeholder="Temperament, loading experience, health or handling needs&hellip;"></textarea>
               </div>
             </div>
             <div class="step-card route-card">
@@ -252,7 +253,7 @@
                 <legend>Pickup</legend>
                 <div class="date-pair">
                   <div class="field">
-                    <label for="pickup-earliest">Earliest pickup date</label>
+                    <label for="pickup-earliest">Earliest pickup date <span class="req" aria-hidden="true">*</span></label>
                     <input id="pickup-earliest" name="pickupEarliest" type="date" required>
                   </div>
                   <div class="field">
@@ -281,14 +282,14 @@
             </div>
             <div class="step-nav">
               <button type="button" class="btn btn-secondary step-back">&larr; Back</button>
-              <button type="button" class="btn step-next">Next: see your quote</button>
+              <button type="button" class="btn step-next">Next: see your estimate</button>
             </div>
           </div>
 
-          <!-- Step 4: Quote and contact details -->
+          <!-- Step 4: Estimate and contact details -->
           <div class="form-step" id="booking-step-4" data-step="4" role="group" aria-labelledby="booking-step-4-title" hidden>
             <div class="step-card">
-              <h3 class="step-title" id="booking-step-4-title">Your quote</h3>
+              <h3 class="step-title" id="booking-step-4-title">Your estimate</h3>
               <div class="quote-layout">
                 <div class="map-slot" data-map-slot="4"></div>
                 <div class="quote" id="quote">
@@ -302,24 +303,34 @@
             </div>
             <div class="step-card">
               <h3 class="step-title-small">How can we reach you?</h3>
-              <div class="field">
-                <label for="name">Full name</label>
-                <input id="name" name="name" type="text" autocomplete="name" required>
-              </div>
-              <div class="contact-pair">
+              <div class="name-pair">
                 <div class="field">
-                  <label for="phone">Phone</label>
-                  <input id="phone" name="phone" type="tel" autocomplete="tel" aria-describedby="contact-hint">
+                  <label for="first-name">First name <span class="req" aria-hidden="true">*</span></label>
+                  <input id="first-name" name="firstName" type="text" autocomplete="given-name" maxlength="60" required>
                 </div>
                 <div class="field">
-                  <label for="email">Email</label>
-                  <input id="email" name="email" type="email" autocomplete="email" aria-describedby="contact-hint">
+                  <label for="last-name">Last name <span class="req" aria-hidden="true">*</span></label>
+                  <input id="last-name" name="lastName" type="text" autocomplete="family-name" maxlength="60" required>
                 </div>
               </div>
-              <p class="hint contact-hint" id="contact-hint">A phone number or an email is enough. Both is great.</p>
+              <!-- First and last name together, sent as "name" as before. -->
+              <input type="hidden" id="name" name="name" value="">
+              <div class="contact-group" id="contact-group">
+                <div class="contact-pair">
+                  <div class="field">
+                    <label for="phone">Phone</label>
+                    <input id="phone" name="phone" type="tel" autocomplete="tel" aria-describedby="contact-hint">
+                  </div>
+                  <div class="field">
+                    <label for="email">Email</label>
+                    <input id="email" name="email" type="email" autocomplete="email" aria-describedby="contact-hint">
+                  </div>
+                </div>
+                <p class="hint contact-hint" id="contact-hint"><span class="req" aria-hidden="true">*</span> A phone number or an email is required. Both is great.</p>
+              </div>
               <div class="field checkbox">
                 <input id="agree" name="agree" type="checkbox" required>
-                <label for="agree">I have read and agree to the <a href="terms.html" target="_blank">Terms &amp; Conditions</a>.</label>
+                <label for="agree">I have read and agree to the <a href="terms.html" target="_blank">Terms &amp; Conditions</a>. <span class="req" aria-hidden="true">*</span></label>
               </div>
               <div class="field checkbox sms-consent">
                 <input id="sms-consent" name="smsConsent" type="checkbox">
@@ -333,7 +344,7 @@
             </div>
             <div class="step-nav">
               <button type="button" class="btn btn-secondary step-back">&larr; Back</button>
-              <button type="submit" class="btn" id="send-booking">Send booking request</button>
+              <button type="submit" class="btn" id="send-booking">Send Booking / Estimate request</button>
             </div>
             <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
             <p class="step-footnote">Questions? Call <a href="tel:+18444916392">1-844-491-NEXA</a></p>
@@ -346,7 +357,8 @@
           <div class="summary-head">
             <div class="summary-check" aria-hidden="true"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFE100" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
             <h2 id="summary-title">Thank you! Your request was sent.</h2>
-            <p>We'll contact you soon to confirm your quote and dates. Here's a copy of your request.</p>
+            <p class="summary-ref" id="summary-ref" hidden>Your reference number: <strong id="summary-ref-number"></strong></p>
+            <p>We'll call you soon to go over your estimate and dates. Nothing is confirmed until we call. Here's a copy of your request.</p>
           </div>
           <div class="summary-card">
             <div class="summary-bar">
@@ -429,7 +441,7 @@
           </details>
           <details>
             <summary>What is included in the price?</summary>
-            <p>Prices are in Canadian dollars, per horse, per kilometre, plus GST, with a minimum charge of $300 per trip. Vet, border, government and customs broker fees are extra and are charged at cost. Additional costs caused by delays at pickup or delivery, extra stops, layovers or border inspections may be charged. The instant quote is an estimate; your price is confirmed when we contact you.</p>
+            <p>Prices are in Canadian dollars, per horse, per kilometre, plus GST, with a minimum charge of $300 per trip. Vet, border, government and customs broker fees are extra and are charged at cost. Additional costs caused by delays at pickup or delivery, extra stops, layovers or border inspections may be charged. The online Booking / Estimate is an estimate only; nothing is confirmed until we call you.</p>
           </details>
           <details>
             <summary>What papers does my horse need?</summary>
@@ -441,7 +453,7 @@
           </details>
           <details>
             <summary>Can I get updates while my horse is on the road?</summary>
-            <p>Yes. If you agree to text messages on the booking form, we send pickup and delivery updates for your trip by text (message frequency varies; reply STOP to opt out). If your horse becomes ill or injured during the trip, we will try to contact you right away.</p>
+            <p>Yes. If you agree to text messages on the Booking / Estimate form, we send pickup and delivery updates for your trip by text (message frequency varies; reply STOP to opt out). If your horse becomes ill or injured during the trip, we will try to contact you right away.</p>
           </details>
         </div>
       </div>
@@ -594,6 +606,7 @@
 
     // The quote panel in step 4. The price itself comes from calcQuote(), exactly as before.
     function updateQuote() {
+      refreshErrors();
       var q = calcQuote();
       refreshTripInfo();
       var tripRows = document.getElementById("quote-trip");
@@ -924,6 +937,7 @@
       if (!p) return;
       var gps = p.lat != null && p.label !== coordsText(p) ? " (GPS " + coordsText(p) + (p.approximate ? ", approximate" : "") + ")" : "";
       loc.found.textContent = "Using: " + p.label + gps;
+      refreshErrors();
     }
 
     // A chosen place is routed by Google's place ID; GPS points and map pins by their exact coordinates.
@@ -949,7 +963,7 @@
 
     function mapUnavailable() {
       document.getElementById("map-status").textContent =
-        "The map isn't available right now, but you can still enter your locations and get a quote.";
+        "The map isn't available right now, but you can still enter your locations and get an estimate.";
       var routeBox = document.getElementById("route-map");
       routeBox.classList.add("unavailable");
       routeBox.textContent = "Map unavailable";
@@ -1415,34 +1429,45 @@
       });
       list.slice(0, MAX_HORSE_CARDS).forEach(function (h, i) {
         var n = i + 1;
-        var v = horseValues[h.key] || (horseValues[h.key] = { height: "", weight: "", age: "", sex: "", foal: "No" });
+        var v = horseValues[h.key] || (horseValues[h.key] = { name: "", age: "", breed: "", gender: "", colour: "", height: "", weight: "", foal: "No" });
         var card = document.createElement("div");
         card.className = "horse-card";
         card.dataset.key = h.key;
+        var id = function (f) { return "horse-" + n + "-" + f; };
+        var text = function (f, label, attrs, required) {
+          return '<div class="field"><label for="' + id(f) + '">' + label + (required ? ' <span class="req" aria-hidden="true">*</span>' : ' <span class="optional">(optional)</span>') + '</label>' +
+            '<input id="' + id(f) + '" name="horse' + n + f.charAt(0).toUpperCase() + f.slice(1) + '" data-field="' + f + '" type="text" autocomplete="off"' +
+            (required ? ' required aria-required="true"' : '') + ' ' + attrs + '></div>';
+        };
         card.innerHTML =
-          '<div class="horse-card-head"><span class="horse-card-title"></span><span class="hint">All optional</span></div>' +
+          '<div class="horse-card-head"><span class="horse-card-title"></span></div>' +
           '<div class="horse-grid-3">' +
-            '<div class="field"><label for="horse-' + n + '-height">Height (hands)</label><input id="horse-' + n + '-height" name="horse' + n + 'Height" data-field="height" type="text" inputmode="decimal" placeholder="e.g. 15.2" autocomplete="off"></div>' +
-            '<div class="field"><label for="horse-' + n + '-weight">Weight (kg)</label><input id="horse-' + n + '-weight" name="horse' + n + 'Weight" data-field="weight" type="text" inputmode="numeric" placeholder="e.g. 500" autocomplete="off"></div>' +
-            '<div class="field"><label for="horse-' + n + '-age">Age (years)</label><input id="horse-' + n + '-age" name="horse' + n + 'Age" data-field="age" type="text" inputmode="decimal" placeholder="e.g. 8" autocomplete="off"></div>' +
+            text("name", "Horse's name", 'maxlength="60"', true) +
+            text("breed", "Breed", 'maxlength="60" placeholder="e.g. Quarter Horse"', true) +
+            text("colour", "Colour", 'maxlength="40" placeholder="e.g. Bay"', true) +
+          '</div>' +
+          '<div class="horse-grid-3">' +
+            text("age", "Age (years)", 'inputmode="decimal" maxlength="5" placeholder="e.g. 8"', true) +
+            '<div class="field"><label for="' + id("gender") + '">Gender <span class="req" aria-hidden="true">*</span></label><select id="' + id("gender") + '" name="horse' + n + 'Gender" data-field="gender" required aria-required="true">' +
+              '<option value="">Choose&hellip;</option><option>Mare</option><option>Gelding</option><option>Stallion</option></select></div>' +
+            text("height", "Height (hands)", 'inputmode="decimal" maxlength="5" placeholder="e.g. 15.2"', false) +
           '</div>' +
           '<div class="horse-grid-2">' +
-            '<div class="field"><label for="horse-' + n + '-sex">Sex</label><select id="horse-' + n + '-sex" name="horse' + n + 'Sex" data-field="sex">' +
-              '<option value="">Choose&hellip;</option><option>Mare</option><option>Gelding</option><option>Stallion</option></select></div>' +
-            '<fieldset class="field horse-foal"><legend>Foal or young horse?</legend><div class="radio-row">' +
+            text("weight", "Weight (kg)", 'inputmode="numeric" maxlength="5" placeholder="e.g. 500"', false) +
+            '<fieldset class="field horse-foal"><legend>Foal or young horse? <span class="optional">(optional)</span></legend><div class="radio-row">' +
               '<label><input type="radio" name="horse' + n + 'Foal" value="Yes" data-field="foal"> Yes</label>' +
               '<label><input type="radio" name="horse' + n + 'Foal" value="No" data-field="foal"> No</label>' +
             '</div></fieldset>' +
           '</div>';
         card.querySelector(".horse-card-title").textContent = "Horse " + n + " \u00b7 " + h.stall;
-        ["height", "weight", "age", "sex"].forEach(function (f) { card.querySelector('[data-field="' + f + '"]').value = v[f]; });
+        ["name", "age", "breed", "gender", "colour", "height", "weight"].forEach(function (f) { card.querySelector('[data-field="' + f + '"]').value = v[f]; });
         card.querySelector('input[value="' + (v.foal === "Yes" ? "Yes" : "No") + '"]').checked = true;
         horseCards.appendChild(card);
       });
       if (list.length > MAX_HORSE_CARDS) {
         var more = document.createElement("p");
         more.className = "hint";
-        more.textContent = "For more than " + MAX_HORSE_CARDS + " horses, please add the others' details in the box below.";
+        more.textContent = "For more than " + MAX_HORSE_CARDS + " horses, please add the others' names, ages, breeds, genders and colours in the box below.";
         horseCards.appendChild(more);
       }
     }
@@ -1463,10 +1488,13 @@
         return {
           horse: i + 1,
           stall: h.stall,
+          name: (v.name || "").trim(),
+          age: (v.age || "").trim(),
+          breed: (v.breed || "").trim(),
+          gender: v.gender || "",
+          colour: (v.colour || "").trim(),
           height: (v.height || "").trim(),
           weight: (v.weight || "").trim(),
-          age: (v.age || "").trim(),
-          sex: v.sex || "",
           foalOrYoung: v.foal || "No"
         };
       });
@@ -1503,8 +1531,12 @@
     function bookingData(f, q) {
       var key = JSON.stringify([waypointFor(pickupLoc.place), waypointFor(dropoffLoc.place)]);
       var route = currentRoute && currentRoute.key === key ? currentRoute : null;
+      var firstName = f.firstName.value.trim(), lastName = f.lastName.value.trim();
+      f.name.value = (firstName + " " + lastName).trim();
       return {
-        name: f.name.value.trim(),
+        name: f.name.value,
+        firstName: firstName,
+        lastName: lastName,
         phone: f.phone.value.trim(),
         email: f.email.value.trim(),
         dates: {
@@ -1594,10 +1626,7 @@
 
     Object.keys(DATES).forEach(function (k) {
       DATES[k].addEventListener("input", function () { checkDates(); updateQuote(); });
-      DATES[k].addEventListener("change", function () {
-        checkDates();
-        if (!DATES[k].checkValidity()) DATES[k].reportValidity();
-      });
+      DATES[k].addEventListener("change", checkDates);
     });
     checkDates();
 
@@ -1609,11 +1638,13 @@
     var currentStep = 1;
     // Each step is checked when moving on (the browser can't point at a field inside a hidden step).
     form.noValidate = true;
-    STEPS.slice(0, -1).forEach(function (stepEl) {
+    // Each step has a summary line at its top, shown when Next or Send finds a problem.
+    STEPS.forEach(function (stepEl) {
       var p = document.createElement("p");
-      p.className = "form-status error step-error field full";
+      p.className = "step-error";
       p.setAttribute("role", "alert");
-      stepEl.insertBefore(p, stepEl.querySelector(".step-nav"));
+      p.hidden = true;
+      stepEl.insertBefore(p, stepEl.firstChild);
     });
 
     function showStep(n) {
@@ -1644,42 +1675,191 @@
       form.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
-    // The first problem in a step, using the same rules as the full form, or null.
-    function stepProblem(n) {
-      var stepEl = STEPS[n - 1];
-      if (n === 1) {
-        var missingPlace = LOCATIONS.filter(function (loc) { return !loc.place; })[0];
-        if (missingPlace) return { el: missingPlace.input, msg: "Please enter the " + missingPlace.name.toLowerCase() + " location." };
-      }
-      if (n === 3) checkDates();
-      var invalid = [].slice.call(stepEl.querySelectorAll("input, select, textarea")).filter(function (el) {
-        return !el.closest(".hp-field") && !el.checkValidity();
-      })[0];
-      if (invalid) return { el: invalid, msg: invalid.validationMessage };
-      if (n === 2 && !calcQuote()) {
-        return { el: document.getElementById("stall-standard"), msg: "Please enter at least one horse in a stall type." };
-      }
-      if (n === 4 && !form.phone.value.trim() && !form.email.value.trim()) {
-        return { el: form.phone, msg: "Please give a phone number or an email address (or both) so we can reach you." };
-      }
-      return null;
+    // ----- Checking each step: a red border and a short red message under each box with a problem -----
+    var HORSE_MESSAGES = {
+      name: "Please enter your horse's name.",
+      age: "Please enter your horse's age.",
+      breed: "Please enter your horse's breed.",
+      gender: "Please choose your horse's gender.",
+      colour: "Please enter your horse's colour."
+    };
+    var STEP_SUMMARY = "Please fill in the boxes marked in red.";
+    var activeErrors = {};   // error id -> { els, check } for the messages showing now
+
+    function numberIn(v, min, max) {
+      if (!/^\d{1,4}([.,]\d{1,2})?$/.test(v)) return false;
+      var n = parseFloat(v.replace(",", "."));
+      return n >= min && n <= max;
     }
 
-    function showProblem(n, problem) {
-      if (n === STEPS.length) showStatus("error", problem.msg);
-      else STEPS[n - 1].querySelector(".step-error").textContent = problem.msg;
-      var closed = problem.el.closest("details");
-      if (closed) closed.open = true;
-      problem.el.focus();
+    // The message for one box, or "" when it's fine.
+    function fieldMessage(el) {
+      var v = el.type === "checkbox" ? "" : el.value.trim();
+      if (el.id === "pickup" || el.id === "dropoff") {
+        var loc = locationFor(el.id);
+        return loc.place ? "" : "Please enter the " + loc.name.toLowerCase() + " location.";
+      }
+      if (el.id === "distance") return Number(v) >= 1 ? "" : "Please enter the driving distance in km.";
+      if (el.id === "pickup-earliest" && !v) return "Please choose the earliest pickup date.";
+      if (el.id === "first-name") return v ? "" : "Please enter your first name.";
+      if (el.id === "last-name") return v ? "" : "Please enter your last name.";
+      if (el.id === "phone") return !v || /^[+()\-.\s\d]{7,25}$/.test(v) && v.replace(/\D/g, "").length >= 7 ? "" : "Please check the phone number.";
+      if (el.id === "email") return !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? "" : "Please check the email address (for example name@example.com).";
+      if (el.id === "agree") return el.checked ? "" : "Please tick the box to agree to the Terms & Conditions.";
+      var f = el.dataset.field;
+      if (f && el.closest(".horse-card")) {
+        if (HORSE_MESSAGES[f] && !v) return HORSE_MESSAGES[f];
+        if (f === "age" && !numberIn(v, 0, 45)) return "Please enter the age in years (for example 8).";
+        if (f === "height" && v && !numberIn(v, 5, 20)) return "Please enter the height in hands (for example 15.2).";
+        if (f === "weight" && v && !numberIn(v, 30, 1500)) return "Please enter the weight in kg (for example 500).";
+        return "";
+      }
+      if (el.classList.contains("stall-input") || el.closest(".stall-card")) return el.checkValidity() ? "" : "Please enter a number from 0 to 20.";
+      return el.checkValidity() ? "" : el.validationMessage;
     }
+
+    // Rules about several boxes together.
+    var GROUPS = [
+      {
+        id: "stalls-error",
+        box: function () { return document.querySelector("fieldset.stalls"); },
+        els: function () { return STALLS.map(function (s) { return document.getElementById(s.input); }); },
+        check: function () {
+          var total = STALLS.reduce(function (sum, s) { return sum + stallCount(s.input); }, 0);
+          return total > 0 ? "" : "Please enter at least one horse.";
+        }
+      },
+      {
+        id: "contact-error",
+        box: function () { return document.getElementById("contact-group"); },
+        els: function () { return [form.phone, form.email]; },
+        check: function () { return form.phone.value.trim() || form.email.value.trim() ? "" : "Please give a phone number or an email."; }
+      }
+    ];
+
+    function describedBy(el, id, add) {
+      var ids = (el.getAttribute("aria-describedby") || "").split(/\s+/).filter(function (x) { return x && x !== id; });
+      if (add) ids.unshift(id);
+      if (ids.length) el.setAttribute("aria-describedby", ids.join(" ")); else el.removeAttribute("aria-describedby");
+    }
+
+    function errorPlace(el) {
+      if (el.type === "checkbox") return { parent: el.closest(".field"), before: null };
+      var after = el.closest(".autocomplete, .distance-row") || el;
+      return { parent: after.parentNode, before: after.nextSibling };
+    }
+
+    function showError(id, els, msg, check, box) {
+      var p = document.getElementById(id);
+      if (!p) {
+        p = document.createElement("p");
+        p.className = "field-error";
+        p.id = id;
+        var place = box ? { parent: box, before: null } : errorPlace(els[0]);
+        place.parent.insertBefore(p, place.before);
+      }
+      p.textContent = msg;
+      p.hidden = false;
+      els.forEach(function (el) {
+        el.setAttribute("aria-invalid", "true");
+        describedBy(el, id, true);
+      });
+      activeErrors[id] = { els: els, check: check };
+    }
+
+    function clearError(id) {
+      var e = activeErrors[id];
+      if (!e) return;
+      e.els.forEach(function (el) {
+        describedBy(el, id, false);
+        // A box can be in two problems (its own and a group's); it stays red while either shows.
+        var stillRed = Object.keys(activeErrors).some(function (k) { return k !== id && activeErrors[k].els.indexOf(el) !== -1; });
+        if (!stillRed) el.removeAttribute("aria-invalid");
+      });
+      var p = document.getElementById(id);
+      if (p) { p.hidden = true; p.textContent = ""; }
+      delete activeErrors[id];
+    }
+
+    // All problems in step n, in page order, each with what it needs to show and re-check itself.
+    function stepProblems(n) {
+      var stepEl = STEPS[n - 1];
+      if (n === 3) checkDates();
+      var problems = [];
+      var grouped = [];
+      GROUPS.forEach(function (g) {
+        var box = g.box();
+        if (!box || !stepEl.contains(box)) return;
+        var msg = g.check();
+        if (msg) {
+          problems.push({ id: g.id, els: g.els(), msg: msg, check: g.check, box: box });
+          grouped = grouped.concat(g.els());
+        }
+      });
+      [].slice.call(stepEl.querySelectorAll("input, select")).forEach(function (el) {
+        if (el.type === "hidden" || el.type === "radio" || el.closest(".hp-field") || el.id === "sms-consent" || grouped.indexOf(el) !== -1) return;
+        var check = function () { return fieldMessage(el); };
+        var msg = check();
+        if (msg) problems.push({ id: (el.id || el.name) + "-error", els: [el], msg: msg, check: check });
+      });
+      // Page order: by the position of each problem's first box.
+      problems.sort(function (a, b) {
+        return a.els[0] === b.els[0] ? 0 : a.els[0].compareDocumentPosition(b.els[0]) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+      });
+      return problems;
+    }
+
+    // Shows step n's problems; returns true when there are none.
+    function checkStep(n, focus) {
+      var stepEl = STEPS[n - 1];
+      var problems = stepProblems(n);
+      // Clear old messages in this step that no longer apply.
+      Object.keys(activeErrors).forEach(function (id) {
+        if (activeErrors[id].els.some(function (el) { return stepEl.contains(el); }) &&
+          !problems.some(function (p) { return p.id === id; })) clearError(id);
+      });
+      problems.forEach(function (p) { showError(p.id, p.els, p.msg, p.check, p.box); });
+      var summary = stepEl.querySelector(".step-error");
+      summary.textContent = problems.length ? STEP_SUMMARY : "";
+      summary.hidden = !problems.length;
+      if (problems.length && focus) {
+        var first = problems[0].els[0];
+        var closed = first.closest("details");
+        if (closed) closed.open = true;
+        first.focus({ preventScroll: true });
+        (first.closest(".field, .stalls, .contact-group") || first).scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      return !problems.length;
+    }
+
+    // As the customer fixes a box, its red goes away (and the message follows what they type).
+    function refreshErrors() {
+      if (!STEPS || !activeErrors) return;
+      Object.keys(activeErrors).forEach(function (id) {
+        var e = activeErrors[id];
+        if (!e.els.every(function (el) { return document.contains(el); })) {
+          // The box was rebuilt (horse cards change with the stall counts).
+          delete activeErrors[id];
+          return;
+        }
+        var msg = e.check();
+        if (!msg) clearError(id);
+        else document.getElementById(id).textContent = msg;
+      });
+      STEPS.forEach(function (stepEl) {
+        var summary = stepEl.querySelector(".step-error");
+        if (summary.hidden) return;
+        var any = Object.keys(activeErrors).some(function (id) {
+          return activeErrors[id].els.some(function (el) { return stepEl.contains(el); });
+        });
+        if (!any) { summary.hidden = true; summary.textContent = ""; }
+      });
+    }
+    form.addEventListener("input", refreshErrors);
+    form.addEventListener("change", refreshErrors);
 
     function nextStep() {
-      var problem = stepProblem(currentStep);
-      if (problem) {
-        showProblem(currentStep, problem);
-        return;
-      }
-      STEPS[currentStep - 1].querySelector(".step-error").textContent = "";
+      if (!checkStep(currentStep, true)) return;
       showStep(currentStep + 1);
     }
 
@@ -1703,34 +1883,15 @@
         return;
       }
       for (var n = 1; n <= STEPS.length; n++) {
-        var problem = stepProblem(n);
-        if (problem) {
+        if (stepProblems(n).length) {
           if (n !== currentStep) showStep(n);
-          showProblem(n, problem);
+          checkStep(n, true);
           return;
         }
       }
-      if (!f.phone.value.trim() && !f.email.value.trim()) {
-        showStatus("error", "Please give a phone number or an email address (or both) so we can reach you.");
-        f.phone.focus();
-        return;
-      }
-      checkDates();
-      var badDate = Object.keys(DATES).map(function (k) { return DATES[k]; }).filter(function (el) { return !el.checkValidity(); })[0];
-      if (badDate) {
-        badDate.reportValidity();
-        return;
-      }
       var q = calcQuote();
       if (!q) {
-        showStatus("", "Please enter at least one horse in a stall type.");
-        document.getElementById("stall-standard").focus();
-        return;
-      }
-      var missing = LOCATIONS.filter(function (loc) { return !loc.place; })[0];
-      if (missing) {
-        showStatus("", "Please enter the " + missing.name.toLowerCase() + " location.");
-        missing.input.focus();
+        showStatus("error", "Please check the driving distance in step 1 and the horses in step 2.");
         return;
       }
       var data = bookingData(f, q);
@@ -1768,14 +1929,16 @@
           if (!result.ok) throw new Error("The booking script reported an error: " + (result.error || "unknown"));
           return result;
         });
-      }).then(function () {
+      }).then(function (result) {
+        // The reference number (NX-2026-0001) comes from the booking script; older versions of it don't send one.
+        if (/^NX-\d{4}-\d{4,}$/.test(result.reference || "")) data.reference = result.reference;
         sent(data);
       }).catch(function (err) {
         // A TypeError ("Failed to fetch") means the browser got no readable reply at all: a network problem,
         // or a reply without CORS permission (for example a Google sign-in page).
         console.error("Booking request failed:", err && err.message ? err.message : err, err);
         sendButton.disabled = false;
-        sendButton.textContent = "Send Booking Request";
+        sendButton.textContent = "Send Booking / Estimate request";
         showStatus("error", "Sorry, something went wrong. Please call us at ", true);
       });
     });
@@ -1798,10 +1961,13 @@
 
     function horseLine(h) {
       var bits = [];
+      if (h.name) bits.push(h.name);
+      if (h.breed) bits.push(h.breed);
+      if (h.colour) bits.push(h.colour);
+      if (h.age) bits.push(h.age + (h.age === "1" ? " year" : " years"));
+      if (h.gender) bits.push(h.gender);
       if (h.height) bits.push(h.height + " hands");
       if (h.weight) bits.push(h.weight + " kg");
-      if (h.age) bits.push(h.age + (h.age === "1" ? " year" : " years"));
-      if (h.sex) bits.push(h.sex);
       if (h.foalOrYoung === "Yes") bits.push("foal or young horse");
       return bits.length ? "Horse " + h.horse + ": " + bits.join(" · ") : "";
     }
@@ -1817,6 +1983,8 @@
       });
       return {
         date: dayFormat.format(new Date()),
+        reference: data.reference || "",
+        heading: "Booking / Estimate request" + (data.reference ? " " + data.reference : "") + " · " + dayFormat.format(new Date()),
         trip: [placeLine(data.pickup, "Pickup") + " → " + placeLine(data.dropoff, "Delivery"),
           kmFormat.format(data.distanceKm) + " km" + (data.trip ? " · " + data.trip : "")],
         dates: ["Pickup: " + (dateRange(dates.pickupEarliest, dates.pickupLatest) || "to be arranged")]
@@ -1826,7 +1994,7 @@
         quote: stallLines.concat(data.quote.minimumApplied ? [{ label: "Minimum charge applied", amount: data.quote.minimumApplied }] : [])
           .concat([{ label: "GST (5%)", amount: data.quote.gst, muted: true }]),
         total: data.quote.total,
-        note: "Automatic estimate. Your price is confirmed when we contact you.",
+        note: "Automatic estimate. Nothing is confirmed until we call you.",
         a: placeName(data.pickup, "Pickup"),
         b: placeName(data.dropoff, "Delivery")
       };
@@ -1879,7 +2047,9 @@
     function showSummary(data) {
       lastSent = data;
       var c = summaryContent(data);
-      document.getElementById("summary-date").textContent = "Booking request · " + c.date;
+      document.getElementById("summary-date").textContent = c.heading;
+      document.getElementById("summary-ref").hidden = !c.reference;
+      document.getElementById("summary-ref-number").textContent = c.reference;
       document.getElementById("summary-route").innerHTML = routeSvg(data, c);
       var trip = document.getElementById("summary-trip");
       trip.innerHTML = "";
@@ -1892,7 +2062,7 @@
       c.horses.forEach(function (t, i) { addText(trip, "span", i < data.stalls.filter(function (s) { return s.count; }).length ? "" : "summary-muted", t); });
       var quote = document.getElementById("summary-quote");
       quote.innerHTML = "";
-      addText(quote, "span", "summary-label", "Quote");
+      addText(quote, "span", "summary-label", "Estimate");
       c.quote.forEach(function (r) {
         var row = addText(quote, "div", "quote-row" + (r.muted ? " quote-muted" : ""), "");
         addText(row, "span", "", r.label);
@@ -1950,10 +2120,16 @@
         ctx.fillStyle = "#F3ECF8";
         ctx.font = "16px " + BODY;
         ctx.textAlign = "right";
-        ctx.fillText("Booking request · " + c.date, W - 40, 50);
+        ctx.fillText(c.heading, W - 40, 50);
         ctx.textAlign = "left";
-        // Route drawing
+        // Reference number, then the route drawing
         var y = 116;
+        if (c.reference) {
+          ctx.fillStyle = "#3D1758";
+          ctx.font = "700 22px " + HEAD;
+          ctx.fillText("Reference number: " + c.reference, 40, y + 12);
+          y += 40;
+        }
         var g = routeShape(data, W - 80, 300, 70);
         if (g) {
           ctx.fillStyle = "#EAF0E4";
@@ -2003,8 +2179,8 @@
         ly = label("Horses", leftX, ly);
         var stallRows = data.stalls.filter(function (s) { return s.count; }).length;
         c.horses.forEach(function (t, i) { ly = line(t, leftX, ly, i >= stallRows); });
-        // Right column: quote
-        ry = label("Quote", rightX, ry);
+        // Right column: estimate
+        ry = label("Estimate", rightX, ry);
         c.quote.forEach(function (r) {
           ctx.fillStyle = r.muted ? "#5B5560" : "#222222";
           ctx.font = "17px " + BODY;
@@ -2085,7 +2261,7 @@
     }
 
     function downloadName(ext) {
-      return "nexa-booking-request-" + todayIso() + "." + ext;
+      return "nexa-booking-estimate-" + (lastSent && lastSent.reference ? lastSent.reference : todayIso()) + "." + ext;
     }
 
     document.getElementById("download-image").addEventListener("click", function () {

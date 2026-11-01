@@ -28,10 +28,11 @@ The route is then checked against the `US_AREAS` boxes. If it still leaves Canad
 | **v1.0** | The previous design (the site as it was before the 1.1 redesign) | tag `v1.0` and branch `release/v1.0` (commit `cc89498`) |
 | **v1.1** | The new design (built on branch `v1.1`, then merged into `main`) | tag `v1.1` |
 | **v1.2** | The booking in 4 steps plus a summary, following `design/booking-*.html` (built on branch `v1.2`) | tag `v1.2` |
+| **v1.3** | "Booking / Estimate": required fields with red messages, horse name/breed/gender/colour, requests saved to a Google Sheet with reference numbers (built on branch `v1.3`) | tag `v1.3` |
 
 The `release/v1.0` branch is never changed, so version 1.0 can always be restored exactly.
 
-**To roll back**, say *"Switch the website back to version 1.0"*. The rollback restores the files on `main` to exactly what they were in `v1.0` with a **new commit** (history is never deleted or rewritten), then pushes `main`. GitHub Pages then serves version 1.0 again. Switching to version 1.1 (or moving forward again later) works the same way, from the `v1.1` or `v1.2` tag. If you roll the website back to before v1.2, the new `Code.gs` can stay: it handles both the old and the new booking forms.
+**To roll back**, say *"Switch the website back to version 1.0"*. The rollback restores the files on `main` to exactly what they were in `v1.0` with a **new commit** (history is never deleted or rewritten), then pushes `main`. GitHub Pages then serves version 1.0 again. Switching to version 1.1 (or moving forward again later) works the same way, from the `v1.1`, `v1.2` or `v1.3` tag. If you roll the website back to before v1.2, the new `Code.gs` can stay: it handles both the old and the new booking forms.
 
 Version tags are created with the **Tag a website version** workflow (Actions tab > Run workflow, give the tag name and the commit). It never moves or replaces an existing tag.
 
@@ -48,22 +49,26 @@ Until real photos arrive, the site shows tasteful placeholders: the horse emblem
 
 ## Booking requests (Google Apps Script)
 
-The booking (`#booking` on `index.html`) has four steps, then a summary:
+The Booking / Estimate form (`#booking` on `index.html`) has four steps, then a summary. Nothing is confirmed until we call the customer, so the wording always says "request" or "estimate".
 
 1. **Trip**: pickup and delivery. The route map shows the trip, and the distance, Canada-only route and trip type ("Local / within Alberta", "Within Canada", "Canada – US (cross-border)", "Within the US") are found automatically. The trip type is sent in the hidden `trip` field. If the distance can't be calculated, "Distance not right? Enter it yourself" opens for a manual distance.
-2. **Horses**: stall counts, plus one optional card per horse (height in hands, weight in kg, age, sex, foal/young horse; fields `horse1Height` … `horse1Foal`, sent as `horseDetails`). Up to 12 cards.
+2. **Horses**: stall counts, plus one card per horse: name, age, breed, gender (Mare, Gelding, Stallion) and colour are required; height in hands, weight in kg and foal/young horse are optional (fields `horse1Name` … `horse1Foal`, sent as `horseDetails`). Up to 12 cards.
 3. **Dates**: pickup and delivery windows.
-4. **Quote and contact**: the price appears here for the first time, next to the map.
+4. **Estimate and contact**: the price appears here for the first time, next to the map. First name and last name are required (sent as `firstName`, `lastName` and, together, the old `name`), plus a phone number or an email.
 
-The one route map moves with the customer from step to step. After sending, a summary screen shows a copy of the request with **Download PDF** and **Download image**: a drawing of the route with pins A and B, made in the browser (no Google picture, no extra library). The booking email still has the real Google Static Maps picture.
+Required boxes have a red *. When Next or Send finds a box empty or wrong, it gets a red border and a short red message under it (linked with `aria-invalid` and `aria-describedby`), the step shows "Please fill in the boxes marked in red" at the top, and the first problem gets the focus. The red goes away as soon as the box is filled in correctly.
 
-The booking form POSTs each request to a Google Apps Script web app (`google-apps-script/Code.gs`), which emails it to nexahorsetransport@gmail.com with a map picture of the route (pickup A, delivery B, driving route) from the Google Maps Static API. Setup, once, signed in as nexahorsetransport@gmail.com:
+The one route map moves with the customer from step to step. After sending, a summary screen shows the reference number (for example NX-2026-0001) and a copy of the request with **Download PDF** and **Download image**: a drawing of the route with pins A and B, made in the browser (no Google picture, no extra library). The booking email still has the real Google Static Maps picture.
+
+The booking form POSTs each request to a Google Apps Script web app (`google-apps-script/Code.gs`), which gives it a reference number (NX-2026-0001, NX-2026-0002, … starting again each year), saves it to the Google Sheet **Nexa Booking Requests** in the nexahorsetransport@gmail.com Google Drive (tab "Requests": one row per request with status "New" and a private token for a future pre-filled invoice/details form link, never shown on the website or in the email; tab "Horses": one row per horse, linked by the reference number), and emails it to nexahorsetransport@gmail.com (reference number in the subject) with a map picture of the route (pickup A, delivery B, driving route) from the Google Maps Static API. Setup, once, signed in as nexahorsetransport@gmail.com:
 
 1. At https://script.google.com create a new project and paste in `google-apps-script/Code.gs`.
 2. In Google Cloud Console create a **separate** API key restricted to the **Maps Static API** (and enable that API). In the Apps Script editor: Project Settings > Script Properties > add `STATIC_MAPS_KEY` with that key. This key is never stored in GitHub or the website.
-3. Optional: run `testBookingEmail()` in the editor to receive a sample email.
+3. Run `setupSheet()` in the editor and approve the permissions (it creates the sheet and logs its link). Optional: run `testBookingEmail()` to receive a sample email.
 4. Deploy > New deployment > Web app, Execute as **Me**, Who has access **Anyone**. Copy the Web app URL (ending in `/exec`) into `BOOKING_ENDPOINT` at the top of the script in `index.html`.
-5. After later code changes: Deploy > Manage deployments > Edit > New version (keeps the same URL).
+5. After later code changes: Deploy > Manage deployments > Edit > New version (keeps the same URL). If the new code needs a new permission, run `setupSheet()` (or any function) in the editor first to approve it.
+
+The sheet is created the first time it's needed; its ID is kept in Script Properties as `SHEET_ID`, and the reference counters as `REF_COUNTER_<year>`. If saving to the sheet fails, the email is still sent and the error is logged (Apps Script > Executions).
 
 If the form shows "Sorry, something went wrong", open the browser console (it logs the real reply), or run the **Check booking endpoint** workflow from the Actions tab: it sends the web app a spam-flagged test request (no email is sent) and prints exactly how it answers.
 

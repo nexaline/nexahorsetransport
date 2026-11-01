@@ -21,7 +21,7 @@
       <nav class="site-nav" aria-label="Main">
         <a href="index.html#services">Services</a>
         <a href="index.html#equipment">Our trailer</a>
-        <a href="index.html#booking">Book</a>
+        <a href="index.html#booking">Booking / Estimate</a>
         <a href="index.html#about">About</a>
         <a href="index.html#faq">FAQ</a>
       </nav>
@@ -227,7 +227,7 @@
       var book = document.createElement("a");
       book.className = "btn btn-small";
       book.href = bookingLink(e);
-      book.textContent = "Book transport to this event";
+      book.textContent = "Booking / Estimate for this event";
       actions.appendChild(book);
       var source = safeUrl(e.sourceUrl) || safeUrl(e.website);
       if (source) actions.appendChild(externalLink(source, "Source", "event-source"));

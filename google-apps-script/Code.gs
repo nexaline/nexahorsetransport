@@ -1,8 +1,14 @@
 /**
- * Nexa Horse Transport – booking request web app (Google Apps Script).
+ * Nexa Horse Transport – Booking / Estimate request web app (Google Apps Script).
  *
- * The booking form on nexahorsetransport.ca POSTs its data here as JSON. This script emails the request
- * to TO_EMAIL with a map picture of the route (pickup A, delivery B and the driving route).
+ * The Booking / Estimate form on nexahorsetransport.ca POSTs its data here as JSON. For each request this script:
+ *  - gives it a reference number (NX-2026-0001, NX-2026-0002, ... starting again each year),
+ *  - saves it to the Google Sheet "Nexa Booking Requests" in this Google account's Drive (tab "Requests",
+ *    one row per request, and tab "Horses", one row per horse, linked by the reference number). The sheet
+ *    is created automatically the first time. Each request also gets a long random private token, kept
+ *    only in the sheet (for a future pre-filled invoice/details form link); it is never sent to the website,
+ *  - emails the request to TO_EMAIL with a map picture of the route (pickup A, delivery B and the driving
+ *    route). The email is sent even if saving to the sheet fails (the error is logged).
  *
  * SETUP (once, signed in to Google as nexahorsetransport@gmail.com):
  *  1. Go to https://script.google.com, click "New project", and replace the code with this file.
@@ -11,7 +17,9 @@
  *     In the Apps Script editor open Project Settings (gear icon) > Script Properties > Add script property:
  *       Property: STATIC_MAPS_KEY   Value: (the new key)
  *     The key lives only here. Never put it in GitHub or in the website code.
- *  3. Optional: run testBookingEmail() from the editor to receive a sample email (approve the permissions).
+ *  3. Run setupSheet() from the editor and approve the permissions (send email as you, connect to an external
+ *     service, see/edit/create Google Sheets). It creates the sheet and logs its link.
+ *     Optional: run testBookingEmail() to receive a sample email.
  *  4. Deploy > New deployment > type "Web app": Execute as "Me", Who has access "Anyone" > Deploy.
  *     Copy the Web app URL (it ends in /exec) into BOOKING_ENDPOINT near the top of the script in index.html.
  *  5. After changing this code later, use Deploy > Manage deployments > Edit > Version "New version",
@@ -25,6 +33,18 @@ var FROM_NAME = "Nexa Horse Transport website";
 var MIN_FILL_MS = 3000;          // forms completed faster than this are treated as spam
 var ROUTE_COLOR = "0x6A2C91";    // brand purple
 var MAX_PATH_POINTS = 250;       // keeps the Static Maps URL well under its length limit
+var SHEET_NAME = "Nexa Booking Requests";
+var TIME_ZONE = "America/Edmonton";
+
+var REQUEST_COLUMNS = ["Reference", "Received", "Status", "First name", "Last name", "Full name", "Phone", "Email",
+  "Pickup", "Pickup GPS", "Pickup entered as", "Delivery", "Delivery GPS", "Delivery entered as",
+  "Trip type (detected)", "Distance (km)", "Distance source", "Route note",
+  "Earliest pickup", "Latest pickup", "Earliest delivery", "Latest delivery",
+  "Number of horses", "Standard stalls", "Roomier stalls", "Box stalls", "Other details",
+  "Estimate lines", "Minimum charge", "Subtotal", "GST (5%)", "Estimated total",
+  "SMS consent", "Terms agreed", "Private token"];
+var HORSE_COLUMNS = ["Reference", "Horse", "Stall", "Name", "Age (years)", "Breed", "Gender", "Colour",
+  "Height (hands)", "Weight (kg)", "Foal or young horse"];
 
 // The website sends the booking as a JSON string with Content-Type text/plain (a "simple" request, so the
 // browser doesn't need a CORS preflight, which Apps Script can't answer). The reply is always JSON.
@@ -42,8 +62,21 @@ function doPost(e) {
     if (!clean(data.phone, 40) && !clean(data.email, 200)) {
       return json({ ok: false, error: "A phone number or an email address is required." });
     }
-    sendBookingEmail(data);
-    return json({ ok: true });
+    var received = new Date();
+    var reference = "";
+    try {
+      reference = nextReference(received);
+    } catch (err) {
+      console.error("Reference number failed: " + (err && err.stack || err));
+    }
+    // Saving to the sheet must never stop the email.
+    try {
+      saveToSheet(data, reference, received);
+    } catch (err) {
+      console.error("Saving to the sheet failed for " + (reference || "(no reference)") + ": " + (err && err.stack || err));
+    }
+    sendBookingEmail(data, reference);
+    return json(reference ? { ok: true, reference: reference } : { ok: true });
   } catch (err) {
     console.error("Booking request failed: " + (err && err.stack || err));
     return json({ ok: false, error: "The request could not be sent." });
@@ -52,19 +85,146 @@ function doPost(e) {
 
 // Visiting the web app URL in a browser shows that it is running.
 function doGet() {
-  return json({ ok: true, service: "Nexa Horse Transport booking requests" });
+  return json({ ok: true, service: "Nexa Horse Transport Booking / Estimate requests" });
 }
 
-function sendBookingEmail(data) {
+// ---------- reference numbers and the Google Sheet ----------
+
+// NX-2026-0001: the year, then a number that goes up by one for each request that year.
+// The counter is kept in the script's properties, under a lock so two requests at once never share a number.
+function nextReference(now) {
+  var year = Utilities.formatDate(now || new Date(), TIME_ZONE, "yyyy");
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var props = PropertiesService.getScriptProperties();
+    var key = "REF_COUNTER_" + year;
+    var n = (parseInt(props.getProperty(key), 10) || 0) + 1;
+    props.setProperty(key, String(n));
+    return "NX-" + year + "-" + ("000" + n).slice(-Math.max(4, String(n).length));
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// A long random private token (64 letters and digits). Kept only in the sheet.
+function privateToken() {
+  return (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, "");
+}
+
+// The "Nexa Booking Requests" spreadsheet, created (with its two tabs) the first time.
+function bookingSpreadsheet() {
+  var props = PropertiesService.getScriptProperties();
+  var id = props.getProperty("SHEET_ID");
+  if (id) {
+    try {
+      return SpreadsheetApp.openById(id);
+    } catch (err) {
+      console.error("The saved sheet could not be opened, so a new one is created: " + err);
+    }
+  }
+  var ss = SpreadsheetApp.create(SHEET_NAME);
+  var requests = ss.getSheets()[0].setName("Requests");
+  var horses = ss.insertSheet("Horses");
+  [[requests, REQUEST_COLUMNS], [horses, HORSE_COLUMNS]].forEach(function (pair) {
+    var sheet = pair[0], columns = pair[1];
+    sheet.getRange(1, 1, 1, columns.length).setValues([columns]).setFontWeight("bold").setBackground("#F4EEF8");
+    sheet.setFrozenRows(1);
+  });
+  ss.setSpreadsheetTimeZone(TIME_ZONE);
+  requests.getRange("B:B").setNumberFormat("yyyy-mm-dd hh:mm");
+  props.setProperty("SHEET_ID", ss.getId());
+  return ss;
+}
+
+function tab(ss, name, columns) {
+  var sheet = ss.getSheetByName(name);
+  if (!sheet) {
+    sheet = ss.insertSheet(name);
+    sheet.getRange(1, 1, 1, columns.length).setValues([columns]).setFontWeight("bold");
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+// A cell value that Sheets keeps as plain text: anything starting with = + - or @ gets a leading apostrophe
+// (hidden in the sheet), so nothing a customer types can run as a formula.
+function cellText(value, max) {
+  var v = clean(value, max || 500);
+  return /^[=+\-@]/.test(v) ? "'" + v : v;
+}
+
+function saveToSheet(data, reference, received) {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var ss = bookingSpreadsheet();
+    var pickup = data.pickup || {}, dropoff = data.dropoff || {};
+    var dates = data.dates || {}, quote = data.quote || {};
+    var stall = function (type) {
+      var s = (data.stalls || []).filter(function (x) { return x && x.type === type; })[0];
+      return String(s ? Number(s.count) || 0 : 0);
+    };
+    var names = splitName(data);
+    var row = [
+      cellText(reference || "(none)"), received, "New",
+      cellText(names.first, 60), cellText(names.last, 60), cellText(data.name, 120),
+      cellText(data.phone, 40), cellText(data.email, 200),
+      cellText(pickup.label, 300), cellText(point(pickup) || ""), cellText(pickup.entered, 200),
+      cellText(dropoff.label, 300), cellText(point(dropoff) || ""), cellText(dropoff.entered, 200),
+      cellText(data.trip, 80), String(Number(data.distanceKm) || 0), cellText(data.distanceSource, 60), cellText(data.routeNote, 600),
+      cellText(dates.pickupEarliest, 20), cellText(dates.pickupLatest, 20), cellText(dates.dropoffEarliest, 20), cellText(dates.dropoffLatest, 20),
+      String(Number(data.horses) || 0), stall("Standard stall"), stall("Roomier stall"), stall("Box stall"), cellText(data.details, 3000),
+      cellText((quote.lines || []).map(function (l) { return clean(l.text, 200) + ": " + clean(l.amount, 40); }).join("\n"), 2000),
+      cellText(quote.minimumApplied, 40), cellText(quote.subtotal, 40), cellText(quote.gst, 40), cellText(quote.total, 40),
+      data.smsConsent && clean(data.phone, 40) ? "Yes" : "No", data.termsAccepted ? "Yes" : "No",
+      privateToken()
+    ];
+    tab(ss, "Requests", REQUEST_COLUMNS).appendRow(row);
+    var horses = horseList(data.horseDetails).map(function (h) {
+      return [cellText(reference || "(none)"), String(h.horse), cellText(h.stall, 40), cellText(h.name, 60), cellText(h.age, 20),
+        cellText(h.breed, 60), cellText(h.gender, 20), cellText(h.colour, 40), cellText(h.height, 20), cellText(h.weight, 20), h.foalOrYoung];
+    });
+    if (horses.length) {
+      var horseSheet = tab(ss, "Horses", HORSE_COLUMNS);
+      horseSheet.getRange(horseSheet.getLastRow() + 1, 1, horses.length, HORSE_COLUMNS.length).setValues(horses);
+    }
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// First and last name as sent by the form; older forms only sent the full name.
+function splitName(data) {
+  var first = clean(data.firstName, 60), last = clean(data.lastName, 60);
+  if (!first && !last) {
+    var parts = clean(data.name, 120).split(/\s+/);
+    first = parts.shift() || "";
+    last = parts.join(" ");
+  }
+  return { first: first, last: last };
+}
+
+// Run from the Apps Script editor once: approves the permissions, creates the sheet if needed, and logs its link.
+function setupSheet() {
+  var ss = bookingSpreadsheet();
+  console.log("Booking / Estimate requests are saved in: " + ss.getUrl());
+  return ss.getUrl();
+}
+
+// ---------- email ----------
+
+function sendBookingEmail(data, reference) {
   var pickup = data.pickup || {};
   var dropoff = data.dropoff || {};
   var name = clean(data.name, 120);
-  var subject = "New booking request – " + name + " – " + clean(pickup.label, 80) + " to " + clean(dropoff.label, 80);
+  var subject = "New Booking / Estimate request" + (reference ? " " + reference : "") + " – " + name + " – " +
+    clean(pickup.label, 80) + " to " + clean(dropoff.label, 80);
 
   var map = routeMapImage(data);
   var mapsLink = googleMapsLink(data);
-  var html = bookingHtml(data, map, mapsLink);
-  var text = bookingText(data, map, mapsLink);
+  var html = bookingHtml(data, map, mapsLink, reference);
+  var text = bookingText(data, map, mapsLink, reference);
 
   var message = { to: TO_EMAIL, subject: subject, htmlBody: html, body: text, name: FROM_NAME };
   var email = clean(data.email, 200);
@@ -180,13 +340,19 @@ function encodeValue(v) {
 
 // ---------- email content ----------
 
-function bookingRows(data) {
+function bookingRows(data, reference) {
   var pickup = data.pickup || {}, dropoff = data.dropoff || {};
+  var names = splitName(data);
   var dates = data.dates || {};
   var stalls = (data.stalls || []).map(function (s) { return clean(s.type, 40) + ": " + (Number(s.count) || 0); }).join(", ");
   return [
+    ["Request", [
+      ["Reference number", reference || "(not available)"],
+      ["Status", "New: nothing is confirmed until we call the customer"]
+    ]],
     ["Customer", [
-      ["Name", clean(data.name, 120)],
+      ["First name", names.first],
+      ["Last name", names.last],
       ["Phone", clean(data.phone, 40) || "(not given)"],
       ["Email", clean(data.email, 200) || "(not given)"]
     ]],
@@ -210,7 +376,7 @@ function bookingRows(data) {
       ["Per stall type", stalls]
     ].concat(horseRows(data.horseDetails))],
     ["Details", [
-      ["Horse details & special requirements", clean(data.details, 3000) || "(none)"]
+      ["Other details & special requirements", clean(data.details, 3000) || "(none)"]
     ]],
     ["Consent", [
       ["Terms & Conditions", data.termsAccepted ? "Agreed" : "Not agreed"],
@@ -219,17 +385,39 @@ function bookingRows(data) {
   ];
 }
 
-// One row per horse from the booking form's optional horse details (height, weight, age, sex, foal or young horse).
-function horseRows(details) {
+// The horse details from the form, cleaned: name, age, breed, gender, colour (required on the form),
+// height, weight and foal or young horse (optional).
+function horseList(details) {
   return (Array.isArray(details) ? details : []).slice(0, 20).map(function (h, i) {
     h = h || {};
+    return {
+      horse: Number(h.horse) || i + 1,
+      stall: clean(h.stall, 40),
+      name: clean(h.name, 60),
+      age: clean(h.age, 20),
+      breed: clean(h.breed, 60),
+      gender: clean(h.gender, 20),
+      colour: clean(h.colour, 40),
+      height: clean(h.height, 20),
+      weight: clean(h.weight, 20),
+      foalOrYoung: clean(h.foalOrYoung, 5) === "Yes" ? "Yes" : "No"
+    };
+  });
+}
+
+// One email row per horse.
+function horseRows(details) {
+  return horseList(details).map(function (h) {
     var bits = [];
-    if (clean(h.height, 20)) bits.push(clean(h.height, 20) + " hands");
-    if (clean(h.weight, 20)) bits.push(clean(h.weight, 20) + " kg");
-    if (clean(h.age, 20)) bits.push(clean(h.age, 20) + " years old");
-    if (clean(h.sex, 20)) bits.push(clean(h.sex, 20));
-    bits.push("Foal or young horse: " + (clean(h.foalOrYoung, 5) === "Yes" ? "Yes" : "No"));
-    return ["Horse " + (Number(h.horse) || i + 1) + " (" + clean(h.stall, 40) + ")", bits.join(" \u00b7 ")];
+    if (h.name) bits.push(h.name);
+    if (h.breed) bits.push(h.breed);
+    if (h.colour) bits.push(h.colour);
+    if (h.age) bits.push(h.age + " years old");
+    if (h.gender) bits.push(h.gender);
+    if (h.height) bits.push(h.height + " hands");
+    if (h.weight) bits.push(h.weight + " kg");
+    bits.push("Foal or young horse: " + h.foalOrYoung);
+    return ["Horse " + h.horse + " (" + h.stall + ")", bits.join(" \u00b7 ")];
   });
 }
 
@@ -243,11 +431,11 @@ function quoteRows(quote) {
   return rows;
 }
 
-function bookingHtml(data, map, mapsLink) {
+function bookingHtml(data, map, mapsLink, reference) {
   var cell = "padding:6px 10px;border-bottom:1px solid #DCCFE6;vertical-align:top;";
   var html = '<div style="font-family:Arial,Helvetica,sans-serif;color:#222222;max-width:680px;">' +
-    '<h2 style="color:#6A2C91;margin:0 0 4px;">New booking request</h2>' +
-    '<p style="margin:0 0 16px;color:#5E5568;">Sent from the booking form on nexahorsetransport.ca' +
+    '<h2 style="color:#6A2C91;margin:0 0 4px;">New Booking / Estimate request' + (reference ? " " + esc(reference) : "") + '</h2>' +
+    '<p style="margin:0 0 16px;color:#5E5568;">Sent from the Booking / Estimate form on nexahorsetransport.ca' +
     (data.submittedAt ? " on " + esc(clean(data.submittedAt, 80)) : "") + ".</p>";
 
   html += '<h3 style="color:#6A2C91;margin:16px 0 6px;">Route map</h3>';
@@ -259,7 +447,7 @@ function bookingHtml(data, map, mapsLink) {
     html += '<p style="margin:8px 0 0;"><a href="' + esc(mapsLink) + '" style="color:#6A2C91;font-weight:bold;">Open route in Google Maps</a></p>';
   }
 
-  bookingRows(data).forEach(function (section) {
+  bookingRows(data, reference).forEach(function (section) {
     html += '<h3 style="color:#6A2C91;margin:20px 0 6px;">' + esc(section[0]) + "</h3><table style=\"border-collapse:collapse;width:100%;\">";
     section[1].forEach(function (row) {
       if (!row[1]) return;
@@ -269,7 +457,7 @@ function bookingHtml(data, map, mapsLink) {
     html += "</table>";
   });
 
-  html += '<h3 style="color:#6A2C91;margin:20px 0 6px;">Instant quote (estimate shown to the customer)</h3><table style="border-collapse:collapse;width:100%;">';
+  html += '<h3 style="color:#6A2C91;margin:20px 0 6px;">Instant estimate (shown to the customer)</h3><table style="border-collapse:collapse;width:100%;">';
   quoteRows(data.quote).forEach(function (row, i, all) {
     var last = i === all.length - 1;
     html += '<tr><td style="' + cell + (last ? "font-weight:bold;" : "") + '">' + esc(row[0]) + '</td><td style="' + cell +
@@ -282,14 +470,14 @@ function bookingHtml(data, map, mapsLink) {
   return html + "</div>";
 }
 
-function bookingText(data, map, mapsLink) {
-  var lines = ["NEW BOOKING REQUEST (nexahorsetransport.ca)", ""];
-  bookingRows(data).forEach(function (section) {
+function bookingText(data, map, mapsLink, reference) {
+  var lines = ["NEW BOOKING / ESTIMATE REQUEST" + (reference ? " " + reference : "") + " (nexahorsetransport.ca)", ""];
+  bookingRows(data, reference).forEach(function (section) {
     lines.push(section[0].toUpperCase());
     section[1].forEach(function (row) { if (row[1]) lines.push(row[0] + ": " + row[1]); });
     lines.push("");
   });
-  lines.push("INSTANT QUOTE (estimate shown to the customer)");
+  lines.push("INSTANT ESTIMATE (shown to the customer)");
   quoteRows(data.quote).forEach(function (row) { lines.push(row[0] + ": " + row[1]); });
   if (data.quote && data.quote.notice) lines.push(clean(data.quote.notice, 600));
   lines.push("");
@@ -319,10 +507,10 @@ function json(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
 
-// Run from the Apps Script editor to send yourself a sample booking email.
+// Run from the Apps Script editor to send yourself a sample email (nothing is saved to the sheet).
 function testBookingEmail() {
   sendBookingEmail({
-    name: "Test Customer", phone: "403-555-0100", email: "", trip: "Within Canada",
+    name: "Test Customer", firstName: "Test", lastName: "Customer", phone: "403-555-0100", email: "", trip: "Within Canada",
     dates: { pickupEarliest: "2027-06-01", pickupLatest: "2027-06-03", dropoffEarliest: "2027-06-02", dropoffLatest: "" },
     details: "Test request from testBookingEmail().",
     pickup: { label: "Sundre, AB, Canada", lat: 51.7976, lng: -114.6403, entered: "address \"Sundre\"" },
@@ -331,9 +519,10 @@ function testBookingEmail() {
     route: { polyline: "", vias: [] },
     stalls: [{ type: "Standard stall", count: 1 }, { type: "Roomier stall", count: 0 }, { type: "Box stall", count: 0 }],
     horses: 1,
-    horseDetails: [{ horse: 1, stall: "Standard stall", height: "15.2", weight: "500", age: "8", sex: "Mare", foalOrYoung: "No" }],
+    horseDetails: [{ horse: 1, stall: "Standard stall", name: "Star", age: "8", breed: "Quarter Horse", gender: "Mare", colour: "Bay",
+      height: "15.2", weight: "500", foalOrYoung: "No" }],
     quote: { lines: [{ text: "1 x Standard stall @ $2.00/km x 110 km", amount: "$220.00" }], minimumApplied: "$300.00",
       subtotal: "$300.00", gst: "$15.00", total: "$315.00 CAD", notice: "This is an automatic estimate only." },
     smsConsent: false, termsAccepted: true, submittedAt: new Date().toString()
-  });
+  }, "NX-TEST-0000");
 }
