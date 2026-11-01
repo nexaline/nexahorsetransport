@@ -92,6 +92,18 @@ function doPost(e) {
     var reply = { ok: true };
     if (reference) reply.reference = reference;
     if (copyKey) reply.copyKey = copyKey;
+    // The customer's own copy, sent automatically when they gave a valid email. It counts as one of the
+    // COPY_LIMIT copies. A failure is logged and never stops the request.
+    try {
+      var email = clean(data.email, 200);
+      if (copyKey && EMAIL_RE.test(email)) {
+        var copy = emailCopy({ reference: reference, copyKey: copyKey, email: email });
+        if (copy.ok) reply.emailedCopy = true;
+        else console.error("Automatic customer copy not sent for " + reference + ": " + copy.error);
+      }
+    } catch (err) {
+      console.error("Automatic customer copy failed for " + (reference || "(no reference)") + ": " + (err && err.stack || err));
+    }
     return json(reply);
   } catch (err) {
     console.error("Booking request failed: " + (err && err.stack || err));
@@ -292,6 +304,20 @@ function emailCopy(req) {
     return { ok: true };
   } catch (err) {
     console.error("Email copy failed for " + reference + ": " + (err && err.stack || err));
+    // A copy that wasn't sent doesn't count towards the limit.
+    try {
+      lock.waitLock(20000);
+      var again = JSON.parse(cache.get("copy:" + reference) || "null");
+      var remaining = COPY_MINUTES * 60 - Math.floor((Date.now() - entry.created) / 1000);
+      if (again && again.key === key && again.sent > 0 && remaining > 0) {
+        again.sent--;
+        cache.put("copy:" + reference, JSON.stringify(again), remaining);
+      }
+    } catch (ignored) {
+      // the count stays as it was
+    } finally {
+      lock.releaseLock();
+    }
     return { ok: false, error: "not-sent" };
   }
 }
@@ -350,8 +376,13 @@ function sendCustomerCopy(snap, reference, to) {
   });
   html += "</table>" +
     '<p style="margin:12px 0;padding:10px 12px;background:#FFF9CC;border-left:4px solid #E8141C;">' + esc(note) + "</p>" +
-    '<p style="margin:16px 0 0;color:#5E5568;">Questions? Reply to this email, or call 1-844-491-NEXA (1-844-491-6392).<br>Nexa Horse Transport · nexahorsetransport.ca</p></div>';
-  text.push(note, "", "Questions? Reply to this email, or call 1-844-491-NEXA (1-844-491-6392).", "Nexa Horse Transport · nexahorsetransport.ca");
+    '<p style="margin:16px 0 6px;color:#5E5568;">Questions? Reply to this email, or contact us:</p>' +
+    '<p style="margin:0;line-height:1.7;">Call us: <a href="tel:+18444916392" style="color:#6A2C91;font-weight:bold;">1-844-491-NEXA (1-844-491-6392)</a><br>' +
+    'Email: <a href="mailto:nexahorsetransport@gmail.com" style="color:#6A2C91;font-weight:bold;">nexahorsetransport@gmail.com</a><br>' +
+    'Website: <a href="https://www.nexahorsetransport.ca" style="color:#6A2C91;font-weight:bold;">www.nexahorsetransport.ca</a></p>' +
+    '<p style="margin:12px 0 0;color:#5E5568;">Nexa Horse Transport</p></div>';
+  text.push(note, "", "Questions? Reply to this email, or contact us:", "Call us: 1-844-491-NEXA (1-844-491-6392)",
+    "Email: nexahorsetransport@gmail.com", "Website: https://www.nexahorsetransport.ca", "", "Nexa Horse Transport");
   var message = {
     to: to,
     subject: "Your Nexa Horse Transport booking/estimate request \u2013 " + reference,

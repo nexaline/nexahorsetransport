@@ -358,7 +358,7 @@
             <div class="summary-check" aria-hidden="true"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFE100" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
             <h2 id="summary-title">Thank you! Your request was sent.</h2>
             <p class="summary-ref" id="summary-ref" hidden>Your reference number: <strong id="summary-ref-number"></strong></p>
-            <p>We'll call or email you soon to go over your estimate and dates. Nothing is confirmed until we call or email you. Here's a copy of your request.</p>
+            <p>We'll call or email you soon to go over your estimate and dates. Nothing is confirmed until we call or email you. <span id="summary-copy-note">Here's a copy of your request.</span></p>
           </div>
           <div class="summary-card">
             <div class="summary-bar">
@@ -1947,6 +1947,8 @@
         if (/^NX-\d{4}-\d{4,}$/.test(result.reference || "")) data.reference = result.reference;
         // A one-time key that lets this page ask for an emailed copy of this request (never shown).
         if (data.reference && /^[a-f0-9]{32}$/.test(result.copyKey || "")) data.copyKey = result.copyKey;
+        // The booking script emails the customer their copy automatically when they gave an email.
+        data.emailedCopy = result.emailedCopy === true;
         sent(data);
       }).catch(function (err) {
         // A TypeError ("Failed to fetch") means the browser got no readable reply at all: a network problem,
@@ -2303,8 +2305,10 @@
     // Only shown when the booking script saved this request for a copy (it sends a reference number and a key).
     function setupEmailCopy(data) {
       copyBox.hidden = !(data.reference && data.copyKey);
-      copiesSent = 0;
-      copyEmail.value = data.email || "";
+      // An automatic copy already went to the form's email; the box is then for a different address.
+      copiesSent = data.emailedCopy ? 1 : 0;
+      copyEmail.value = data.emailedCopy ? "" : data.email || "";
+      document.getElementById("summary-copy-note").textContent = data.emailedCopy ? "We've emailed you a copy." : "Here's a copy of your request.";
       copyButton.disabled = false;
       copyButton.textContent = "Send to my email";
       clearError("copy-email-error");
