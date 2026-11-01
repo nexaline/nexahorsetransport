@@ -11,7 +11,7 @@
   <!-- Fonts load without holding up the page: text shows at once in a system font, then switches. -->
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&amp;family=Source+Sans+3:wght@400;600&amp;display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&amp;family=Source+Sans+3:wght@400;600&amp;display=swap"></noscript>
-  <link rel="stylesheet" href="styles.css?v=1.5">
+  <link rel="stylesheet" href="styles.css?v=1.6">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
@@ -41,11 +41,17 @@
             <a class="btn btn-large btn-outline-light" href="tel:+18444916392" aria-label="Call us at 1-844-491-6392">Call us</a>
           </div>
         </div>
-        <!-- PHOTO SPOT: when the hero photo is ready, save it as photos/hero-truck-trailer.jpg (truck and trailer on an
-             Alberta road, foothills behind) and replace the emblem image below with:
-             <img src="photos/hero-truck-trailer.jpg" alt="Nexa Horse Transport truck and trailer on an Alberta road" width="1200" height="900"> -->
-        <div class="hero-photo">
-          <img class="hero-emblem" src="nexa-emblem.svg" alt="" width="340" height="340">
+        <div class="hero-photo hero-slideshow" aria-roledescription="carousel" aria-label="Our truck and trailer">
+            <img class="hero-slide is-active" src="photos/truck-trailer-1.jpg" alt="Nexa Horse Transport Ford F-350 dually and Four Star gooseneck horse trailer at sunset in Alberta" width="1200" height="900">
+            <img class="hero-slide" src="photos/truck-trailer-2.jpg" alt="The Nexa truck and six-horse trailer parked on a ranch field" width="1200" height="900" loading="lazy">
+            <img class="hero-slide" src="photos/truck-trailer-3.jpg" alt="Front view of the Nexa Ford F-350 with the horse trailer behind" width="1200" height="900" loading="lazy">
+            <img class="hero-slide" src="photos/truck-trailer-4.jpg" alt="Rear view of the Four Star horse trailer, ready for loading" width="1200" height="900" loading="lazy">
+          <div class="hero-dots">
+            <button type="button" class="hero-dot is-active" aria-label="Show photo 1 of 4" aria-current="true"></button>
+            <button type="button" class="hero-dot" aria-label="Show photo 2 of 4"></button>
+            <button type="button" class="hero-dot" aria-label="Show photo 3 of 4"></button>
+            <button type="button" class="hero-dot" aria-label="Show photo 4 of 4"></button>
+          </div>
         </div>
       </div>
     </section>
@@ -2376,6 +2382,30 @@
       if (!lastSent) return;
       drawSummary(lastSent).then(function (canvas) { saveFile(pdfFromCanvas(canvas), downloadName("pdf")); });
     });
+  </script>
+  <script>
+    /* Hero slideshow: our truck and trailer, changes every 5 seconds */
+    (function () {
+      var box = document.querySelector(".hero-slideshow");
+      if (!box) return;
+      var slides = box.querySelectorAll(".hero-slide"), dots = box.querySelectorAll(".hero-dot"), i = 0, timer;
+      function show(n) {
+        slides[i].classList.remove("is-active"); dots[i].classList.remove("is-active"); dots[i].removeAttribute("aria-current");
+        i = (n + slides.length) % slides.length;
+        slides[i].classList.add("is-active"); dots[i].classList.add("is-active"); dots[i].setAttribute("aria-current", "true");
+      }
+      function start() { stop(); timer = setInterval(function () { show(i + 1); }, 5000); }
+      function stop() { if (timer) clearInterval(timer); }
+      dots.forEach(function (d, n) { d.addEventListener("click", function () { show(n); start(); }); });
+      var x0 = null;
+      box.addEventListener("touchstart", function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+      box.addEventListener("touchend", function (e) {
+        if (x0 === null) return; var dx = e.changedTouches[0].clientX - x0; x0 = null;
+        if (Math.abs(dx) > 40) { show(i + (dx < 0 ? 1 : -1)); start(); }
+      });
+      box.addEventListener("mouseenter", stop); box.addEventListener("mouseleave", start);
+      if (!window.matchMedia || !window.matchMedia("(prefers-reduced-motion: reduce)").matches) start();
+    })();
   </script>
 </body>
 </html>

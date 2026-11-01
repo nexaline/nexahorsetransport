@@ -214,6 +214,16 @@ h3 { font-weight: 700; }
 .hero-photo img { display: block; }
 .hero-emblem { width: 58%; height: auto; filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.35)); }
 .hero-photo img:not(.hero-emblem) { width: 100%; height: 100%; object-fit: cover; }
+/* Hero slideshow (truck and trailer photos), 4:3, never stretched */
+.hero-slideshow { position: relative; display: block; background: #2A1040; }
+.hero-slideshow .hero-slide { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.9s ease; }
+.hero-slideshow .hero-slide.is-active { opacity: 1; }
+.hero-dots { position: absolute; left: 0; right: 0; bottom: 12px; display: flex; justify-content: center; gap: 4px; }
+.hero-dot { width: 28px; height: 28px; padding: 0; border: 0; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.hero-dot::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: rgba(255, 255, 255, 0.6); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45); transition: background 0.3s, transform 0.3s; }
+.hero-dot.is-active::before { background: #FFE100; transform: scale(1.25); }
+.hero-dot:focus-visible { outline: 2px solid #FFE100; outline-offset: 2px; border-radius: 50%; }
+@media (prefers-reduced-motion: reduce) { .hero-slideshow .hero-slide { transition: none; } }
 
 /* ---------- Trust bar ---------- */
 .trust-bar { background: var(--white); border-bottom: 1px solid var(--line); }

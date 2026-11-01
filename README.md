@@ -30,11 +30,12 @@ The route is then checked against the `US_AREAS` boxes. If it still leaves Canad
 | **v1.2** | The booking in 4 steps plus a summary, following `design/booking-*.html` (built on branch `v1.2`) | tag `v1.2` |
 | **v1.4** | "Email me a copy" on the summary screen, Justina's photo kept square on every screen (built on branch `v1.4`) | tag `v1.4` |
 | **v1.5** | Mohammad Reza's photo in Meet the team (round, never stretched), last name removed; customer copy emailed automatically | tag `v1.5` |
+| **v1.6** | Hero slideshow: 4 photos of our truck and trailer (`photos/truck-trailer-1.jpg` to `-4.jpg`), changes every 5 seconds, dots and swipe | tag `v1.6` |
 | **v1.3** | "Booking / Estimate": required fields with red messages, horse name/breed/gender/colour, requests saved to a Google Sheet with reference numbers (built on branch `v1.3`) | tag `v1.3` |
 
 The `release/v1.0` branch is never changed, so version 1.0 can always be restored exactly.
 
-**To roll back**, say *"Switch the website back to version 1.0"*. The rollback restores the files on `main` to exactly what they were in `v1.0` with a **new commit** (history is never deleted or rewritten), then pushes `main`. GitHub Pages then serves version 1.0 again. Switching to version 1.1 (or moving forward again later) works the same way, from the `v1.1`, `v1.2`, `v1.3`, `v1.4` or `v1.5` tag. If you roll the website back to before v1.2, the new `Code.gs` can stay: it handles both the old and the new booking forms.
+**To roll back**, say *"Switch the website back to version 1.0"*. The rollback restores the files on `main` to exactly what they were in `v1.0` with a **new commit** (history is never deleted or rewritten), then pushes `main`. GitHub Pages then serves version 1.0 again. Switching to version 1.1 (or moving forward again later) works the same way, from the `v1.1`, `v1.2`, `v1.3`, `v1.4`, `v1.5` or `v1.6` tag. If you roll the website back to before v1.2, the new `Code.gs` can stay: it handles both the old and the new booking forms.
 
 Version tags are created with the **Tag a website version** workflow (Actions tab > Run workflow, give the tag name and the commit). It never moves or replaces an existing tag.
 
