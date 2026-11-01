@@ -1,0 +1,65 @@
+rules_version = '2';
+// Nexa Team App – who can read and change what. Paste into Firebase console > Firestore > Rules > Publish.
+// Roles live in /members/{email}. The two owner accounts below are always Admin, so the team can be set up.
+service cloud.firestore {
+  match /databases/{db}/documents {
+
+    function signedIn() { return request.auth != null && request.auth.token.email_verified == true; }
+    function myEmail() { return request.auth.token.email.lower(); }
+    function memberPath() { return /databases/$(db)/documents/members/$(myEmail()); }
+    function isOwner() { return signedIn() && myEmail() in ['nexahorsetransport@gmail.com', 'm7samadian@gmail.com']; }
+    function role() {
+      return isOwner() ? 'admin'
+        : (signedIn() && exists(memberPath()) && get(memberPath()).data.active == true ? get(memberPath()).data.role : 'none');
+    }
+    function isMember() { return role() != 'none'; }
+    function isStaff() { return role() in ['admin', 'manager', 'dispatcher']; }
+    function canManageTeam() { return role() in ['admin', 'manager']; }
+    function tripPath(ref) { return /databases/$(db)/documents/trips/$(ref); }
+    function isTripDriver(ref) { return role() == 'driver' && get(tripPath(ref)).data.driverEmail == myEmail(); }
+
+    // Team members: everyone on the team can see the list; Admin and Manager add, change and remove people.
+    // Only an Admin can create, change or remove another Admin.
+    match /members/{email} {
+      allow read: if isMember() || (signedIn() && email == myEmail());
+      allow create, update: if canManageTeam()
+        && email == email.lower()
+        && request.resource.data.role in ['admin', 'manager', 'dispatcher', 'driver']
+        && (role() == 'admin' || request.resource.data.role != 'admin')
+        && (role() == 'admin' || resource == null || resource.data.role != 'admin');
+      allow delete: if canManageTeam() && (role() == 'admin' || resource.data.role != 'admin');
+    }
+
+    // Company settings (dispatch phone number etc.): everyone reads, Admin changes.
+    match /settings/{doc} {
+      allow read: if isMember();
+      allow write: if role() == 'admin';
+    }
+
+    // Trips: office staff see and change all trips; a driver sees only trips assigned to them and may only
+    // move them to picked up / in transit / delivered (and save their last location).
+    match /trips/{ref} {
+      allow read: if isStaff() || (role() == 'driver' && resource.data.driverEmail == myEmail());
+      allow create, update: if isStaff();
+      allow update: if role() == 'driver'
+        && resource.data.driverEmail == myEmail()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt', 'updatedBy', 'lastLocation'])
+        && request.resource.data.status in ['picked_up', 'in_transit', 'delivered'];
+      allow delete: if role() == 'admin';
+
+      // Prices, invoices and the customer's phone and email: office staff only (never drivers).
+      match /private/{doc} {
+        allow read, write: if isStaff();
+      }
+
+      // Trip history (status changes, pickup and delivery confirmations, notes, calls): permanent, never edited.
+      match /events/{id} {
+        allow read: if isStaff() || isTripDriver(ref);
+        allow create: if (isStaff() || isTripDriver(ref))
+          && request.resource.data.by == myEmail()
+          && (isStaff() || request.resource.data.type in ['status', 'pickup', 'delivery', 'location', 'note', 'problem']);
+        allow update, delete: if false;
+      }
+    }
+  }
+}
