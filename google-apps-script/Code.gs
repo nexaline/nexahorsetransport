@@ -9,6 +9,9 @@
  *    only in the sheet (for a future pre-filled invoice/details form link); it is never sent to the website,
  *  - emails the request to TO_EMAIL with a map picture of the route (pickup A, delivery B and the driving
  *    route). The email is sent even if saving to the sheet fails (the error is logged).
+ *  - keeps a copy of the request for one hour, so the customer can press "Email me a copy" on the summary
+ *    screen. The page gets a one-time key for it; at most COPY_LIMIT copies are sent per request, and the copy
+ *    only ever contains this request's details, built here (never text sent with the copy request).
  *
  * SETUP (once, signed in to Google as nexahorsetransport@gmail.com):
  *  1. Go to https://script.google.com, click "New project", and replace the code with this file.
@@ -34,6 +37,9 @@ var MIN_FILL_MS = 3000;          // forms completed faster than this are treated
 var ROUTE_COLOR = "0x6A2C91";    // brand purple
 var MAX_PATH_POINTS = 250;       // keeps the Static Maps URL well under its length limit
 var SHEET_NAME = "Nexa Booking Requests";
+var COPY_LIMIT = 2;              // "Email me a copy": copies per request
+var COPY_MINUTES = 60;           // ... available for this long after the request is sent
+var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 var TIME_ZONE = "America/Edmonton";
 
 var REQUEST_COLUMNS = ["Reference", "Received", "Status", "First name", "Last name", "Full name", "Phone", "Email",
@@ -51,6 +57,7 @@ var HORSE_COLUMNS = ["Reference", "Horse", "Stall", "Name", "Age (years)", "Bree
 function doPost(e) {
   try {
     var data = JSON.parse((e && e.postData && e.postData.contents) || "{}");
+    if (data.action === "emailCopy") return json(emailCopy(data));
     // Spam: the hidden "website" field is filled in, or the form was completed too quickly.
     // Reply "ok" so bots learn nothing, but send no email.
     if (clean(data.website, 200) || !(Number(data.elapsedMs) >= MIN_FILL_MS)) {
@@ -76,7 +83,16 @@ function doPost(e) {
       console.error("Saving to the sheet failed for " + (reference || "(no reference)") + ": " + (err && err.stack || err));
     }
     sendBookingEmail(data, reference);
-    return json(reference ? { ok: true, reference: reference } : { ok: true });
+    var copyKey = "";
+    try {
+      copyKey = rememberForCopy(data, reference);
+    } catch (err) {
+      console.error("Keeping the copy failed for " + (reference || "(no reference)") + ": " + (err && err.stack || err));
+    }
+    var reply = { ok: true };
+    if (reference) reply.reference = reference;
+    if (copyKey) reply.copyKey = copyKey;
+    return json(reply);
   } catch (err) {
     console.error("Booking request failed: " + (err && err.stack || err));
     return json({ ok: false, error: "The request could not be sent." });
@@ -210,6 +226,142 @@ function setupSheet() {
   var ss = bookingSpreadsheet();
   console.log("Booking / Estimate requests are saved in: " + ss.getUrl());
   return ss.getUrl();
+}
+
+// ---------- "Email me a copy" ----------
+
+// What the customer's copy may show: only this request's trip, dates, horses and estimate.
+function copySnapshot(data) {
+  var place = function (p) { p = p || {}; return { label: clean(p.label, 300), lat: Number(p.lat), lng: Number(p.lng) }; };
+  var quote = data.quote || {};
+  return {
+    firstName: splitName(data).first,
+    pickup: place(data.pickup),
+    dropoff: place(data.dropoff),
+    route: { polyline: simplifyPolyline(clean((data.route || {}).polyline, 60000)) },
+    distanceKm: Number(data.distanceKm) || 0,
+    trip: clean(data.trip, 80),
+    dates: data.dates || {},
+    stalls: (data.stalls || []).map(function (s) { return { type: clean(s && s.type, 40), count: Number(s && s.count) || 0 }; }),
+    horses: Number(data.horses) || 0,
+    horseDetails: horseList(data.horseDetails),
+    quote: {
+      lines: (quote.lines || []).slice(0, 10).map(function (l) { return { text: clean(l && l.text, 200), amount: clean(l && l.amount, 40) }; }),
+      minimumApplied: clean(quote.minimumApplied, 40), subtotal: clean(quote.subtotal, 40), gst: clean(quote.gst, 40), total: clean(quote.total, 40)
+    }
+  };
+}
+
+// Keeps the request for COPY_MINUTES and returns the one-time key the page needs to ask for a copy.
+function rememberForCopy(data, reference) {
+  if (!reference) return "";
+  var key = Utilities.getUuid().replace(/-/g, "");
+  var entry = { key: key, sent: 0, created: Date.now(), data: copySnapshot(data) };
+  var value = JSON.stringify(entry);
+  if (value.length > 90000) {
+    entry.data.route = { polyline: "" };
+    value = JSON.stringify(entry);
+  }
+  CacheService.getScriptCache().put("copy:" + reference, value, COPY_MINUTES * 60);
+  return key;
+}
+
+// The page's "Send to my email". Sends this request's copy to the address given, at most COPY_LIMIT times.
+function emailCopy(req) {
+  var reference = clean(req.reference, 30), key = clean(req.copyKey, 64), to = clean(req.email, 200);
+  if (!/^NX-\d{4}-\d{4,}$/.test(reference) || !/^[a-f0-9]{32}$/.test(key)) return { ok: false, error: "not-available" };
+  if (!EMAIL_RE.test(to)) return { ok: false, error: "bad-email" };
+  var cache = CacheService.getScriptCache();
+  var lock = LockService.getScriptLock();
+  var entry;
+  lock.waitLock(20000);
+  try {
+    var raw = cache.get("copy:" + reference);
+    entry = raw ? JSON.parse(raw) : null;
+    if (!entry || entry.key !== key) return { ok: false, error: "not-available" };
+    var left = COPY_MINUTES * 60 - Math.floor((Date.now() - entry.created) / 1000);
+    if (left <= 0) return { ok: false, error: "not-available" };
+    if (entry.sent >= COPY_LIMIT) return { ok: false, error: "limit" };
+    entry.sent++;
+    cache.put("copy:" + reference, JSON.stringify(entry), left);
+  } finally {
+    lock.releaseLock();
+  }
+  try {
+    sendCustomerCopy(entry.data, reference, to);
+    return { ok: true };
+  } catch (err) {
+    console.error("Email copy failed for " + reference + ": " + (err && err.stack || err));
+    return { ok: false, error: "not-sent" };
+  }
+}
+
+function sendCustomerCopy(snap, reference, to) {
+  var map = routeMapImage(snap);
+  var cell = "padding:6px 10px;border-bottom:1px solid #DCCFE6;vertical-align:top;";
+  var dates = snap.dates || {};
+  var range = function (a, b) { a = clean(a, 20); b = clean(b, 20); return a && b && a !== b ? a + " to " + b : a || b; };
+  var stallText = snap.stalls.filter(function (s) { return s.count; }).map(function (s) { return s.count + " \u00d7 " + s.type; }).join(", ");
+  var sections = [
+    ["Your trip", [
+      ["Reference number", reference],
+      ["Pickup", snap.pickup.label],
+      ["Delivery", snap.dropoff.label],
+      ["Driving distance", snap.distanceKm ? snap.distanceKm + " km" : ""],
+      ["Trip type", snap.trip]
+    ]],
+    ["Dates", [
+      ["Pickup", range(dates.pickupEarliest, dates.pickupLatest) || "to be arranged"],
+      ["Delivery", range(dates.dropoffEarliest, dates.dropoffLatest) || "to be arranged"]
+    ]],
+    ["Your horses", [["Stalls", stallText]].concat(horseRows(snap.horseDetails))]
+  ];
+  var note = "This is an automatic estimate only. Nothing is confirmed until Nexa Horse Transport calls or emails you to confirm. " +
+    "Vet, border, government and customs broker fees are extra, at cost.";
+  var hello = snap.firstName ? "Hi " + snap.firstName + "," : "Hello,";
+  var html = '<div style="font-family:Arial,Helvetica,sans-serif;color:#222222;max-width:680px;">' +
+    '<h2 style="color:#6A2C91;margin:0 0 4px;">Your Booking / Estimate request ' + esc(reference) + '</h2>' +
+    '<p style="margin:12px 0;">' + esc(hello) + '</p>' +
+    '<p style="margin:0 0 16px;">Thank you for your request. Here is a copy for your records. We will call or email you soon to go over your estimate and dates.</p>';
+  if (map.blob) html += '<img src="cid:routeMap" alt="Map of the route from pickup (A) to delivery (B)" width="640" style="max-width:100%;height:auto;border:2px solid #6A2C91;border-radius:6px;">';
+  var text = ["YOUR BOOKING / ESTIMATE REQUEST " + reference, "", hello, "",
+    "Thank you for your request. Here is a copy for your records. We will call or email you soon to go over your estimate and dates.", ""];
+  sections.forEach(function (section) {
+    html += '<h3 style="color:#6A2C91;margin:20px 0 6px;">' + esc(section[0]) + '</h3><table style="border-collapse:collapse;width:100%;">';
+    text.push(section[0].toUpperCase());
+    section[1].forEach(function (row) {
+      if (!row[1]) return;
+      html += '<tr><td style="' + cell + 'font-weight:bold;width:38%;">' + esc(row[0]) + '</td><td style="' + cell + '">' + esc(row[1]) + "</td></tr>";
+      text.push(row[0] + ": " + row[1]);
+    });
+    html += "</table>";
+    text.push("");
+  });
+  html += '<h3 style="color:#6A2C91;margin:20px 0 6px;">Your estimate</h3><table style="border-collapse:collapse;width:100%;">';
+  text.push("YOUR ESTIMATE");
+  var rows = (snap.quote.lines || []).map(function (l) { return [l.text, l.amount]; });
+  if (snap.quote.minimumApplied) rows.push(["Minimum charge applied", snap.quote.minimumApplied]);
+  rows.push(["Subtotal", snap.quote.subtotal], ["GST (5%)", snap.quote.gst], ["Estimated total", snap.quote.total]);
+  rows.forEach(function (row, i) {
+    var last = i === rows.length - 1;
+    html += '<tr><td style="' + cell + (last ? "font-weight:bold;" : "") + '">' + esc(row[0]) + '</td><td style="' + cell +
+      'text-align:right;white-space:nowrap;' + (last ? "font-weight:bold;" : "") + '">' + esc(row[1]) + "</td></tr>";
+    text.push(row[0] + ": " + row[1]);
+  });
+  html += "</table>" +
+    '<p style="margin:12px 0;padding:10px 12px;background:#FFF9CC;border-left:4px solid #E8141C;">' + esc(note) + "</p>" +
+    '<p style="margin:16px 0 0;color:#5E5568;">Questions? Reply to this email, or call 1-844-491-NEXA (1-844-491-6392).<br>Nexa Horse Transport · nexahorsetransport.ca</p></div>';
+  text.push(note, "", "Questions? Reply to this email, or call 1-844-491-NEXA (1-844-491-6392).", "Nexa Horse Transport · nexahorsetransport.ca");
+  var message = {
+    to: to,
+    subject: "Your Nexa Horse Transport booking/estimate request \u2013 " + reference,
+    htmlBody: html,
+    body: text.join("\n"),
+    name: "Nexa Horse Transport",
+    replyTo: TO_EMAIL
+  };
+  if (map.blob) message.inlineImages = { routeMap: map.blob };
+  MailApp.sendEmail(message);
 }
 
 // ---------- email ----------

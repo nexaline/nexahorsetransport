@@ -532,6 +532,16 @@ select[aria-invalid="true"]:focus { outline: 2px solid var(--error); border-colo
 .summary-small { font-size: 0.875rem; }
 .summary-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin-top: 26px; }
 .summary-actions .btn { gap: 10px; }
+.summary-email { max-width: 620px; margin: 22px auto 0; padding: 20px 22px; background: var(--white); border: 1px solid var(--line); border-radius: 14px; }
+.summary-email[hidden] { display: none; }
+.summary-email-title { margin: 0 0 12px; font-size: 1.2rem; }
+.summary-email-row { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px; }
+.summary-email-row .field { flex: 1 1 260px; }
+.summary-email-row .btn { flex: none; margin-top: 30px; }
+.copy-status { margin: 12px 0 0; font-weight: 600; }
+.copy-status:empty { display: none; }
+.copy-status.success { color: var(--purple); }
+.copy-status.error { padding: 10px 12px; border-radius: 8px; background: var(--warning-bg); border-left: 5px solid var(--error); color: var(--warning-text); }
 
 /* Spam trap: kept off screen so only bots fill it in */
 .hp-field { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
@@ -577,9 +587,11 @@ select[aria-invalid="true"]:focus { outline: 2px solid var(--error); border-colo
 }
 .team-initials-large { flex: 1 1 300px; max-width: 340px; width: auto; height: auto; aspect-ratio: 1; font-size: 6rem; }
 .team-photo-large { flex: 1 1 380px; min-width: 0; max-height: 560px; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 18px; }
-/* Justina's photo: square, rounded, thin yellow frame */
-.team-photo-frame { display: block; flex: 1 1 300px; max-width: 360px; }
-.team-photo-square { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border: 3px solid var(--yellow); border-radius: 18px; background: var(--tint); }
+/* Justina's photo: always square (never stretched), rounded, thin yellow frame.
+   Its height comes only from its own width, never from the row it sits in. */
+.team-photo-frame { display: block; flex: 0 1 360px; width: 100%; max-width: 360px; height: auto; align-self: center; }
+.team-photo-square { display: block; width: 100%; max-width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: cover; object-position: center 30%;
+  border: 3px solid var(--yellow); border-radius: 18px; background: var(--tint); }
 .team-photo-small { flex: none; width: 140px; height: 140px; object-fit: cover; border-radius: 50%; }
 
 .team-stats { display: flex; flex-wrap: wrap; gap: 28px; margin: 22px 0 0; padding-top: 20px; border-top: 1px solid var(--line); }
@@ -728,7 +740,9 @@ select[aria-invalid="true"]:focus { outline: 2px solid var(--error); border-colo
   .summary-actions .btn { flex: 1 1 100%; }
   .team-lead { gap: 28px; }
   .team-initials-large { flex-basis: 100%; max-width: 240px; margin: 0 auto; font-size: 4.5rem; }
-  .team-photo-frame { flex-basis: 100%; max-width: 320px; margin: 0 auto; }
+  .team-photo-frame { flex: 0 0 100%; max-width: 520px; margin: 0 auto; }
+  .summary-email { padding: 18px; }
+  .summary-email-row .btn { flex: 1 1 100%; margin-top: 0; }
   .team-card { padding: 20px; gap: 20px; }
   .event-filters { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .event-filters .field:first-child { grid-column: 1 / -1; }
@@ -763,6 +777,11 @@ select[aria-invalid="true"]:focus { outline: 2px solid var(--error); border-colo
     font-size: 1.1rem;
   }
   .call-bar:focus-visible { outline: 3px solid var(--white); outline-offset: -6px; }
+}
+
+/* Tablets: when Justina's photo sits above her text, centre it */
+@media (min-width: 641px) and (max-width: 920px) {
+  .team-photo-frame { flex: 0 0 100%; max-width: 420px; margin: 0 auto; }
 }
 
 /* Narrow phones: one date per row so the date boxes aren't cut off */

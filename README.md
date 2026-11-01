@@ -28,11 +28,12 @@ The route is then checked against the `US_AREAS` boxes. If it still leaves Canad
 | **v1.0** | The previous design (the site as it was before the 1.1 redesign) | tag `v1.0` and branch `release/v1.0` (commit `cc89498`) |
 | **v1.1** | The new design (built on branch `v1.1`, then merged into `main`) | tag `v1.1` |
 | **v1.2** | The booking in 4 steps plus a summary, following `design/booking-*.html` (built on branch `v1.2`) | tag `v1.2` |
+| **v1.4** | "Email me a copy" on the summary screen, Justina's photo kept square on every screen (built on branch `v1.4`) | tag `v1.4` |
 | **v1.3** | "Booking / Estimate": required fields with red messages, horse name/breed/gender/colour, requests saved to a Google Sheet with reference numbers (built on branch `v1.3`) | tag `v1.3` |
 
 The `release/v1.0` branch is never changed, so version 1.0 can always be restored exactly.
 
-**To roll back**, say *"Switch the website back to version 1.0"*. The rollback restores the files on `main` to exactly what they were in `v1.0` with a **new commit** (history is never deleted or rewritten), then pushes `main`. GitHub Pages then serves version 1.0 again. Switching to version 1.1 (or moving forward again later) works the same way, from the `v1.1`, `v1.2` or `v1.3` tag. If you roll the website back to before v1.2, the new `Code.gs` can stay: it handles both the old and the new booking forms.
+**To roll back**, say *"Switch the website back to version 1.0"*. The rollback restores the files on `main` to exactly what they were in `v1.0` with a **new commit** (history is never deleted or rewritten), then pushes `main`. GitHub Pages then serves version 1.0 again. Switching to version 1.1 (or moving forward again later) works the same way, from the `v1.1`, `v1.2`, `v1.3` or `v1.4` tag. If you roll the website back to before v1.2, the new `Code.gs` can stay: it handles both the old and the new booking forms.
 
 Version tags are created with the **Tag a website version** workflow (Actions tab > Run workflow, give the tag name and the commit). It never moves or replaces an existing tag.
 
@@ -59,6 +60,8 @@ The Booking / Estimate form (`#booking` on `index.html`) has four steps, then a 
 Required boxes have a red *. When Next or Send finds a box empty or wrong, it gets a red border and a short red message under it (linked with `aria-invalid` and `aria-describedby`), the step shows "Please fill in the boxes marked in red" at the top, and the first problem gets the focus. The red goes away as soon as the box is filled in correctly.
 
 The one route map moves with the customer from step to step. After sending, a summary screen shows the reference number (for example NX-2026-0001) and a copy of the request with **Download PDF** and **Download image**: a drawing of the route with pins A and B, made in the browser (no Google picture, no extra library). The booking email still has the real Google Static Maps picture.
+
+**Email me a copy** (summary screen): the customer's email from the form is filled in (they can change it). The booking script keeps the request for one hour and gives the page a one-time key; "Send to my email" sends the customer a copy from nexahorsetransport@gmail.com (subject "Your Nexa Horse Transport booking/estimate request – NX-…", reply-to nexahorsetransport@gmail.com) with the route map, trip, dates, horses and estimate. At most 2 copies per request, only for that request, and the copy is built by the script from the saved request, so nothing else can be sent with it.
 
 The booking form POSTs each request to a Google Apps Script web app (`google-apps-script/Code.gs`), which gives it a reference number (NX-2026-0001, NX-2026-0002, … starting again each year), saves it to the Google Sheet **Nexa Booking Requests** in the nexahorsetransport@gmail.com Google Drive (tab "Requests": one row per request with status "New" and a private token for a future pre-filled invoice/details form link, never shown on the website or in the email; tab "Horses": one row per horse, linked by the reference number), and emails it to nexahorsetransport@gmail.com (reference number in the subject) with a map picture of the route (pickup A, delivery B, driving route) from the Google Maps Static API. Setup, once, signed in as nexahorsetransport@gmail.com:
 

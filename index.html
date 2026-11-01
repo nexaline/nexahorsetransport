@@ -11,7 +11,7 @@
   <!-- Fonts load without holding up the page: text shows at once in a system font, then switches. -->
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&amp;family=Source+Sans+3:wght@400;600&amp;display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&amp;family=Source+Sans+3:wght@400;600&amp;display=swap"></noscript>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=1.4">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
@@ -129,7 +129,7 @@
       <div class="container container-booking">
         <div id="booking-flow">
         <h2 class="center">Booking / Estimate</h2>
-        <p class="lead center">Four short steps to request an estimate. Nothing is confirmed until we call you.</p>
+        <p class="lead center">Four short steps to request an estimate. Nothing is confirmed until we call or email you.</p>
         <p class="req-note center">Boxes marked <span class="req">*</span> are required.</p>
 
         <form id="booking-form" class="booking-form">
@@ -358,7 +358,7 @@
             <div class="summary-check" aria-hidden="true"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFE100" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
             <h2 id="summary-title">Thank you! Your request was sent.</h2>
             <p class="summary-ref" id="summary-ref" hidden>Your reference number: <strong id="summary-ref-number"></strong></p>
-            <p>We'll call you soon to go over your estimate and dates. Nothing is confirmed until we call. Here's a copy of your request.</p>
+            <p>We'll call or email you soon to go over your estimate and dates. Nothing is confirmed until we call or email you. Here's a copy of your request.</p>
           </div>
           <div class="summary-card">
             <div class="summary-bar">
@@ -376,6 +376,18 @@
           <div class="summary-actions">
             <button type="button" class="btn btn-call" id="download-pdf"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>Download PDF</button>
             <button type="button" class="btn btn-secondary" id="download-image"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/></svg>Download image</button>
+          </div>
+          <!-- Email me a copy: the booking script sends the copy it saved for this request (at most 2). -->
+          <div class="summary-email" id="summary-email" hidden>
+            <h3 class="summary-email-title">Email me a copy</h3>
+            <div class="summary-email-row">
+              <div class="field">
+                <label for="copy-email">Your email</label>
+                <input id="copy-email" type="email" autocomplete="email" inputmode="email" maxlength="200">
+              </div>
+              <button type="button" class="btn btn-secondary" id="send-copy">Send to my email</button>
+            </div>
+            <p class="copy-status" id="copy-status" role="status" aria-live="polite"></p>
           </div>
           <p class="step-footnote">Questions? Call <a href="tel:+18444916392">1-844-491-NEXA</a></p>
         </div>
@@ -442,7 +454,7 @@
           </details>
           <details>
             <summary>What is included in the price?</summary>
-            <p>Prices are in Canadian dollars, per horse, per kilometre, plus GST, with a minimum charge of $300 per trip. Vet, border, government and customs broker fees are extra and are charged at cost. Additional costs caused by delays at pickup or delivery, extra stops, layovers or border inspections may be charged. The online Booking / Estimate is an estimate only; nothing is confirmed until we call you.</p>
+            <p>Prices are in Canadian dollars, per horse, per kilometre, plus GST, with a minimum charge of $300 per trip. Vet, border, government and customs broker fees are extra and are charged at cost. Additional costs caused by delays at pickup or delivery, extra stops, layovers or border inspections may be charged. The online Booking / Estimate is an estimate only; nothing is confirmed until we call or email you.</p>
           </details>
           <details>
             <summary>What papers does my horse need?</summary>
@@ -1933,6 +1945,8 @@
       }).then(function (result) {
         // The reference number (NX-2026-0001) comes from the booking script; older versions of it don't send one.
         if (/^NX-\d{4}-\d{4,}$/.test(result.reference || "")) data.reference = result.reference;
+        // A one-time key that lets this page ask for an emailed copy of this request (never shown).
+        if (data.reference && /^[a-f0-9]{32}$/.test(result.copyKey || "")) data.copyKey = result.copyKey;
         sent(data);
       }).catch(function (err) {
         // A TypeError ("Failed to fetch") means the browser got no readable reply at all: a network problem,
@@ -1995,7 +2009,7 @@
         quote: stallLines.concat(data.quote.minimumApplied ? [{ label: "Minimum charge applied", amount: data.quote.minimumApplied }] : [])
           .concat([{ label: "GST (5%)", amount: data.quote.gst, muted: true }]),
         total: data.quote.total,
-        note: "Automatic estimate. Nothing is confirmed until we call you.",
+        note: "Automatic estimate. Nothing is confirmed until we call or email you.",
         a: placeName(data.pickup, "Pickup"),
         b: placeName(data.dropoff, "Delivery")
       };
@@ -2073,6 +2087,7 @@
       addText(total, "span", "", "Total");
       addText(total, "span", "quote-total", c.total);
       addText(quote, "span", "summary-muted summary-small", c.note);
+      setupEmailCopy(data);
       document.getElementById("booking-flow").hidden = true;
       var box = document.getElementById("booking-summary");
       box.hidden = false;
@@ -2264,6 +2279,90 @@
     function downloadName(ext) {
       return "nexa-booking-estimate-" + (lastSent && lastSent.reference ? lastSent.reference : todayIso()) + "." + ext;
     }
+
+    // ----- Email me a copy (on the summary) -----
+    var copyBox = document.getElementById("summary-email");
+    var copyEmail = document.getElementById("copy-email");
+    var copyButton = document.getElementById("send-copy");
+    var copyStatus = document.getElementById("copy-status");
+    var COPY_LIMIT = 2;
+    var copiesSent = 0;
+    var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    function copyEmailMessage() {
+      var v = copyEmail.value.trim();
+      if (!v) return "Please enter your email address.";
+      return EMAIL_RE.test(v) ? "" : "Please check the email address (for example name@example.com).";
+    }
+
+    function setCopyStatus(kind, text) {
+      copyStatus.className = "copy-status" + (kind ? " " + kind : "");
+      copyStatus.textContent = text;
+    }
+
+    // Only shown when the booking script saved this request for a copy (it sends a reference number and a key).
+    function setupEmailCopy(data) {
+      copyBox.hidden = !(data.reference && data.copyKey);
+      copiesSent = 0;
+      copyEmail.value = data.email || "";
+      copyButton.disabled = false;
+      copyButton.textContent = "Send to my email";
+      clearError("copy-email-error");
+      setCopyStatus("", "");
+    }
+
+    copyEmail.addEventListener("input", function () {
+      if (activeErrors["copy-email-error"] && !copyEmailMessage()) clearError("copy-email-error");
+    });
+
+    copyButton.addEventListener("click", function () {
+      if (!lastSent || !lastSent.copyKey) return;
+      var msg = copyEmailMessage();
+      if (msg) {
+        showError("copy-email-error", [copyEmail], msg, copyEmailMessage);
+        setCopyStatus("", "");
+        copyEmail.focus();
+        return;
+      }
+      clearError("copy-email-error");
+      copyButton.disabled = true;
+      copyButton.textContent = "Sending...";
+      setCopyStatus("", "Sending...");
+      fetch(BOOKING_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "emailCopy", reference: lastSent.reference, copyKey: lastSent.copyKey, email: copyEmail.value.trim() }),
+        redirect: "follow"
+      }).then(function (r) { return r.json(); }).then(function (result) {
+        if (result && result.ok) {
+          copiesSent++;
+          setCopyStatus("success", "Sent! Check your inbox (and spam folder).");
+          copyButton.textContent = "Send to my email";
+          copyButton.disabled = copiesSent >= COPY_LIMIT;
+          return;
+        }
+        if (result && result.error === "limit") {
+          copiesSent = COPY_LIMIT;
+          setCopyStatus("error", "We've already sent the most copies we can for this request. Please use Download PDF to keep a copy.");
+          copyButton.textContent = "Send to my email";
+          return;
+        }
+        if (result && result.error === "bad-email") {
+          copyButton.disabled = false;
+          copyButton.textContent = "Send to my email";
+          showError("copy-email-error", [copyEmail], "Please check the email address (for example name@example.com).", copyEmailMessage);
+          setCopyStatus("", "");
+          copyEmail.focus();
+          return;
+        }
+        throw new Error((result && result.error) || "no reply");
+      }).catch(function (err) {
+        console.error("Email copy failed:", err && err.message ? err.message : err);
+        copyButton.disabled = copiesSent >= COPY_LIMIT;
+        copyButton.textContent = "Send to my email";
+        setCopyStatus("error", "Sorry, we couldn't send the email right now. Please use Download PDF to keep a copy, or call us at 1-844-491-NEXA.");
+      });
+    });
 
     document.getElementById("download-image").addEventListener("click", function () {
       if (!lastSent) return;
