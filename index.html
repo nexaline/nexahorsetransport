@@ -574,6 +574,9 @@
     // Booking requests are POSTed to the Google Apps Script web app in google-apps-script/Code.gs, which emails
     // them to nexahorsetransport@gmail.com. Paste its Web app URL (ending in /exec) between the quotes.
     var BOOKING_ENDPOINT = "https://script.google.com/macros/s/AKfycby6HFJxs3YskvUVwm8qII1K3W4so235l3shS-N8nKGgalHVeGOstW8VGKP5J_U3QMc-OA/exec";
+    // A copy of each request also goes to the Nexa Phone app (Dispatch > Bookings > To do), where the team
+    // quotes it, confirms it and puts it on a trip. If this copy fails, the email above still arrives.
+    var DISPATCH_ENDPOINT = "https://nexa-phone-1762.twil.io/api";
     var MIN_FILL_MS = 3000; // forms completed faster than this are treated as spam
     var formStartedAt = Date.now();
 
@@ -1648,6 +1651,20 @@
       };
     }
 
+    // Form-encoded POST, a "simple" request: no CORS preflight. The reply isn't needed.
+    function sendToDispatch(data) {
+      if (!DISPATCH_ENDPOINT) return;
+      try {
+        var copy = Object.assign({}, data, { route: null });
+        fetch(DISPATCH_ENDPOINT, {
+          method: "POST",
+          body: new URLSearchParams({ payload: JSON.stringify({ action: "website-booking", data: copy }) })
+        }).catch(function (err) { console.warn("Copy to Nexa dispatch failed:", err && err.message); });
+      } catch (err) {
+        console.warn("Copy to Nexa dispatch failed:", err && err.message);
+      }
+    }
+
     function sent(data) {
       sendButton.textContent = "Request sent";
       sendButton.disabled = true;
@@ -1980,6 +1997,7 @@
         showStatus("error", "Sorry, something went wrong. Please call us at ", true);
         return;
       }
+      sendToDispatch(data);
       sendButton.disabled = true;
       sendButton.textContent = "Sending...";
       showStatus("", "Sending your request...");
