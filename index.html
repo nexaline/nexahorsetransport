@@ -22,7 +22,8 @@
   <!-- Fonts load without holding up the page: text shows at once in a system font, then switches. -->
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&amp;family=Source+Sans+3:wght@400;600&amp;display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&amp;family=Source+Sans+3:wght@400;600&amp;display=swap"></noscript>
-  <link rel="stylesheet" href="styles.css?v=1.10">
+  <link rel="stylesheet" href="styles.css?v=1.11">
+  <script>if (/[?&]embed=booking\b/.test(location.search)) document.documentElement.classList.add("embed");</script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
@@ -123,21 +124,6 @@
       </div>
     </section>
 
-    <section class="section section-white" aria-labelledby="service-areas-heading">
-      <div class="container">
-        <h2 id="service-areas-heading">Explore our horse transport service areas</h2>
-        <p class="lead">Planning a horse move in Alberta, between Alberta and British Columbia, or across Canada? Explore our service information and request a tailored estimate for your journey.</p>
-        <ul>
-          <li><a href="alberta-horse-transport.html">Horse transport in Alberta — Calgary, Edmonton, Red Deer and Sundre</a></li>
-          <li><a href="british-columbia-horse-transport.html">Horse transport between British Columbia and Alberta</a></li>
-          <li><a href="long-distance-horse-transport-canada.html">Long-distance horse transport across Canada</a></li>
-          <li><a href="alberta-ontario-horse-transport.html">Horse transport between Alberta and Ontario — both directions</a></li>
-          <li><a href="coast-to-coast-horse-transport-canada.html">Coast-to-coast horse transport across Canada</a></li>
-          <li><a href="british-columbia-ontario-horse-transport.html">Horse transport between British Columbia and Ontario</a></li>
-        </ul>
-      </div>
-    </section>
-
     <section id="equipment" class="section">
       <div class="container split">
         <div class="split-photo hero-slideshow inside-slideshow" aria-roledescription="carousel" aria-label="Inside our trailer">
@@ -173,10 +159,18 @@
           <h2>Coast to coast, every two weeks</h2>
         </div>
         <p class="lead">Our scheduled run crosses Canada in both directions, from <strong>Langley, BC</strong> to Halifax, NS and back, stopping at major cities and horse communities along the way. We also carry horses across the border, to and from the USA.</p>
-        <a class="route-figure" href="images/route-map-terrain.svg" target="_blank" rel="noopener">
+        <div class="route-figure">
           <img src="images/route-map-terrain.svg" alt="Topographic map of Canada and the northern USA showing the Nexa route from Langley, BC through Calgary, Edmonton, Saskatoon, Regina, Winnipeg, Thunder Bay, Sudbury, Toronto, Ottawa, Montréal, Québec City and Fredericton to Halifax, and seven border crossings for trips to and from the USA" width="1030" height="410" loading="lazy">
-          <span class="visually-hidden"> (opens the full-size map in a new tab)</span>
-        </a>
+          <a class="prov" href="british-columbia-horse-transport.html" style="left:0.00%;top:0.00%;width:23.30%;height:58.54%" aria-label="Horse transport in British Columbia"><span>British Columbia</span></a>
+          <a class="prov" href="alberta-horse-transport.html" style="left:23.30%;top:0.00%;width:8.74%;height:60.98%" aria-label="Horse transport in Alberta"><span>Alberta</span></a>
+          <a class="prov" href="long-distance-horse-transport-canada.html" style="left:32.04%;top:0.00%;width:8.74%;height:62.20%" aria-label="Horse transport in Saskatchewan"><span>Saskatchewan</span></a>
+          <a class="prov" href="long-distance-horse-transport-canada.html" style="left:40.78%;top:0.00%;width:10.19%;height:60.98%" aria-label="Horse transport in Manitoba"><span>Manitoba</span></a>
+          <a class="prov" href="alberta-ontario-horse-transport.html" style="left:50.97%;top:0.00%;width:23.30%;height:80.49%" aria-label="Horse transport in Ontario"><span>Ontario</span></a>
+          <a class="prov" href="coast-to-coast-horse-transport-canada.html" style="left:74.27%;top:0.00%;width:10.19%;height:61.46%" aria-label="Horse transport in Québec"><span>Québec</span></a>
+          <a class="prov" href="coast-to-coast-horse-transport-canada.html" style="left:80.10%;top:48.29%;width:7.57%;height:15.12%" aria-label="Horse transport in New Brunswick"><span>New Brunswick</span></a>
+          <a class="prov" href="coast-to-coast-horse-transport-canada.html" style="left:87.09%;top:40.24%;width:4.37%;height:7.32%" aria-label="Horse transport in Prince Edward Island"><span>Prince Edward Island</span></a>
+          <a class="prov" href="coast-to-coast-horse-transport-canada.html" style="left:87.86%;top:47.80%;width:9.22%;height:15.61%" aria-label="Horse transport in Nova Scotia"><span>Nova Scotia</span></a>
+        </div>
         <ul class="route-legend">
           <li><svg width="22" height="22" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="12" fill="none" stroke="#E8141C" stroke-width="3"/><circle cx="15" cy="15" r="7" fill="#FFE100" stroke="#3D1758" stroke-width="3"/></svg>Langley, BC: west coast hub</li>
           <li><svg width="18" height="18" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="8" fill="#6A2C91" stroke="#FFE100" stroke-width="3"/></svg>Home base (Sundre, AB)</li>
@@ -184,6 +178,7 @@
           <li><svg width="18" height="18" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="5" fill="#FFFFFF" stroke="#3D1758" stroke-width="2.5"/></svg>City stop</li>
           <li><svg width="18" height="18" viewBox="-10 -10 20 20" aria-hidden="true"><rect x="-9" y="-9" width="18" height="18" rx="3" fill="#6A2C91"/><path d="M-5 0H5" stroke="#FFE100" stroke-width="2" stroke-linecap="round"/></svg>Border crossing</li>
           <li><svg width="30" height="10" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 5H32" stroke="#6A2C91" stroke-width="3" stroke-dasharray="6 4"/></svg>Route to the border</li>
+          <li class="route-tap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6A2C91" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11V5a2 2 0 014 0v6"/><path d="M13 9a2 2 0 014 0v3"/><path d="M17 11a2 2 0 014 0v3a7 7 0 01-7 7h-1a7 7 0 01-6-3.5L5 14a2 2 0 013.4-2L9 13"/></svg>Tap a province for details</li>
         </ul>
         <p class="route-info">Every trip in Canada stays on Canadian highways.</p>
       </div>
@@ -2512,6 +2507,15 @@
       box.addEventListener("mouseenter", stop); box.addEventListener("mouseleave", start);
       if (!window.matchMedia || !window.matchMedia("(prefers-reduced-motion: reduce)").matches) start();
     });
+  </script>
+  <script>
+    /* When shown inside a province page, tell that page how tall the booking form is */
+    (function () {
+      if (!document.documentElement.classList.contains("embed") || window.parent === window) return;
+      function send() { window.parent.postMessage({ nexaBookingHeight: document.documentElement.scrollHeight }, location.origin); }
+      if (window.ResizeObserver) new ResizeObserver(send).observe(document.body);
+      window.addEventListener("load", send); setInterval(send, 1500); send();
+    })();
   </script>
 </body>
 </html>

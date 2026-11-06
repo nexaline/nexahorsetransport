@@ -11,32 +11,43 @@
   <meta property="og:description" content="Horse transport services based in Sundre, Alberta, including Calgary, Edmonton, Red Deer and regional horse communities. Request a tailored estimate.">
   <meta property="og:url" content="https://nexahorsetransport.ca/alberta-horse-transport.html">
   <link rel="icon" href="nexa-emblem.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=1.10">
+  <link rel="stylesheet" href="styles.css?v=1.11">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-header"><div class="container header-inner">
     <a href="index.html" class="logo"><img src="nexa-logo-header.svg" alt="Nexa Horse Transport homepage" width="163" height="56"></a>
-    <nav class="site-nav" aria-label="Main"><a href="index.html#services">Services</a><a href="index.html#route">Route</a><a href="index.html#booking">Booking / Estimate</a><a href="index.html#about">About</a></nav>
+    <nav class="site-nav" aria-label="Main"><a href="index.html#services">Services</a><a href="index.html#route">Route</a><a href="#booking">Booking / Estimate</a><a href="index.html#about">About</a></nav>
     <a class="call-btn" href="tel:+18444916392">Call 1-844-491-NEXA</a>
   </div></header>
   <main id="main">
     <section class="section section-white"><div class="container">
       <h1>Horse transport in Alberta</h1>
       <p class="lead">Based in Sundre, Nexa Horse Transport helps horse owners plan local and regional moves across Alberta. Whether the journey is to a new barn, a show, a trainer or a veterinary appointment, the same careful loading and route planning matter.</p>
-      <p><a class="btn btn-large" href="index.html#booking">Request a horse transport estimate</a></p>
+      <p><a class="btn btn-large" href="#booking">Request a horse transport estimate</a></p>
     </div></section>
     <section class="section"><div class="container"><h2>Serving Alberta horse communities</h2><p>Our Alberta service area includes Sundre, Calgary, Edmonton, Red Deer and communities along the routes between them. Pickups and deliveries outside major centres can be considered, too; send both addresses so we can check the driving route and schedule.</p></div></section>
     <section class="section"><div class="container"><h2>Barn moves, shows and veterinary travel</h2><p>Shorter trips can still involve timing, loading and handling requirements. Tell us about your horse’s experience with trailers, the loading facilities at each end, and any special needs. For events, share the desired arrival window so timing can be discussed before booking.</p></div></section>
     <section class="section"><div class="container"><h2>A realistic quote before you commit</h2><p>The request form calculates a preliminary estimate using the route and the horses travelling. We review logistics and availability before any transport is confirmed. A quote may change if pickup access, timing or the horse’s needs require a different plan.</p></div></section>
     <section class="section"><div class="container"><h2>Planning your Alberta pickup</h2><p>Provide the full pickup and delivery locations, number of horses, ideal dates and any constraints on trailer access. Our team can then assess whether a local trip or a place on a wider route is suitable.</p></div></section>
+    <section id="booking" class="section section-white" aria-label="Booking / Estimate"><div class="container">
+      <iframe class="booking-embed" src="index.html?embed=booking#booking" title="Booking / Estimate form" loading="lazy"></iframe>
+      <noscript><p><a class="btn btn-large" href="index.html#booking">Open the Booking / Estimate form</a></p></noscript>
+    </div></section>
     <section class="section section-white"><div class="container"><h2>Explore our other transport services</h2>
       <p><a href="alberta-horse-transport.html">Alberta horse transport</a> · <a href="british-columbia-horse-transport.html">BC and Alberta horse transport</a> · <a href="long-distance-horse-transport-canada.html">Long-distance Canadian horse transport</a></p>
-      <p>For a specific journey, <a href="index.html#booking">request an estimate</a> or call <a href="tel:+18444916392">1-844-491-6392</a>.</p>
+      <p>For a specific journey, <a href="#booking">request an estimate</a> or call <a href="tel:+18444916392">1-844-491-6392</a>.</p>
     </div></section>
   </main>
   <footer class="site-footer"><div class="container footer-grid"><div class="footer-brand"><img src="nexa-logo-header.svg" alt="Nexa Horse Transport" width="174" height="60"><p>Nexa Horse Transport is a brand of Nexa Line Ltd., an Alberta corporation.</p></div>
   <div class="footer-col"><p class="footer-heading">Contact</p><a href="tel:+18444916392">1-844-491-NEXA</a><a href="mailto:nexahorsetransport@gmail.com">nexahorsetransport@gmail.com</a><span>Sundre, Alberta</span></div>
   <div class="footer-col"><p class="footer-heading">More</p><a href="index.html">Home</a><a href="events.html">Events calendar</a><a href="terms.html">Terms &amp; Conditions</a><a href="privacy.html">Privacy Policy</a></div></div><div class="container footer-bottom"><span>© 2026 Nexa Horse Transport</span></div></footer>
+  <script>
+    /* Booking form: grow the frame to fit the form */
+    window.addEventListener("message", function (e) {
+      if (e.origin !== location.origin || !e.data || !e.data.nexaBookingHeight) return;
+      var f = document.querySelector(".booking-embed"); if (f) f.style.height = Math.max(600, e.data.nexaBookingHeight) + "px";
+    });
+  </script>
 </body>
 </html>
