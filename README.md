@@ -37,11 +37,12 @@ The route is then checked against the `US_AREAS` boxes. If it still leaves Canad
 | **v1.10** | New "Route" section with the topographic (terrain) coast-to-coast map, Langley hub, border crossings | tag `v1.10` |
 | **v1.11** | Service-areas list removed from the home page; provinces on the route map link to the service pages (same addresses); each service page shows the Booking / Estimate form (index.html?embed=booking) | tag `v1.11` |
 | **v1.12** | Route map provinces use the official provincial borders (Natural Earth, public domain), mosaic-tile hover | tag `v1.12` |
+| **v1.13** | BC page: topographic BC route map (images/bc-route-map.svg) with 3 tiers of horse communities and Fraser Valley inset | tag `v1.13` |
 | **v1.3** | "Booking / Estimate": required fields with red messages, horse name/breed/gender/colour, requests saved to a Google Sheet with reference numbers (built on branch `v1.3`) | tag `v1.3` |
 
 The `release/v1.0` branch is never changed, so version 1.0 can always be restored exactly.
 
-**To roll back**, say *"Switch the website back to version 1.0"*. The rollback restores the files on `main` to exactly what they were in `v1.0` with a **new commit** (history is never deleted or rewritten), then pushes `main`. GitHub Pages then serves version 1.0 again. Switching to version 1.1 (or moving forward again later) works the same way, from the `v1.1`, `v1.2`, `v1.3`, `v1.4`, `v1.5`, `v1.6`, `v1.7`, `v1.8`, `v1.9`, `v1.10`, `v1.11` or `v1.12` tag. If you roll the website back to before v1.2, the new `Code.gs` can stay: it handles both the old and the new booking forms.
+**To roll back**, say *"Switch the website back to version 1.0"*. The rollback restores the files on `main` to exactly what they were in `v1.0` with a **new commit** (history is never deleted or rewritten), then pushes `main`. GitHub Pages then serves version 1.0 again. Switching to version 1.1 (or moving forward again later) works the same way, from the `v1.1`, `v1.2`, `v1.3`, `v1.4`, `v1.5`, `v1.6`, `v1.7`, `v1.8`, `v1.9`, `v1.10`, `v1.11`, `v1.12` or `v1.13` tag. If you roll the website back to before v1.2, the new `Code.gs` can stay: it handles both the old and the new booking forms.
 
 Version tags are created with the **Tag a website version** workflow (Actions tab > Run workflow, give the tag name and the commit). It never moves or replaces an existing tag.
 
