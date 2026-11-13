@@ -291,8 +291,15 @@ html.embed #booking { padding: 8px 0 24px; }
 .know-card h3 { margin: 10px 0 6px; font-size: 1.05rem; }
 .know-card p { margin: 0; color: var(--body); font-size: 0.97rem; }
 .know-note { margin: 18px 0 0; color: var(--muted, #6B6570); font-size: 0.95rem; }
-#bc-route { padding-top: 48px; }
+#bc-route, #prov-route { padding-top: 48px; }
 @media (max-width: 700px) { .prov-hero-flag { flex-basis: 160px; } .prov-hero { padding-top: 40px; } }
+.ov-title { margin: 28px 0 10px; color: var(--deep); }
+.ov-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.ov-row { background: var(--tint, #F4EEF8); border-radius: 12px; padding: 14px 18px; }
+.ov-row h3 { margin: 0 0 4px; font-size: 1rem; color: var(--deep); }
+.ov-path { margin: 0 0 4px; font-weight: 600; color: var(--deep); }
+.muted-line { margin: 0; color: var(--body); font-size: 0.93rem; }
+.explore-links { line-height: 1.9; }
 .bc-tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 24px; }
 .bc-tier { background: var(--white); border: 1px solid var(--line); border-top: 4px solid var(--red); border-radius: 12px; padding: 18px 20px; }
 .bc-tier h3 { margin: 0 0 8px; color: var(--deep); font-size: 1.1rem; }
