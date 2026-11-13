@@ -300,6 +300,11 @@ html.embed #booking { padding: 8px 0 24px; }
 .ov-path { margin: 0 0 4px; font-weight: 600; color: var(--deep); }
 .muted-line { margin: 0; color: var(--body); font-size: 0.93rem; }
 .explore-links { line-height: 1.9; }
+.prov-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.prov-card { display: block; background: var(--white); border: 1px solid var(--line); border-top: 4px solid var(--red); border-radius: 12px; padding: 14px 18px; text-decoration: none; color: inherit; transition: border-color 0.2s, box-shadow 0.2s; }
+.prov-card:hover, .prov-card:focus-visible { border-color: var(--purple); box-shadow: 0 6px 18px rgba(61, 23, 88, 0.14); }
+.prov-card h3 { margin: 0 0 4px; font-size: 1.05rem; color: var(--deep); }
+.prov-card p { margin: 0; color: var(--body); font-size: 0.95rem; }
 .bc-tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 24px; }
 .bc-tier { background: var(--white); border: 1px solid var(--line); border-top: 4px solid var(--red); border-radius: 12px; padding: 18px 20px; }
 .bc-tier h3 { margin: 0 0 8px; color: var(--deep); font-size: 1.1rem; }
