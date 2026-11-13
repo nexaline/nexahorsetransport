@@ -194,6 +194,8 @@ h3 { font-weight: 700; }
   color: var(--white);
 }
 
+.hero h1 .eyebrow { display: block; text-transform: uppercase; line-height: 1.4; }
+
 .hero-lead { margin: 0 0 32px; max-width: 560px; font-size: 1.25rem; color: var(--on-purple-muted); }
 
 .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; }
