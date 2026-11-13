@@ -863,3 +863,5 @@ select[aria-invalid="true"]:focus { outline: 2px solid var(--error); border-colo
   .date-pair { grid-template-columns: minmax(0, 1fr); }
   .horse-grid-3 { grid-template-columns: minmax(0, 1fr); }
 }
+
+.faq-more { margin: 20px 0 0; }
