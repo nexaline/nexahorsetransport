@@ -1,4 +1,4 @@
-// Collects upcoming horse shows, races, competitions and auctions from official public sources into
+// Collects upcoming horse shows, races and competitions from official public sources into
 // events.json. Run weekly by .github/workflows/update-events.yml (Node 20+, no dependencies).
 //
 // Only basic event facts are kept: name, type, dates, place and links. For each source the script
@@ -52,20 +52,14 @@ const SOURCES = [
   { id: "royal-winter-fair", horseOnly: true, name: "Royal Agricultural Winter Fair (Royal Horse Show)", type: "show",
     pages: ["https://www.royalfair.org/"],
     defaults: { venue: "Exhibition Place", city: "Toronto", region: "ON", country: "CA" } },
-  { id: "cths-alberta", name: "Canadian Thoroughbred Horse Society (Alberta) sales", type: "auction",
-    pages: ["https://www.cthsalberta.com/sales", "https://www.cthsalberta.com/"],
-    defaults: { region: "AB", country: "CA" } },
-  { id: "keeneland", horseOnly: true, name: "Keeneland (racing and sales)", type: "race",
-    pages: ["https://www.keeneland.com/sales", "https://www.keeneland.com/racing", "https://www.keeneland.com/"],
+  { id: "keeneland", horseOnly: true, name: "Keeneland (racing)", type: "race",
+    pages: ["https://www.keeneland.com/racing", "https://www.keeneland.com/"],
     defaults: { venue: "Keeneland", city: "Lexington", region: "KY", country: "US" } },
   { id: "kentucky-derby", horseOnly: true, name: "Kentucky Derby / Churchill Downs", type: "race",
     pages: ["https://www.kentuckyderby.com/", "https://www.churchilldowns.com/"],
     defaults: { venue: "Churchill Downs", city: "Louisville", region: "KY", country: "US" } },
   { id: "breeders-cup", name: "Breeders' Cup", type: "race",
     pages: ["https://www.breederscup.com/"],
-    defaults: { country: "US" } },
-  { id: "fasig-tipton", name: "Fasig-Tipton sales", type: "auction",
-    pages: ["https://www.fasigtipton.com/sales", "https://www.fasigtipton.com/"],
     defaults: { country: "US" } }
 ];
 
@@ -311,10 +305,10 @@ function placeFromText(text) {
 // The event type from its name, or null if the name doesn't say.
 function classify(name) {
   const n = name.toLowerCase();
-  if (/\b(sale|sales|auction)\b/.test(n)) return "auction";
+  if (/\b(sale|sales|auction|rodeo|stampede)\b/.test(n)) return "skip";
   if (/\b(race|races|racing|stakes|derby|cup day|handicap|post time|breeders'? cup|plate)\b/.test(n)) return "race";
   if (/\b(horse show|show jumping|tournament|masters|royal horse show|national|north american|hunter|jumper)\b/.test(n)) return "show";
-  if (/\b(championships?|competition|rodeo|stampede|dressage|eventing|reining|cutting|trials?|equestrian|equine)\b/.test(n)) return "competition";
+  if (/\b(championships?|competition|dressage|eventing|reining|cutting|trials?|equestrian|equine)\b/.test(n)) return "competition";
   if (/\bhorses?\b/.test(n)) return "show";
   return null;
 }
@@ -333,7 +327,7 @@ function tidy(raw, source, sourceUrl, today, horizon) {
   if (country !== "CA" && country !== "US") return null;
   const name = raw.name.slice(0, 160);
   const type = classify(name) || (source.horseOnly ? null : source.type);
-  if (!type) return null;
+  if (!type || type === "skip") return null;
   return {
     id: slug(source.id + "-" + name + "-" + raw.start),
     name,

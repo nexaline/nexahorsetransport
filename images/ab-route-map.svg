@@ -62,11 +62,11 @@ text{font-family:Archivo,'Source Sans 3',system-ui,sans-serif}
 <path d="M623.3,328.2 L484.9,272.0 L439.2,244.7 L310.2,109.6 L188.0,90.2 L136.4,81.5" fill="none" stroke="#FFFFFF" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M623.3,328.2 L484.9,272.0 L439.2,244.7 L310.2,109.6 L188.0,90.2 L136.4,81.5" fill="none" stroke="#6A2C91" stroke-width="3" stroke-dasharray="7 4" stroke-linecap="round" stroke-linejoin="round"/>
 <circle cx="578.7" cy="684.6" r="7" fill="#FFE100" stroke="#3D1758" stroke-width="3"/>
 <circle cx="587.8" cy="730.0" r="7" fill="#FFE100" stroke="#3D1758" stroke-width="3"/>
-<circle cx="542.8" cy="664.3" r="7" fill="#FFE100" stroke="#3D1758" stroke-width="3"/>
+<circle cx="542.8" cy="664.3" r="9" fill="#6A2C91" stroke="#FFE100" stroke-width="3.5"/>
 <circle cx="534.0" cy="698.5" r="7" fill="#FFE100" stroke="#3D1758" stroke-width="3"/>
 <circle cx="599.2" cy="510.1" r="7" fill="#FFE100" stroke="#3D1758" stroke-width="3"/>
 <circle cx="623.3" cy="328.2" r="7" fill="#FFE100" stroke="#3D1758" stroke-width="3"/>
-<circle cx="527.3" cy="577.7" r="9" fill="#6A2C91" stroke="#FFE100" stroke-width="3.5"/>
+<circle cx="527.3" cy="577.7" r="5.5" fill="#FFFFFF" stroke="#6A2C91" stroke-width="3"/>
 <circle cx="573.9" cy="578.7" r="5.5" fill="#FFFFFF" stroke="#6A2C91" stroke-width="3"/>
 <circle cx="618.1" cy="451.5" r="5.5" fill="#FFFFFF" stroke="#6A2C91" stroke-width="3"/>
 <circle cx="638.6" cy="684.3" r="5.5" fill="#FFFFFF" stroke="#6A2C91" stroke-width="3"/>
@@ -81,11 +81,11 @@ text{font-family:Archivo,'Source Sans 3',system-ui,sans-serif}
 <circle cx="681.3" cy="401.6" r="5.5" fill="#6A2C91" stroke="#FFFFFF" stroke-width="2"/>
 <text class="t1" x="566.7" y="689.6" text-anchor="end">Calgary</text>
 <text class="t1" x="599.8" y="735.0" text-anchor="start">Okotoks &amp; Foothills</text>
-<text class="t1" x="530.8" y="669.3" text-anchor="end">Cochrane &amp; Rocky View</text>
+<text class="t1" x="528.8" y="669.3" text-anchor="end">Cochrane &amp; Rocky View (home base)</text>
 <text class="t1" x="522.0" y="703.5" text-anchor="end">Bragg Creek</text>
 <text class="t1" x="611.2" y="515.1" text-anchor="start">Red Deer</text>
 <text class="t1" x="635.3" y="320.2" text-anchor="start">Edmonton</text>
-<text class="t1" x="513.3" y="582.7" text-anchor="end">Sundre (home base)</text>
+<text class="t2" x="515.3" y="582.7" text-anchor="end">Sundre</text>
 <text class="t2" x="585.9" y="583.7" text-anchor="start">Olds &amp; Carstairs</text>
 <text class="t2" x="630.1" y="456.5" text-anchor="start">Ponoka &amp; Rimbey</text>
 <text class="t2" x="650.6" y="689.3" text-anchor="start">Strathmore</text>
