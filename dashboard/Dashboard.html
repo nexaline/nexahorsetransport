@@ -208,7 +208,8 @@ function drawBooking(data) {
     ["Details", b["Other details"]],
     ["Estimate", b["Estimate lines"]],
     ["Estimated total", b["Estimated total"]],
-    ["Texts allowed", b["SMS consent"]]
+    ["Texts allowed", b["SMS consent"]],
+    ["Terms agreed", b["Terms agreed"] ? b["Terms agreed"] + (b["Terms version"] ? " (version of " + b["Terms version"] + ")" : "") : ""]
   ])]));
 
   // Edit
@@ -220,6 +221,12 @@ function drawBooking(data) {
     field(b, "Earliest pickup"), field(b, "Latest pickup"), field(b, "Earliest delivery"), field(b, "Latest delivery")
   ]);
   form.appendChild(g1);
+  // Optional second contact from the website form: emergency contact, agent or receiver at delivery.
+  form.appendChild(el("h3", { text: "Another contact (emergency, agent or receiver)", style: "margin:16px 0 6px" }));
+  form.appendChild(el("div", { class: "grid" }, [
+    field(b, "Other contact role"), field(b, "Other contact name"), field(b, "Other contact phone"),
+    field(b, "Other contact email"), field(b, "Other contact address")
+  ]));
   form.appendChild(el("div", { style: "margin-top:10px" }, [field(b, "Other details", "area")]));
   form.appendChild(el("div", { style: "margin-top:10px" }, [field(b, "Internal notes", "area")]));
   var save = el("button", { type: "button", class: "btn", text: "Save changes", style: "margin-top:12px" });

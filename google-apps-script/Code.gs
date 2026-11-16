@@ -48,7 +48,9 @@ var REQUEST_COLUMNS = ["Reference", "Received", "Status", "First name", "Last na
   "Earliest pickup", "Latest pickup", "Earliest delivery", "Latest delivery",
   "Number of horses", "Standard stalls", "Roomier stalls", "Box stalls", "Other details",
   "Estimate lines", "Minimum charge", "Subtotal", "GST (5%)", "Estimated total",
-  "SMS consent", "Terms agreed", "Private token"];
+  "SMS consent", "Terms agreed", "Private token",
+  "Other contact role", "Other contact name", "Other contact phone", "Other contact email", "Other contact address",
+  "Terms version"];
 var HORSE_COLUMNS = ["Reference", "Horse", "Stall", "Name", "Age (years)", "Breed", "Gender", "Colour",
   "Height (hands)", "Weight (kg)", "Foal or young horse"];
 
@@ -194,6 +196,7 @@ function saveToSheet(data, reference, received) {
       return String(s ? Number(s.count) || 0 : 0);
     };
     var names = splitName(data);
+    var other = otherContact(data);
     var row = [
       cellText(reference || "(none)"), received, "New",
       cellText(names.first, 60), cellText(names.last, 60), cellText(data.name, 120),
@@ -206,9 +209,11 @@ function saveToSheet(data, reference, received) {
       cellText((quote.lines || []).map(function (l) { return clean(l.text, 200) + ": " + clean(l.amount, 40); }).join("\n"), 2000),
       cellText(quote.minimumApplied, 40), cellText(quote.subtotal, 40), cellText(quote.gst, 40), cellText(quote.total, 40),
       data.smsConsent && clean(data.phone, 40) ? "Yes" : "No", data.termsAccepted ? "Yes" : "No",
-      privateToken()
+      privateToken(),
+      cellText(other.role, 40), cellText(other.name, 120), cellText(other.phone, 40), cellText(other.email, 200), cellText(other.address, 300),
+      data.termsAccepted ? cellText(data.termsVersion, 20) : ""
     ];
-    tab(ss, "Requests", REQUEST_COLUMNS).appendRow(row);
+    appendByHeader(tab(ss, "Requests", REQUEST_COLUMNS), REQUEST_COLUMNS, row);
     var horses = horseList(data.horseDetails).map(function (h) {
       return [cellText(reference || "(none)"), String(h.horse), cellText(h.stall, 40), cellText(h.name, 60), cellText(h.age, 20),
         cellText(h.breed, 60), cellText(h.gender, 20), cellText(h.colour, 40), cellText(h.height, 20), cellText(h.weight, 20), h.foalOrYoung];
@@ -220,6 +225,36 @@ function saveToSheet(data, reference, received) {
   } finally {
     lock.releaseLock();
   }
+}
+
+// Adds a row by column name, not position: the dashboard adds its own columns after ours, and new columns
+// (like "Other contact ...") are added at the end of the header row the first time they are needed.
+function appendByHeader(sheet, columns, values) {
+  var width = Math.max(sheet.getLastColumn(), 1);
+  var headers = sheet.getRange(1, 1, 1, width).getDisplayValues()[0];
+  while (headers.length && !headers[headers.length - 1]) headers.pop();
+  var missing = columns.filter(function (c) { return headers.indexOf(c) === -1; });
+  if (missing.length) {
+    if (sheet.getMaxColumns() < headers.length + missing.length) {
+      sheet.insertColumnsAfter(sheet.getMaxColumns(), headers.length + missing.length - sheet.getMaxColumns());
+    }
+    sheet.getRange(1, headers.length + 1, 1, missing.length).setValues([missing]).setFontWeight("bold");
+    headers = headers.concat(missing);
+  }
+  sheet.appendRow(headers.map(function (h) {
+    var i = columns.indexOf(h);
+    return i === -1 ? "" : values[i];
+  }));
+}
+
+// The optional second contact (emergency contact, agent or receiver at delivery), cleaned.
+function otherContact(data) {
+  var o = data.otherContact || {};
+  var roles = ["Emergency contact", "Agent", "Receiver at delivery", "Other"];
+  return {
+    role: roles.indexOf(clean(o.role, 40)) !== -1 ? clean(o.role, 40) : "",
+    name: clean(o.name, 120), phone: clean(o.phone, 40), email: clean(o.email, 200), address: clean(o.address, 300)
+  };
 }
 
 // First and last name as sent by the form; older forms only sent the full name.
@@ -528,6 +563,14 @@ function bookingRows(data, reference) {
   var names = splitName(data);
   var dates = data.dates || {};
   var stalls = (data.stalls || []).map(function (s) { return clean(s.type, 40) + ": " + (Number(s.count) || 0); }).join(", ");
+  var other = otherContact(data);
+  var otherRows = other.role || other.name || other.phone || other.email || other.address ? [
+    ["Who", other.role || "(not given)"],
+    ["Name", other.name || "(not given)"],
+    ["Phone", other.phone || "(not given)"],
+    ["Email", other.email || "(not given)"],
+    ["Address", other.address || "(not given)"]
+  ] : [["Another contact", "(none given)"]];
   return [
     ["Request", [
       ["Reference number", reference || "(not available)"],
@@ -558,11 +601,12 @@ function bookingRows(data, reference) {
       ["Number of horses", String(Number(data.horses) || 0)],
       ["Per stall type", stalls]
     ].concat(horseRows(data.horseDetails))],
+    ["Another contact", otherRows],
     ["Details", [
       ["Other details & special requirements", clean(data.details, 3000) || "(none)"]
     ]],
     ["Consent", [
-      ["Terms & Conditions", data.termsAccepted ? "Agreed" : "Not agreed"],
+      ["Terms & Conditions", data.termsAccepted ? "Agreed" + (clean(data.termsVersion, 20) ? " (version of " + clean(data.termsVersion, 20) + ")" : "") : "Not agreed"],
       ["SMS consent", data.smsConsent && clean(data.phone, 40) ? "Yes" : "No"]
     ]]
   ];

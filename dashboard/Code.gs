@@ -39,7 +39,9 @@ var EDITABLE = {
   "Pickup": 300, "Delivery": 300,
   "Earliest pickup": 20, "Latest pickup": 20, "Earliest delivery": 20, "Latest delivery": 20,
   "Other details": 3000, "Confirmed price": 40, "Confirmed pickup date": 20, "Confirmed delivery date": 20,
-  "Internal notes": 5000
+  "Internal notes": 5000,
+  "Other contact role": 40, "Other contact name": 120, "Other contact phone": 40, "Other contact email": 200,
+  "Other contact address": 300
 };
 var HORSE_EDITABLE = { "Name": 60, "Age (years)": 20, "Breed": 60, "Gender": 20, "Colour": 40,
   "Height (hands)": 20, "Weight (kg)": 20 };
