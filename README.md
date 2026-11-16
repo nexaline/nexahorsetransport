@@ -49,6 +49,7 @@ The route is then checked against the `US_AREAS` boxes. If it still leaves Canad
 | **v1.22** | FAQ wording: hay and water on stops, owners send enough hay for the trip, daily updates, 2 hours' notice in the updates answer, prices per km from Canada (home, terms, guides, llms.txt) | tag `v1.22` |
 | **v1.23** | New Terms & Conditions (payment before delivery, no deposit, free cancellation before loading, claims, insurance), FAQ and Privacy Policy updated to match, Terms pop-up that must be read to the end before booking, optional second contact (emergency, agent or receiver) on the booking form, booking script and dashboard save it | tag `v1.23` |
 | **v1.24** | Terms pop-up moved to the end (opens on Send, read to the end, accept sends the request), "Send a copy to:" box on the summary, terms say clearly that email counts as writing (new "Written notice by email" point) | tag `v1.24` |
+| **v1.25** | Larger, darker text on the Terms, Privacy and terms pop-up (bigger still on phones); on phones the pop-up fills the screen | tag `v1.25` |
 | **v1.3** | "Booking / Estimate": required fields with red messages, horse name/breed/gender/colour, requests saved to a Google Sheet with reference numbers (built on branch `v1.3`) | tag `v1.3` |
 
 The `release/v1.0` branch is never changed, so version 1.0 can always be restored exactly.

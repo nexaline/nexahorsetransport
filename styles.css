@@ -907,3 +907,25 @@ html.embed .terms-dialog { max-height: min(560px, 90vh); }
   .terms-dialog { padding: 16px; }
   .terms-modal-actions .btn { flex: 1 1 100%; }
 }
+
+/* Terms, Privacy and the terms pop-up: larger, darker text that is easy to read for everyone */
+.terms { font-size: 1.1rem; line-height: 1.7; color: var(--text); }
+.terms p, .terms li { color: var(--text); }
+.terms li { margin-bottom: 10px; }
+.terms h2 { font-size: 1.5rem; line-height: 1.3; }
+.terms-modal-body { font-size: 1.1rem; line-height: 1.7; color: var(--text); }
+.terms-modal-body p, .terms-modal-body li { color: var(--text); }
+.terms-modal-body li { margin: 8px 0; }
+.terms-modal-body h2 { font-size: 1.3rem; line-height: 1.3; }
+.terms-modal-intro, .terms-modal-hint { font-size: 1.05rem; }
+@media (max-width: 640px) {
+  .terms { font-size: 1.2rem; line-height: 1.75; }
+  .terms h2 { font-size: 1.45rem; }
+  .terms ul { padding-left: 24px; }
+  /* On phones the pop-up fills the screen, so there is more room to read. */
+  html:not(.embed) .terms-modal { padding: 0; }
+  html:not(.embed) .terms-dialog { height: 100vh; height: 100dvh; max-height: none; border-radius: 0; }
+  .terms-modal-body { font-size: 1.2rem; line-height: 1.75; padding: 4px 14px 18px; }
+  .terms-modal-body h2 { font-size: 1.35rem; }
+  .terms-modal-title { font-size: 1.6rem; }
+}
