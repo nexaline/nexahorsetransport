@@ -929,3 +929,5 @@ html.embed .terms-dialog { max-height: min(560px, 90vh); }
   .terms-modal-body h2 { font-size: 1.35rem; }
   .terms-modal-title { font-size: 1.6rem; }
 }
+
+.translation-note { margin: 0 0 18px; padding: 10px 14px; border-left: 4px solid #FFE100; background: #fff; border-radius: 6px; font-size: 0.95rem; color: #3D1758; max-width: 640px; }
