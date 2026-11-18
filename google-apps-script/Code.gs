@@ -27,8 +27,13 @@
  *     Copy the Web app URL (it ends in /exec) into BOOKING_ENDPOINT near the top of the script in index.html.
  *  5. After changing this code later, use Deploy > Manage deployments > Edit > Version "New version",
  *     so the same URL keeps working.
+ *  6. Emails from Nexa Phone (trip updates, arrival notices, trip sheets): in Project Settings > Script Properties
+ *     add NEXA_PHONE_SECRET with the key from Nexa Phone > Settings > Company settings > Emails. Run
+ *     authorizeNexaPhoneMail() once in the editor and approve (Gmail), then deploy a new version (step 5).
+ *     To send as trips@nexahorsetransport.ca, add it in Gmail > Settings > Accounts > "Send mail as" first.
  *
- * Gmail accounts can send about 100 emails a day from Apps Script, far more than this form needs.
+ * Gmail accounts can send to about 100 recipients a day from Apps Script (Google Workspace: 1,500). The booking
+ * emails and the Nexa Phone emails (step 6) share that allowance.
  */
 
 var TO_EMAIL = "nexahorsetransport@gmail.com";
@@ -60,6 +65,7 @@ function doPost(e) {
   try {
     var data = JSON.parse((e && e.postData && e.postData.contents) || "{}");
     if (data.action === "emailCopy") return json(emailCopy(data));
+    if (data.action === "nexaPhoneMail") return json(nexaPhoneMail(data));
     // Spam: the hidden "website" field is filled in, or the form was completed too quickly.
     // Reply "ok" so bots learn nothing, but send no email.
     if (clean(data.website, 200) || !(Number(data.elapsedMs) >= MIN_FILL_MS)) {
@@ -752,4 +758,51 @@ function testBookingEmail() {
       subtotal: "$300.00", gst: "$15.00", total: "$315.00 CAD", notice: "This is an automatic estimate only." },
     smsConsent: false, termsAccepted: true, submittedAt: new Date().toString()
   }, "NX-TEST-0000");
+}
+
+// ---------- Emails from Nexa Phone (trip updates, arrival notices, trip sheets) ----------
+
+// Nexa Phone, the team app, sends its emails through here so they come from the Nexa Gmail. Each request must
+// carry the key saved in Script Properties as NEXA_PHONE_SECRET (copied from Nexa Phone > Settings > Company
+// settings > Emails). Emails go "as" the address Nexa Phone asks for (for example trips@nexahorsetransport.ca)
+// when that address is set up in Gmail under Settings > Accounts > "Send mail as"; otherwise as this account.
+var NEXA_PHONE_MAX_MESSAGES = 10;
+
+function nexaPhoneMail(req) {
+  var secret = PropertiesService.getScriptProperties().getProperty("NEXA_PHONE_SECRET");
+  if (!secret || String(req.secret || "") !== secret) return { ok: false, error: "Not allowed." };
+  var list = Array.isArray(req.messages) ? req.messages.slice(0, NEXA_PHONE_MAX_MESSAGES) : [];
+  if (!list.length) return { ok: false, error: "Nothing to send." };
+  var from = clean(req.from, 200).toLowerCase();
+  var aliases = [];
+  try {
+    aliases = GmailApp.getAliases().map(function (a) { return String(a).toLowerCase(); });
+  } catch (err) {
+    console.error("Reading Gmail aliases failed: " + (err && err.stack || err));
+  }
+  var sendAs = from && aliases.indexOf(from) >= 0 ? from : "";
+  var replyTo = EMAIL_RE.test(clean(req.replyTo, 200)) ? clean(req.replyTo, 200) : (sendAs || TO_EMAIL);
+  var results = list.map(function (m) {
+    var to = clean(m && m.to, 200);
+    if (!EMAIL_RE.test(to)) return { ok: false, error: "Bad email address." };
+    try {
+      var options = { name: "Nexa Horse Transport", replyTo: replyTo };
+      var html = String((m && m.html) || "").slice(0, 100000);
+      if (html) options.htmlBody = html;
+      if (sendAs) options.from = sendAs;
+      GmailApp.sendEmail(to, clean(m.subject, 200) || "Nexa Horse Transport", String((m && m.text) || "").slice(0, 50000), options);
+      return { ok: true };
+    } catch (err) {
+      console.error("Nexa Phone email to " + to + " failed: " + (err && err.stack || err));
+      return { ok: false, error: String(err && err.message || err).slice(0, 200) };
+    }
+  });
+  return { ok: true, results: results, sentAs: sendAs || Session.getEffectiveUser().getEmail(), remaining: MailApp.getRemainingDailyQuota() };
+}
+
+// Run once from the editor after adding this code: approves sending with Gmail and shows the "Send mail as"
+// addresses this account has (trips@nexahorsetransport.ca should be in the list once it is set up in Gmail).
+function authorizeNexaPhoneMail() {
+  Logger.log("Can send as: " + GmailApp.getAliases().join(", "));
+  Logger.log("Emails left today: " + MailApp.getRemainingDailyQuota());
 }

@@ -52,6 +52,7 @@ The route is then checked against the `US_AREAS` boxes. If it still leaves Canad
 | **v1.25** | Larger, darker text on the Terms, Privacy and terms pop-up (bigger still on phones); on phones the pop-up fills the screen | tag `v1.25` |
 | **v1.26** | SEO: three new pages — `calgary-cochrane-horse-transport.html` (home base, Calgary-area communities, short-haul price examples), `langley-bc-horse-transport.html` (west coast hub, Langley to Calgary, coast-to-coast start) and `transport-chevaux-quebec.html` (Québec page in French, linked both ways with the English Québec page by hreflang); added to every "Explore" list, the home page, sitemap and `llms.txt`; home page description no longer suggests trips inside the USA | tag `v1.26` |
 | **v1.27** | French Québec page: note at the top (in French) saying the page was translated with AI and may contain mistakes, offered out of respect for French and Québec clients; the English version applies if they differ | tag `v1.27` |
+| **v1.28** | The copy of each request for Nexa Phone Dispatch is sent after the booking script answers, so Dispatch shows the same NX-2026-0001 reference as the client; the booking script can send Nexa Phone's trip emails (trip updates, arrival notices, trip sheets) from the Nexa Gmail, as trips@nexahorsetransport.ca once that "Send mail as" address is set up (`nexaPhoneMail`, key in `NEXA_PHONE_SECRET`) | tag `v1.28` |
 | **v1.3** | "Booking / Estimate": required fields with red messages, horse name/breed/gender/colour, requests saved to a Google Sheet with reference numbers (built on branch `v1.3`) | tag `v1.3` |
 
 The `release/v1.0` branch is never changed, so version 1.0 can always be restored exactly.
@@ -93,6 +94,7 @@ The booking form POSTs each request to a Google Apps Script web app (`google-app
 3. Run `setupSheet()` in the editor and approve the permissions (it creates the sheet and logs its link). Optional: run `testBookingEmail()` to receive a sample email.
 4. Deploy > New deployment > Web app, Execute as **Me**, Who has access **Anyone**. Copy the Web app URL (ending in `/exec`) into `BOOKING_ENDPOINT` at the top of the script in `index.html`.
 5. After later code changes: Deploy > Manage deployments > Edit > New version (keeps the same URL). If the new code needs a new permission, run `setupSheet()` (or any function) in the editor first to approve it.
+6. Nexa Phone emails (trip updates, arrival notices, trip sheets): Script Properties > add `NEXA_PHONE_SECRET` with the key shown in Nexa Phone > Settings > Company settings > Emails. Run `authorizeNexaPhoneMail()` once and approve (Gmail), then deploy a new version (step 5). To send as trips@nexahorsetransport.ca, first add it in Gmail > Settings > Accounts and Import > "Send mail as".
 
 The sheet is created the first time it's needed; its ID is kept in Script Properties as `SHEET_ID`, and the reference counters as `REF_COUNTER_<year>`. If saving to the sheet fails, the email is still sent and the error is logged (Apps Script > Executions).
 
