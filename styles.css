@@ -931,3 +931,11 @@ html.embed .terms-dialog { max-height: min(560px, 90vh); }
 }
 
 .translation-note { margin: 0 0 18px; padding: 10px 14px; border-left: 4px solid #FFE100; background: #fff; border-radius: 6px; font-size: 0.95rem; color: #3D1758; max-width: 640px; }
+
+/* Cookie notice (consent.js) */
+.cookie-bar { position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 1000; max-width: 720px; margin: 0 auto; background: #fff; color: #3D1758; border: 2px solid #6A2C91; border-radius: 12px; box-shadow: 0 8px 28px rgba(0,0,0,.2); padding: 16px 18px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.cookie-bar p { margin: 0; flex: 1 1 320px; font-size: 0.95rem; line-height: 1.45; }
+.cookie-bar a { color: #6A2C91; }
+.cookie-actions { display: flex; gap: 10px; }
+.cookie-actions .btn { padding: 10px 18px; }
+.cookie-settings-link { background: none; border: 0; padding: 0; margin-left: 16px; color: inherit; text-decoration: underline; cursor: pointer; font: inherit; opacity: .85; }
