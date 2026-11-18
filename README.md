@@ -54,6 +54,7 @@ The route is then checked against the `US_AREAS` boxes. If it still leaves Canad
 | **v1.27** | French Québec page: note at the top (in French) saying the page was translated with AI and may contain mistakes, offered out of respect for French and Québec clients; the English version applies if they differ | tag `v1.27` |
 | **v1.28** | The copy of each request for Nexa Phone Dispatch is sent after the booking script answers, so Dispatch shows the same NX-2026-0001 reference as the client; the booking script can send Nexa Phone's trip emails (trip updates, arrival notices, trip sheets) from the Nexa Gmail, as trips@nexahorsetransport.ca once that "Send mail as" address is set up (`nexaPhoneMail`, key in `NEXA_PHONE_SECRET`) | tag `v1.28` |
 | **v1.3** | "Booking / Estimate": required fields with red messages, horse name/breed/gender/colour, requests saved to a Google Sheet with reference numbers (built on branch `v1.3`) | tag `v1.3` |
+| **v1.4** | Justina's bio rewritten (35+ years with horses, travels, her PRE mare Hermosa; not a trainer), Mohammad's bio without flight hours, Videos section and its links hidden (code kept) | tag `v1.4` |
 
 The `release/v1.0` branch is never changed, so version 1.0 can always be restored exactly.
 
