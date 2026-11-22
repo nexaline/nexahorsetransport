@@ -9,6 +9,10 @@
  *    only in the sheet (for a future pre-filled invoice/details form link); it is never sent to the website,
  *  - emails the request to TO_EMAIL with a map picture of the route (pickup A, delivery B and the driving
  *    route). The email is sent even if saving to the sheet fails (the error is logged).
+ *  - "Calculate my estimate" (action "estimate"): the form sends the customer's name, phone, email and trip when
+ *    they ask to see the price. It is saved with status "Estimate viewed" and you get a short "not booked yet"
+ *    email, so you can follow up even if they leave. If they then send the request, the same row and reference
+ *    number are updated (the page proves it is the same visitor with a one-time key), instead of adding a new row.
  *  - keeps a copy of the request for one hour, so the customer can press "Email me a copy" on the summary
  *    screen. The page gets a one-time key for it; at most COPY_LIMIT copies are sent per request, and the copy
  *    only ever contains this request's details, built here (never text sent with the copy request).
@@ -46,6 +50,7 @@ var COPY_LIMIT = 2;              // "Email me a copy": copies per request
 var COPY_MINUTES = 60;           // ... available for this long after the request is sent
 var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 var TIME_ZONE = "America/Edmonton";
+var ESTIMATE_HOURS = 6;          // a booking sent within this time updates its "Estimate viewed" row
 
 var REQUEST_COLUMNS = ["Reference", "Received", "Status", "First name", "Last name", "Full name", "Phone", "Email",
   "Pickup", "Pickup GPS", "Pickup entered as", "Delivery", "Delivery GPS", "Delivery entered as",
@@ -66,6 +71,7 @@ function doPost(e) {
     var data = JSON.parse((e && e.postData && e.postData.contents) || "{}");
     if (data.action === "emailCopy") return json(emailCopy(data));
     if (data.action === "nexaPhoneMail") return json(nexaPhoneMail(data));
+    if (data.action === "estimate") return json(saveEstimate(data));
     // Spam: the hidden "website" field is filled in, or the form was completed too quickly.
     // Reply "ok" so bots learn nothing, but send no email.
     if (clean(data.website, 200) || !(Number(data.elapsedMs) >= MIN_FILL_MS)) {
@@ -79,14 +85,16 @@ function doPost(e) {
     }
     var received = new Date();
     var reference = "";
+    // The same visitor already saw their estimate: keep its reference and update that row.
+    var fromEstimate = estimateReference(data);
     try {
-      reference = nextReference(received);
+      reference = fromEstimate || nextReference(received);
     } catch (err) {
       console.error("Reference number failed: " + (err && err.stack || err));
     }
     // Saving to the sheet must never stop the email.
     try {
-      saveToSheet(data, reference, received);
+      saveToSheet(data, reference, received, "New", !!fromEstimate);
     } catch (err) {
       console.error("Saving to the sheet failed for " + (reference || "(no reference)") + ": " + (err && err.stack || err));
     }
@@ -190,7 +198,7 @@ function cellText(value, max) {
   return /^[=+\-@]/.test(v) ? "'" + v : v;
 }
 
-function saveToSheet(data, reference, received) {
+function saveToSheet(data, reference, received, status, update) {
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
@@ -204,7 +212,7 @@ function saveToSheet(data, reference, received) {
     var names = splitName(data);
     var other = otherContact(data);
     var row = [
-      cellText(reference || "(none)"), received, "New",
+      cellText(reference || "(none)"), received, status || "New",
       cellText(names.first, 60), cellText(names.last, 60), cellText(data.name, 120),
       cellText(data.phone, 40), cellText(data.email, 200),
       cellText(pickup.label, 300), cellText(point(pickup) || ""), cellText(pickup.entered, 200),
@@ -219,11 +227,16 @@ function saveToSheet(data, reference, received) {
       cellText(other.role, 40), cellText(other.name, 120), cellText(other.phone, 40), cellText(other.email, 200), cellText(other.address, 300),
       data.termsAccepted ? cellText(data.termsVersion, 20) : ""
     ];
-    appendByHeader(tab(ss, "Requests", REQUEST_COLUMNS), REQUEST_COLUMNS, row);
+    var requests = tab(ss, "Requests", REQUEST_COLUMNS);
+    // Updating an "Estimate viewed" row keeps when it first came in and its private token.
+    if (!(update && reference && updateByHeader(requests, REQUEST_COLUMNS, row, reference, ["Received", "Private token"]))) {
+      appendByHeader(requests, REQUEST_COLUMNS, row);
+    }
     var horses = horseList(data.horseDetails).map(function (h) {
       return [cellText(reference || "(none)"), String(h.horse), cellText(h.stall, 40), cellText(h.name, 60), cellText(h.age, 20),
         cellText(h.breed, 60), cellText(h.gender, 20), cellText(h.colour, 40), cellText(h.height, 20), cellText(h.weight, 20), h.foalOrYoung];
     });
+    if (update && reference) removeHorseRows(tab(ss, "Horses", HORSE_COLUMNS), reference);
     if (horses.length) {
       var horseSheet = tab(ss, "Horses", HORSE_COLUMNS);
       horseSheet.getRange(horseSheet.getLastRow() + 1, 1, horses.length, HORSE_COLUMNS.length).setValues(horses);
@@ -251,6 +264,83 @@ function appendByHeader(sheet, columns, values) {
     var i = columns.indexOf(h);
     return i === -1 ? "" : values[i];
   }));
+}
+
+// Updates the row whose Reference is `reference`, by column name. Columns in `keep`, and columns that are not
+// ours (the dashboard's), keep what they have. Returns false when there is no such row.
+function updateByHeader(sheet, columns, values, reference, keep) {
+  var width = Math.max(sheet.getLastColumn(), 1);
+  var headers = sheet.getRange(1, 1, 1, width).getDisplayValues()[0];
+  var refCol = headers.indexOf("Reference");
+  var last = sheet.getLastRow();
+  if (refCol === -1 || last < 2) return false;
+  var refs = sheet.getRange(2, refCol + 1, last - 1, 1).getDisplayValues();
+  var at = -1;
+  for (var i = refs.length - 1; i >= 0; i--) if (refs[i][0] === reference) { at = i + 2; break; }
+  if (at === -1) return false;
+  var current = sheet.getRange(at, 1, 1, width).getValues()[0];
+  var next = headers.map(function (h, j) {
+    var k = columns.indexOf(h);
+    return k === -1 || (keep || []).indexOf(h) !== -1 ? current[j] : values[k];
+  });
+  sheet.getRange(at, 1, 1, width).setValues([next]);
+  return true;
+}
+
+// Removes the "Horses" rows of one reference (they are added again with the latest details).
+function removeHorseRows(sheet, reference) {
+  var last = sheet.getLastRow();
+  if (last < 2) return;
+  var refs = sheet.getRange(2, 1, last - 1, 1).getDisplayValues();
+  for (var i = refs.length - 1; i >= 0; i--) if (refs[i][0] === reference) sheet.deleteRow(i + 2);
+}
+
+// ---------- "Calculate my estimate" ----------
+
+// Saves the visitor's details when they ask to see their price, and tells you by email.
+function saveEstimate(data) {
+  // Spam: same rules as a request. Reply "ok" so bots learn nothing.
+  if (clean(data.website, 200) || !(Number(data.elapsedMs) >= MIN_FILL_MS)) return { ok: true };
+  if (!clean(data.name, 120)) return { ok: false, error: "A name is required." };
+  if (!clean(data.phone, 40) && !clean(data.email, 200)) return { ok: false, error: "A phone number or an email address is required." };
+  data.termsAccepted = false;
+  data.smsConsent = false;
+  var received = new Date();
+  var reference = nextReference(received);
+  try {
+    saveToSheet(data, reference, received, "Estimate viewed", false);
+  } catch (err) {
+    console.error("Saving the estimate failed for " + reference + ": " + (err && err.stack || err));
+  }
+  try {
+    sendBookingEmail(data, reference, "estimate");
+  } catch (err) {
+    console.error("Estimate email failed for " + reference + ": " + (err && err.stack || err));
+  }
+  var key = Utilities.getUuid().replace(/-/g, "");
+  try {
+    CacheService.getScriptCache().put("estimate:" + reference, key, ESTIMATE_HOURS * 3600);
+  } catch (err) {
+    console.error("Keeping the estimate key failed for " + reference + ": " + (err && err.stack || err));
+    key = "";
+  }
+  return key ? { ok: true, reference: reference, estimateKey: key } : { ok: true, reference: reference };
+}
+
+// The estimate's reference when the request comes from the same visitor (matching one-time key), otherwise "".
+function estimateReference(data) {
+  var reference = clean(data.estimateReference, 30), key = clean(data.estimateKey, 64);
+  if (!/^NX-\d{4}-\d{4,}$/.test(reference) || !/^[a-f0-9]{32}$/.test(key)) return "";
+  try {
+    var saved = CacheService.getScriptCache().get("estimate:" + reference);
+    if (saved && saved === key) {
+      CacheService.getScriptCache().remove("estimate:" + reference);
+      return reference;
+    }
+  } catch (err) {
+    console.error("Checking the estimate key failed for " + reference + ": " + (err && err.stack || err));
+  }
+  return "";
 }
 
 // The optional second contact (emergency contact, agent or receiver at delivery), cleaned.
@@ -438,17 +528,17 @@ function sendCustomerCopy(snap, reference, to) {
 
 // ---------- email ----------
 
-function sendBookingEmail(data, reference) {
+function sendBookingEmail(data, reference, kind) {
   var pickup = data.pickup || {};
   var dropoff = data.dropoff || {};
   var name = clean(data.name, 120);
-  var subject = "New Booking / Estimate request" + (reference ? " " + reference : "") + " – " + name + " – " +
-    clean(pickup.label, 80) + " to " + clean(dropoff.label, 80);
+  var subject = (kind === "estimate" ? "New estimate (not booked yet)" : "New Booking / Estimate request") +
+    (reference ? " " + reference : "") + " – " + name + " – " + clean(pickup.label, 80) + " to " + clean(dropoff.label, 80);
 
   var map = routeMapImage(data);
   var mapsLink = googleMapsLink(data);
-  var html = bookingHtml(data, map, mapsLink, reference);
-  var text = bookingText(data, map, mapsLink, reference);
+  var html = bookingHtml(data, map, mapsLink, reference, kind);
+  var text = bookingText(data, map, mapsLink, reference, kind);
 
   var message = { to: TO_EMAIL, subject: subject, htmlBody: html, body: text, name: FROM_NAME };
   var email = clean(data.email, 200);
@@ -664,12 +754,17 @@ function quoteRows(quote) {
   return rows;
 }
 
-function bookingHtml(data, map, mapsLink, reference) {
+var ESTIMATE_NOTE = "The customer saw this estimate on the website after giving their name, phone and email. " +
+  "They have not sent a booking request yet: call or email them to follow up. If they send it, you will get the full request with the same reference number.";
+
+function bookingHtml(data, map, mapsLink, reference, kind) {
   var cell = "padding:6px 10px;border-bottom:1px solid #DCCFE6;vertical-align:top;";
   var html = '<div style="font-family:Arial,Helvetica,sans-serif;color:#222222;max-width:680px;">' +
-    '<h2 style="color:#6A2C91;margin:0 0 4px;">New Booking / Estimate request' + (reference ? " " + esc(reference) : "") + '</h2>' +
+    '<h2 style="color:#6A2C91;margin:0 0 4px;">' + (kind === "estimate" ? "New estimate (not booked yet)" : "New Booking / Estimate request") +
+    (reference ? " " + esc(reference) : "") + '</h2>' +
     '<p style="margin:0 0 16px;color:#5E5568;">Sent from the Booking / Estimate form on nexahorsetransport.ca' +
-    (data.submittedAt ? " on " + esc(clean(data.submittedAt, 80)) : "") + ".</p>";
+    (data.submittedAt ? " on " + esc(clean(data.submittedAt, 80)) : "") + ".</p>" +
+    (kind === "estimate" ? '<p style="margin:0 0 16px;padding:10px 12px;background:#FFF9CC;border-left:4px solid #6A2C91;">' + esc(ESTIMATE_NOTE) + "</p>" : "");
 
   html += '<h3 style="color:#6A2C91;margin:16px 0 6px;">Route map</h3>';
   if (map.blob) {
@@ -703,8 +798,10 @@ function bookingHtml(data, map, mapsLink, reference) {
   return html + "</div>";
 }
 
-function bookingText(data, map, mapsLink, reference) {
-  var lines = ["NEW BOOKING / ESTIMATE REQUEST" + (reference ? " " + reference : "") + " (nexahorsetransport.ca)", ""];
+function bookingText(data, map, mapsLink, reference, kind) {
+  var lines = [(kind === "estimate" ? "NEW ESTIMATE (NOT BOOKED YET)" : "NEW BOOKING / ESTIMATE REQUEST") + (reference ? " " + reference : "") +
+    " (nexahorsetransport.ca)", ""];
+  if (kind === "estimate") lines.push(ESTIMATE_NOTE, "");
   bookingRows(data, reference).forEach(function (section) {
     lines.push(section[0].toUpperCase());
     section[1].forEach(function (row) { if (row[1]) lines.push(row[0] + ": " + row[1]); });
