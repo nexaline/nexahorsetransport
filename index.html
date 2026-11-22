@@ -28,7 +28,7 @@
   <!-- Fonts load without holding up the page: text shows at once in a system font, then switches. -->
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&amp;family=Source+Sans+3:wght@400;600&amp;display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&amp;family=Source+Sans+3:wght@400;600&amp;display=swap"></noscript>
-  <link rel="stylesheet" href="styles.css?v=1.34">
+  <link rel="stylesheet" href="styles.css?v=1.35">
   <script>if (/[?&]embed=booking\b/.test(location.search)) document.documentElement.classList.add("embed");</script>
 </head>
 <body>
@@ -297,7 +297,7 @@
                   </p>
                   <div class="route-map" id="route-map" role="region" aria-label="Map of the pickup, destination and route"></div>
                   <p class="hint map-locked-note">To change the pickup or destination, go back to step 1.</p>
-                  <p class="hint" id="map-status">The <strong>Pickup</strong> pin is where we collect your horse and the <strong>Destination</strong> pin is the delivery. Drag either pin to fine-tune it.</p>
+                  <p class="hint" id="map-status">The <strong>Departure</strong> pin is where we collect your horse and the <strong>Destination</strong> pin is the delivery. Drag either pin to fine-tune it.</p>
                 </div>
               </div>
               <div class="trip-facts" id="trip-facts" aria-live="polite">
@@ -760,12 +760,12 @@
     var kmFormat = new Intl.NumberFormat("en-CA");
     var dayFormat = new Intl.DateTimeFormat("en-CA", { month: "short", day: "numeric", year: "numeric" });
 
-    // "Calgary" from "Calgary, AB, Canada" or "Near Calgary, AB, Canada"; "Pickup pin"/"Destination pin" for bare coordinates.
+    // "Calgary" from "Calgary, AB, Canada" or "Near Calgary, AB, Canada"; "Departure pin"/"Destination pin" for bare coordinates.
     function shortPlace(loc) {
       var p = loc.place;
       if (!p || !p.label) return loc.key === "pickup" ? "Pickup" : "Delivery";
       var name = p.label.replace(/^Near /, "").split(",")[0].trim();
-      return /^-?\d/.test(name) ? (loc.key === "pickup" ? "Pickup pin" : "Destination pin") : name;
+      return /^-?\d/.test(name) ? (loc.key === "pickup" ? "Departure pin" : "Destination pin") : name;
     }
 
     function localDate(iso) {
@@ -1006,7 +1006,7 @@
       return {
         key: key,
         name: key === "pickup" ? "Pickup" : "Delivery",
-        pinLabel: key === "pickup" ? "Pickup" : "Destination",
+        pinLabel: key === "pickup" ? "Departure" : "Destination",
         place: null,
         version: 0,
         input: document.getElementById(key),
@@ -1227,7 +1227,7 @@
       if (routeMap) routeMap.setOptions({ draggableCursor: null });
     }
 
-    // A map pin that says what it is ("Pickup", "Destination") instead of a letter.
+    // A map pin that says what it is ("Departure", "Destination") instead of a letter.
     function wordPin(maps, text, fill) {
       var w = Math.round(text.length * 8.8 + 26), h = 30, tip = 9;
       var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + (h + tip) + '" viewBox="0 0 ' + w + " " + (h + tip) + '">' +
@@ -1829,19 +1829,21 @@
     ).join("");
     var lastEstimateKey = "";
 
-    // When the estimate (last step) is shown, the team gets a copy even if the visitor never sends it.
+    // When the price is shown ("Calculate my estimate"), the team gets a copy in Nexa Phone with the visitor's
+    // name, phone, email and NX reference, even if they never send it. Sent again only if the trip changes.
     function sendEstimateToDispatch() {
       if (!DISPATCH_ENDPOINT || estimateId.length !== 32) return;
       try {
         var q = calcQuote();
         if (!q) return;
         var data = bookingData(form, q);
-        var key = JSON.stringify([data.pickup, data.dropoff, data.distanceKm, data.horseDetails, data.dates, data.quote.total]);
+        var key = JSON.stringify([data.pickup, data.dropoff, data.distanceKm, data.horseDetails, data.dates, data.quote.total, data.name, data.phone, data.email]);
         if (key === lastEstimateKey || data.website) return;
         lastEstimateKey = key;
         var copy = {
           estimateId: estimateId, pickup: data.pickup, dropoff: data.dropoff, distanceKm: data.distanceKm,
-          dates: data.dates, horseDetails: data.horseDetails, quote: data.quote, elapsedMs: data.elapsedMs
+          dates: data.dates, horseDetails: data.horseDetails, quote: data.quote, elapsedMs: data.elapsedMs,
+          name: data.name, phone: data.phone, email: data.email, reference: estimateLead.reference
         };
         fetch(DISPATCH_ENDPOINT, {
           method: "POST",
@@ -1968,7 +1970,7 @@
         updateMapMarkers();
       }
       updateQuote();
-      if (n === STEPS.length) sendEstimateToDispatch();
+      if (n === STEPS.length && estimateShown) sendEstimateToDispatch();
       var title = document.getElementById("booking-step-" + n + "-title");
       title.setAttribute("tabindex", "-1");
       title.focus({ preventScroll: true });
@@ -2292,9 +2294,10 @@
     var CONTACT_IDS = ["first-name", "last-name", "phone", "email"];
     var calcButton = document.getElementById("calc-estimate");
 
+    // Returns a promise that settles when the booking script has answered (or right away when nothing is sent).
     function saveEstimateLead() {
       var q = calcQuote();
-      if (!q || !BOOKING_ENDPOINT) return;
+      if (!q || !BOOKING_ENDPOINT) return Promise.resolve();
       var data = bookingData(form, q);
       data.action = "estimate";
       // The name goes as "leadName": an older booking script (before the "estimate" action) then replies
@@ -2302,8 +2305,8 @@
       data.leadName = data.name;
       data.name = "";
       // Spam: same rules as sending; a bot gets the price but nothing is saved.
-      if (data.website || data.elapsedMs < MIN_FILL_MS) return;
-      fetch(BOOKING_ENDPOINT, {
+      if (data.website || data.elapsedMs < MIN_FILL_MS) return Promise.resolve();
+      return fetch(BOOKING_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(data),
@@ -2331,7 +2334,8 @@
       document.getElementById("after-estimate").hidden = false;
       sendButton.hidden = false;
       updateQuote();
-      saveEstimateLead();
+      // Nexa Phone gets it after the booking script answers, so it carries the NX reference number.
+      saveEstimateLead().then(sendEstimateToDispatch, sendEstimateToDispatch);
       var title = document.getElementById("estimate-title");
       title.scrollIntoView({ behavior: "smooth", block: "start" });
       title.focus({ preventScroll: true });
@@ -2514,7 +2518,7 @@
       return '<svg viewBox="0 0 900 300" width="100%" role="img" aria-label="Drawing of the route from ' + escapeHtml(c.a) + ' to ' + escapeHtml(c.b) + '">' +
         '<rect width="900" height="300" rx="12" fill="#EAF0E4"/>' +
         '<path d="' + d + '" fill="none" stroke="#6A2C91" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>' +
-        pin(g.a, "Pickup", "#6A2C91", c.a) + pin(g.b, "Destination", "#B0122B", c.b) + '</svg>';
+        pin(g.a, "Departure", "#6A2C91", c.a) + pin(g.b, "Destination", "#B0122B", c.b) + '</svg>';
     }
 
     function addText(parent, tag, cls, text) {
@@ -2625,7 +2629,7 @@
           ctx.beginPath();
           g.line.forEach(function (p, i) { (i ? ctx.lineTo : ctx.moveTo).call(ctx, 40 + p[0], y + p[1]); });
           ctx.stroke();
-          [[g.a, "Pickup", "#6A2C91", c.a], [g.b, "Destination", "#B0122B", c.b]].forEach(function (pin) {
+          [[g.a, "Departure", "#6A2C91", c.a], [g.b, "Destination", "#B0122B", c.b]].forEach(function (pin) {
             var px = 40 + pin[0][0], py = y + pin[0][1];
             ctx.fillStyle = pin[2];
             ctx.beginPath();
@@ -2635,7 +2639,7 @@
             ctx.beginPath();
             ctx.arc(px, py, 5, 0, Math.PI * 2);
             ctx.fill();
-            // "Pickup: Calgary", the word in the pin's colour, centred under the pin
+            // "Departure: Calgary", the word in the pin's colour, centred under the pin
             ctx.font = "700 16px " + BODY;
             var word = pin[1] + ": ", ww = ctx.measureText(word).width;
             ctx.font = "16px " + BODY;
