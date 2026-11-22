@@ -1030,3 +1030,16 @@ html.embed .terms-dialog { max-height: min(560px, 90vh); }
 @media (prefers-reduced-motion: reduce) {
   .mnav-panel, .mnav-backdrop { transition: none; }
 }
+
+/* ---------- Booking step 4: price shown after "Calculate my estimate" ---------- */
+.step-card[hidden], #send-booking[hidden], .estimate-gate[hidden] { display: none; }
+.estimate-gate { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+.estimate-gate .btn { align-self: flex-start; min-height: 56px; font-size: 1.1rem; }
+.estimate-consent { font-size: 0.95rem; }
+.estimate-consent a { color: var(--purple); }
+.quote.is-locked .quote-total-row { display: none; }
+.quote-row.quote-locked { padding: 14px; border: 2px dashed var(--purple); border-radius: 10px; background: var(--tint); color: var(--deep); font-weight: 600; }
+#estimate-title:focus { outline: none; }
+@media (max-width: 640px) {
+  .estimate-gate .btn { align-self: stretch; }
+}
