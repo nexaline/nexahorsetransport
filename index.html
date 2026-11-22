@@ -296,6 +296,7 @@
                     <button type="button" class="link-button" id="map-hint-cancel">Cancel</button>
                   </p>
                   <div class="route-map" id="route-map" role="region" aria-label="Map of the pickup, destination and route"></div>
+                  <p class="hint map-locked-note">To change the pickup or destination, go back to step 1.</p>
                   <p class="hint" id="map-status">The <strong>Pickup</strong> pin is where we collect your horse and the <strong>Destination</strong> pin is the delivery. Drag either pin to fine-tune it.</p>
                 </div>
               </div>
@@ -1163,6 +1164,26 @@
     var pickingFor = null;
     // After a pin is placed or dragged the map stays where the customer is looking, instead of zooming out.
     var keepMapView = false;
+    // After step 1 the map is only a picture of the chosen route: no dragging pins, no tapping, no panning.
+    var mapLocked = false;
+
+    function setMapLocked(locked) {
+      mapLocked = locked;
+      if (locked) stopPicking();
+      if (!routeMap) return;
+      routeMap.setOptions({
+        gestureHandling: locked ? "none" : "auto",
+        keyboardShortcuts: !locked,
+        zoomControl: !locked,
+        draggableCursor: locked ? "default" : null
+      });
+      Object.keys(routeMarkers).forEach(function (key) {
+        var marker = routeMarkers[key];
+        if (marker.setDraggable) marker.setDraggable(!locked);
+        if (marker.setClickable) marker.setClickable(!locked);
+      });
+      document.getElementById("route-map").classList.toggle("is-locked", locked);
+    }
     var mapHint = document.getElementById("map-hint");
 
     function mapUnavailable() {
@@ -1179,12 +1200,13 @@
       routeMap = new maps.Map(document.getElementById("route-map"),
         Object.assign({ center: WESTERN_CANADA, zoom: 4, draggableCursor: null }, MAP_OPTIONS));
       routeMap.addListener("click", function (e) {
-        if (!pickingFor) return;
+        if (!pickingFor || mapLocked) return;
         var loc = pickingFor;
         stopPicking();
         placePin(loc, e.latLng);
       });
       updateMapMarkers();
+      setMapLocked(mapLocked);
     }).catch(mapUnavailable);
 
     function startPicking(loc) {
@@ -1227,9 +1249,9 @@
           if (!marker) {
             marker = routeMarkers[loc.key] = new maps.Marker({
               icon: wordPin(maps, loc.pinLabel, loc.key === "pickup" ? "#6A2C91" : "#B0122B"),
-              title: loc.pinLabel + ": " + loc.name + " location (drag to adjust)", draggable: true
+              title: loc.pinLabel + ": " + loc.name + " location", draggable: !mapLocked, clickable: !mapLocked
             });
-            marker.addListener("dragend", function () { placePin(loc, marker.getPosition()); });
+            marker.addListener("dragend", function () { if (!mapLocked) placePin(loc, marker.getPosition()); });
           }
           marker.setPosition(position);
           marker.setMap(routeMap);
@@ -1936,7 +1958,7 @@
         jump.disabled = !done;
         li.querySelector(".step-label").textContent = (done ? "\u2713 " : "") + stepLabels[i];
       });
-      if (n !== 1) stopPicking();
+      setMapLocked(n !== 1);
       // The one route map moves into this step's map spot, then re-measures and fits the pins and route.
       var slot = STEPS[n - 1].querySelector(".map-slot");
       if (slot && mapBlock.parentNode !== slot) slot.appendChild(mapBlock);
@@ -2275,6 +2297,10 @@
       if (!q || !BOOKING_ENDPOINT) return;
       var data = bookingData(form, q);
       data.action = "estimate";
+      // The name goes as "leadName": an older booking script (before the "estimate" action) then replies
+      // "a name is required" and saves or emails nothing, instead of treating this as a full request.
+      data.leadName = data.name;
+      data.name = "";
       // Spam: same rules as sending; a bot gets the price but nothing is saved.
       if (data.website || data.elapsedMs < MIN_FILL_MS) return;
       fetch(BOOKING_ENDPOINT, {

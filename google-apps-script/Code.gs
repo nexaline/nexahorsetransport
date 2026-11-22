@@ -301,7 +301,9 @@ function removeHorseRows(sheet, reference) {
 function saveEstimate(data) {
   // Spam: same rules as a request. Reply "ok" so bots learn nothing.
   if (clean(data.website, 200) || !(Number(data.elapsedMs) >= MIN_FILL_MS)) return { ok: true };
-  if (!clean(data.name, 120)) return { ok: false, error: "A name is required." };
+  // The page sends the name as "leadName", so a booking script from before this action ignores the estimate.
+  data.name = clean(data.leadName, 120) || clean(data.name, 120);
+  if (!data.name) return { ok: false, error: "A name is required." };
   if (!clean(data.phone, 40) && !clean(data.email, 200)) return { ok: false, error: "A phone number or an email address is required." };
   data.termsAccepted = false;
   data.smsConsent = false;

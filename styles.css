@@ -515,6 +515,8 @@ select[aria-invalid="true"]:focus { outline: 2px solid var(--error); border-colo
 .route-map.unavailable { height: auto; padding: 14px; color: var(--muted); font-size: 0.95rem; }
 #map-status { margin-top: 8px; }
 .map-slot:not([data-map-slot="1"]) #map-status { display: none; }
+.map-locked-note { display: none; margin-top: 8px; }
+.map-slot:not([data-map-slot="1"]) .map-locked-note { display: block; }
 .map-slot[data-map-slot="2"] .route-map,
 .map-slot[data-map-slot="3"] .route-map { height: 260px; }
 .map-slot[data-map-slot="4"] .route-map { height: 100%; min-height: 300px; }
