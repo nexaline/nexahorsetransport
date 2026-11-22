@@ -39,3 +39,20 @@ jobs:
             echo "::error::The web app did not answer with {\"ok\":true}. See the response above."
             exit 1
           fi
+
+      - name: Check the booking script version
+        run: |
+          URL=$(grep -oE 'var BOOKING_ENDPOINT = "[^"]*"' index.html | cut -d'"' -f2)
+          # An "estimate" with a name but no phone or email: saves and emails nothing in any version.
+          # The script from v1.34 on answers "A phone number or an email address is required";
+          # an older one doesn't know "estimate" and answers "A name is required".
+          curl -sS -L -o version-body.txt -H "Content-Type: text/plain;charset=utf-8" \
+            --data '{"action":"estimate","leadName":"Version check","elapsedMs":9000,"website":""}' "$URL" || true
+          echo "--- response body"; head -c 300 version-body.txt; echo
+          if grep -q 'phone number or an email' version-body.txt; then
+            echo "Result: the deployed booking script has \"Calculate my estimate\" (v1.34 or later)."
+          elif grep -q 'name is required' version-body.txt; then
+            echo "::warning::The deployed booking script is older than v1.34: paste the latest Code.gs and deploy a New version."
+          else
+            echo "::warning::Unexpected answer; see the response above."
+          fi
