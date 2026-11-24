@@ -40,7 +40,7 @@
  * emails and the Nexa Phone emails (step 6) share that allowance.
  */
 
-var TO_EMAIL = "nexahorsetransport@gmail.com";
+var TO_EMAIL = "booking@nexahorsetransport.ca";
 var FROM_NAME = "Nexa Horse Transport website";
 var MIN_FILL_MS = 3000;          // forms completed faster than this are treated as spam
 var ROUTE_COLOR = "0x6A2C91";    // brand purple
@@ -510,12 +510,12 @@ function sendCustomerCopy(snap, reference, to) {
   html += "</table>" +
     '<p style="margin:12px 0;padding:10px 12px;background:#FFF9CC;border-left:4px solid #E8141C;">' + esc(note) + "</p>" +
     '<p style="margin:16px 0 6px;color:#5E5568;">Questions? Reply to this email, or contact us:</p>' +
-    '<p style="margin:0;line-height:1.7;">Call us: <a href="tel:+18444916392" style="color:#6A2C91;font-weight:bold;">1-844-491-NEXA (1-844-491-6392)</a><br>' +
-    'Email: <a href="mailto:nexahorsetransport@gmail.com" style="color:#6A2C91;font-weight:bold;">nexahorsetransport@gmail.com</a><br>' +
+    '<p style="margin:0;line-height:1.7;">Call us: <a href="tel:+18444916392" style="color:#6A2C91;font-weight:bold;">1-844-491-6392 (toll-free)</a><br>' +
+    'Email: <a href="mailto:info@nexahorsetransport.ca" style="color:#6A2C91;font-weight:bold;">info@nexahorsetransport.ca</a><br>' +
     'Website: <a href="https://www.nexahorsetransport.ca" style="color:#6A2C91;font-weight:bold;">www.nexahorsetransport.ca</a></p>' +
     '<p style="margin:12px 0 0;color:#5E5568;">Nexa Horse Transport</p></div>';
-  text.push(note, "", "Questions? Reply to this email, or contact us:", "Call us: 1-844-491-NEXA (1-844-491-6392)",
-    "Email: nexahorsetransport@gmail.com", "Website: https://www.nexahorsetransport.ca", "", "Nexa Horse Transport");
+  text.push(note, "", "Questions? Reply to this email, or contact us:", "Call us: 1-844-491-6392 (toll-free)",
+    "Email: info@nexahorsetransport.ca", "Website: https://www.nexahorsetransport.ca", "", "Nexa Horse Transport");
   var message = {
     to: to,
     subject: "Your Nexa Horse Transport booking/estimate request \u2013 " + reference,

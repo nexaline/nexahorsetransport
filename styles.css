@@ -1045,3 +1045,19 @@ html.embed .terms-dialog { max-height: min(560px, 90vh); }
 @media (max-width: 640px) {
   .estimate-gate .btn { align-self: stretch; }
 }
+
+/* Meet the team: AI assistants (Reina and Colt), clearly labelled as AI */
+.team-ai { margin-top: 56px; }
+.team-ai-title { margin: 0 0 8px; font-size: 1.5rem; color: var(--deep); }
+.team-ai-intro { max-width: 760px; margin: 0 0 20px; }
+.team-ai-banner { display: block; width: 100%; height: auto; margin: 0 0 20px; border-radius: 16px; }
+.team-ai-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.team-card-ai { margin-top: 0; align-items: flex-start; }
+.team-card-ai .team-photo-small { width: 112px; height: 112px; max-width: 112px; }
+.team-card-ai .team-text { flex: 1 1 200px; }
+@media (max-width: 760px) {
+  .team-ai-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Links marked "hidden" (e.g. the Videos link while the Videos section is hidden) stay hidden in the footer */
+.site-footer a[hidden] { display: none; }

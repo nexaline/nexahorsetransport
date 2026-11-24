@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Colt, AI assistant (placeholder picture)">
+  <rect width="240" height="240" fill="#6A2C91"/>
+  <circle cx="120" cy="104" r="58" fill="#FFFFFF" opacity="0.12"/>
+  <text x="120" y="126" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="72" font-weight="800" fill="#FFE100">C</text>
+  <rect x="78" y="168" width="84" height="34" rx="17" fill="#FFE100"/>
+  <text x="120" y="192" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="800" fill="#3D1758">AI</text>
+</svg>

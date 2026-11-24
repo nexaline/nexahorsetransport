@@ -14,12 +14,12 @@
   var T = fr ? {
     home: "Accueil", estimate: "Estimation", call: "Appeler", menu: "Menu", close: "Fermer", title: "Menu",
     homePage: "Page d'accueil", alberta: "Alberta", canada: "Partout au Canada", longTrips: "Longs trajets",
-    help: "Planifier votre trajet", contact: "Nous joindre", callUs: "Appelez-nous", textUs: "Téléphone",
+    help: "Planifier votre trajet", contact: "Nous joindre", callUs: "Appelez-nous", tollFree: "(sans frais)", textUs: "Téléphone",
     email: "Courriel", booking: "Réservation / Estimation", legal: "Informations légales", barLabel: "Menu du téléphone"
   } : {
     home: "Home", estimate: "Estimate", call: "Call", menu: "Menu", close: "Close", title: "Menu",
     homePage: "Home page", alberta: "Alberta", canada: "Across Canada", longTrips: "Long-distance trips",
-    help: "Plan your trip", contact: "Contact us", callUs: "Call us", textUs: "Phone",
+    help: "Plan your trip", contact: "Contact us", callUs: "Call us", tollFree: "(toll-free)", textUs: "Phone",
     email: "Email", booking: "Booking / Estimate", legal: "Legal", barLabel: "Phone menu"
   };
 
@@ -94,7 +94,7 @@
   bar.innerHTML =
     '<a class="mnav-item" href="' + (onHome ? "#home" : "index.html") + '">' + icon("home") + "<span>" + T.home + "</span></a>" +
     '<a class="mnav-item" href="' + (bookingHere ? "#booking" : "index.html#booking") + '">' + icon("estimate") + "<span>" + T.estimate + "</span></a>" +
-    '<a class="mnav-item mnav-call" href="tel:+18444916392" aria-label="' + T.call + ' 1-844-491-NEXA (1-844-491-6392)">' + icon("call") + "<span>" + T.call + "</span></a>" +
+    '<a class="mnav-item mnav-call" href="tel:+18444916392" aria-label="' + T.call + ' 1-844-491-6392 (toll-free)">' + icon("call") + "<span>" + T.call + "</span></a>" +
     '<button type="button" class="mnav-item mnav-menu-btn" aria-expanded="false" aria-controls="mnav-sheet">' + icon("menu") + "<span>" + T.menu + "</span></button>";
 
   // ----- The Menu panel -----
@@ -112,9 +112,9 @@
         '<button type="button" class="mnav-close" data-close>' + icon("close", 24) + "<span>" + T.close + "</span></button></div>" +
       '<div class="mnav-body">' +
         '<div class="mnav-contact">' +
-          '<a class="mnav-contact-call" href="tel:+18444916392">' + icon("call", 24) + "<span><strong>" + T.callUs + "</strong>1-844-491-NEXA<small>(1-844-491-6392)</small></span></a>" +
+          '<a class="mnav-contact-call" href="tel:+18444916392">' + icon("call", 24) + "<span><strong>" + T.callUs + "</strong>1-844-491-6392<small>" + T.tollFree + "</small></span></a>" +
           '<a class="mnav-contact-row" href="tel:+14036361639">' + icon("call", 22) + "<span>" + T.textUs + ": +1 403 636 1639</span></a>" +
-          '<a class="mnav-contact-row" href="mailto:nexahorsetransport@gmail.com">' + icon("mail", 22) + "<span>nexahorsetransport@gmail.com</span></a>" +
+          '<a class="mnav-contact-row" href="mailto:info@nexahorsetransport.ca">' + icon("mail", 22) + "<span>info@nexahorsetransport.ca</span></a>" +
         "</div>";
   GROUPS.forEach(function (g, i) {
     html += '<section class="mnav-group" aria-labelledby="mnav-g' + i + '"><h2 class="mnav-group-title" id="mnav-g' + i + '">' + esc(g.title) + "</h2><ul>";
