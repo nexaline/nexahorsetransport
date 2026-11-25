@@ -337,7 +337,7 @@ function privateCard(t, p) {
       phone ? h("a", { class: "btn", href: telLink(phone), text: "☎ Call " + phone }) : null,
       phone ? h("a", { class: "btn light", href: "sms:" + String(phone).replace(/[^\d+]/g, ""), text: "💬 Text" }) : null,
       email ? h("a", { class: "btn light", href: "mailto:" + email + "?subject=" + encodeURIComponent("Your Nexa trip " + t.id), text: "📧 Email" }) : null),
-    h("p", { class: "muted no-print", text: "Calls and texts from 1-844-491-NEXA inside the app come in a later part. For now these open your phone." }),
+    h("p", { class: "muted no-print", text: "Calls and texts from 1-844-491-6392 (toll-free) inside the app come in a later part. For now these open your phone." }),
     h("div", { class: "grid" }, mk("customerPhone", "Customer phone", "tel"), mk("customerEmail", "Customer email", "email"),
       mk("estimateTotal", "Website estimate ($)", "text"), mk("price", "Confirmed price before GST ($)", "number", { step: "0.01", min: "0" }),
       mk("invoiceNumber", "Invoice number"), mk("paidOn", "Paid on (date)", "date")),
@@ -361,7 +361,7 @@ function printDoc(t, p, kind) {
   const horses = (t.horses || []).map(x => esc(x.name) + (x.stall ? " (" + esc(x.stall) + ")" : "")).join(", ");
   w.document.write(`<!doctype html><meta charset="utf-8"><title>${kind} ${esc(t.id)}</title>
   <body style="font-family:system-ui,sans-serif;max-width:720px;margin:30px auto;color:#222">
-  <div style="background:#6A2C91;color:#fff;padding:16px 20px;border-bottom:4px solid #E8141C"><b style="font-size:22px">Nexa Horse Transport</b><br>Nexa Line Ltd · 1-844-491-NEXA · nexahorsetransport@gmail.com · www.nexahorsetransport.ca</div>
+  <div style="background:#6A2C91;color:#fff;padding:16px 20px;border-bottom:4px solid #E8141C"><b style="font-size:22px">Nexa Horse Transport</b><br>Nexa Line Ltd · 1-844-491-6392 (toll-free) · info@nexahorsetransport.ca · www.nexahorsetransport.ca</div>
   <h1 style="color:#3D1758">${kind} ${kind === "Invoice" && p.invoiceNumber ? "#" + esc(p.invoiceNumber) : ""}</h1>
   <p>Date: ${new Date().toLocaleDateString("en-CA")}<br>Trip reference: <b>${esc(t.id)}</b><br>Customer: ${esc(t.customerName)}${p.customerEmail ? "<br>" + esc(p.customerEmail) : ""}${p.customerPhone ? "<br>" + esc(p.customerPhone) : ""}</p>
   <p>From: ${esc(t.pickup && t.pickup.label)}<br>To: ${esc(t.delivery && t.delivery.label)}<br>Horses: ${horses || "-"}</p>
