@@ -62,6 +62,7 @@ The route is then checked against the `US_AREAS` boxes. If it still leaves Canad
 | **v1.35** | The start pin on the map is called "Departure" (map, hints, summary drawing, PDF and image); "Destination" stays. "Calculate my estimate" also sends the visitor's name, phone, email and NX reference to Nexa Phone (Dispatch > Bookings > Website estimates), after the booking script answers; no estimate goes to Nexa Phone before Calculate | tag `v1.35` |
 | **v1.3** | "Booking / Estimate": required fields with red messages, horse name/breed/gender/colour, requests saved to a Google Sheet with reference numbers (built on branch `v1.3`) | tag `v1.3` |
 | **v1.36** | New business emails: info@nexahorsetransport.ca shown everywhere on the site (footers, contact, terms, privacy, phone menu, structured data, llms.txt, trip sheet); booking requests now go to booking@nexahorsetransport.ca (`TO_EMAIL` in the booking script, which also makes customer replies go there). Toll-free number written as digits, "1-844-491-6392 (toll-free)" ("sans frais" on the French page). The Nexa Gmail stays only as the Google login | tag `v1.36` |
+| **v1.37** | Meet the team: "Our AI assistants" with Reina and Colt (illustrations `images/reina.webp/.jpg`, `images/colt.webp/.jpg`, both together in `images/reina-colt.webp`), clearly labelled as AI assistants, not people, with a person always one step away | tag `v1.37` |
 
 The `release/v1.0` branch is never changed, so version 1.0 can always be restored exactly.
 

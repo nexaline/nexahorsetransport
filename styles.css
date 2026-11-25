@@ -699,6 +699,19 @@ select[aria-invalid="true"]:focus { outline: 2px solid var(--error); border-colo
 }
 .team-card .team-text { flex: 1 1 320px; }
 .team-card .team-text p:last-child { margin-bottom: 0; }
+/* AI assistants (Reina and Colt): illustrated, clearly labelled as AI */
+.team-ai-heading { margin: 56px 0 8px; font-family: var(--font-head); font-weight: 800; font-size: 1.5rem; color: var(--deep); }
+.team-ai-intro { margin: 0; max-width: 760px; color: var(--body); }
+.team-ai-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 24px; }
+.team-card-ai { margin-top: 0; align-items: flex-start; }
+.team-card-ai picture { flex: 0 0 160px; }
+.team-photo-ai { display: block; width: 160px; height: 200px; aspect-ratio: 4 / 5; object-fit: cover; object-position: center top; border-radius: 14px; border: 3px solid #FFE100; }
+.team-card-ai .team-text { flex: 1 1 180px; }
+@media (max-width: 480px) {
+  .team-ai-grid { grid-template-columns: 1fr; }
+  .team-card-ai picture { flex-basis: 100%; }
+  .team-photo-ai { width: 100%; max-width: 280px; height: auto; margin: 0 auto; }
+}
 
 /* ---------- FAQ ---------- */
 .faq { border-top: 1px solid var(--line); }
