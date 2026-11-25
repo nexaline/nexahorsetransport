@@ -702,6 +702,7 @@ select[aria-invalid="true"]:focus { outline: 2px solid var(--error); border-colo
 /* AI assistants (Reina and Colt): illustrated, clearly labelled as AI */
 .team-ai-heading { margin: 56px 0 8px; font-family: var(--font-head); font-weight: 800; font-size: 1.5rem; color: var(--deep); }
 .team-ai-intro { margin: 0; max-width: 760px; color: var(--body); }
+.team-ai-call { margin-top: 12px; }
 .team-ai-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 24px; }
 .team-card-ai { margin-top: 0; align-items: flex-start; }
 .team-card-ai picture { flex: 0 0 160px; }
