@@ -438,6 +438,10 @@
                 </div>
                 <p class="hint contact-hint" id="contact-hint">We'll only contact you about this trip.</p>
               </div>
+              <div class="field checkbox sms-consent">
+                <input id="sms-consent" name="smsConsent" type="checkbox">
+                <label for="sms-consent">I agree to receive text messages from Nexa Horse Transport (Nexa Line Ltd.) at the phone number provided, about my quote, booking, and trip updates. Message frequency varies. Message and data rates may apply. Reply STOP to opt out, HELP for help. Consent is not a condition of booking. See our <a href="terms.html#sms" target="_blank">Terms</a> and <a href="privacy.html" target="_blank">Privacy Policy</a>.</label>
+              </div>
               <div class="estimate-gate" id="estimate-gate">
                 <button type="button" class="btn" id="calc-estimate">Calculate my estimate</button>
                 <p class="hint estimate-consent">By tapping &ldquo;Calculate my estimate&rdquo;, you agree that Nexa Horse Transport may call or email you about this estimate. We never sell your details. <a href="privacy.html" target="_blank">Privacy Policy</a></p>
@@ -498,10 +502,6 @@
               <div class="field checkbox">
                 <input id="agree" name="agree" type="checkbox" required>
                 <label for="agree">I have read and agree to the <a href="terms.html" target="_blank" id="agree-terms-link">Terms &amp; Conditions</a>. <span class="req" aria-hidden="true">*</span></label>
-              </div>
-              <div class="field checkbox sms-consent">
-                <input id="sms-consent" name="smsConsent" type="checkbox">
-                <label for="sms-consent">I agree to receive text messages from Nexa Horse Transport (Nexa Line Ltd.) at the phone number provided, about my quote, booking, and trip updates. Message frequency varies. Message and data rates may apply. Reply STOP to opt out, HELP for help. Consent is not a condition of booking. See our <a href="terms.html#sms" target="_blank">Terms</a> and <a href="privacy.html" target="_blank">Privacy Policy</a>.</label>
               </div>
             </div>
             <div class="step-nav">
@@ -1872,19 +1872,27 @@
 
     // When the price is shown ("Calculate my estimate"), the team gets a copy in Nexa Phone with the visitor's
     // name, phone, email and NX reference, even if they never send it. Sent again only if the trip changes.
+    // Ticking "I agree to receive text messages" after seeing the price: the estimate goes by text too.
+    document.getElementById("sms-consent").addEventListener("change", function () {
+      if (estimateShown) sendEstimateToDispatch();
+    });
+
     function sendEstimateToDispatch() {
       if (!DISPATCH_ENDPOINT || estimateId.length !== 32) return;
       try {
         var q = calcQuote();
         if (!q) return;
         var data = bookingData(form, q);
-        var key = JSON.stringify([data.pickup, data.dropoff, data.distanceKm, data.horseDetails, data.dates, data.quote.total, data.name, data.phone, data.email]);
+        var key = JSON.stringify([data.pickup, data.dropoff, data.distanceKm, data.horseDetails, data.dates, data.quote.total, data.name, data.phone, data.email, data.smsConsent]);
         if (key === lastEstimateKey || data.website) return;
+        // (The text box is part of the key: ticking it after seeing the price sends the estimate by text.)
         lastEstimateKey = key;
         var copy = {
           estimateId: estimateId, pickup: data.pickup, dropoff: data.dropoff, distanceKm: data.distanceKm,
           dates: data.dates, horseDetails: data.horseDetails, quote: data.quote, elapsedMs: data.elapsedMs,
-          name: data.name, phone: data.phone, email: data.email, reference: estimateLead.reference
+          name: data.name, phone: data.phone, email: data.email, reference: estimateLead.reference,
+          // Ticked "I agree to receive text messages": Nexa Phone texts them this estimate.
+          smsConsent: data.smsConsent
         };
         fetch(DISPATCH_ENDPOINT, {
           method: "POST",
