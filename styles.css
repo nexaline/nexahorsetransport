@@ -1059,3 +1059,7 @@ html.embed .terms-dialog { max-height: min(560px, 90vh); }
 @media (max-width: 640px) {
   .estimate-gate .btn { align-self: stretch; }
 }
+
+/* Meet the team: one-line founder contact (no photo or profile) */
+.team-founder { margin: 40px 0 0; padding: 18px 22px; background: var(--cream); border: 1px solid var(--line); border-radius: 16px; max-width: 760px; }
+.team-founder a { color: var(--purple); font-weight: 600; overflow-wrap: anywhere; }
