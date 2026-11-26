@@ -1655,6 +1655,26 @@
 
     // Arriving from "Book transport to this event" on the Events page: the event's place is the delivery location.
     var arriving = new URLSearchParams(window.location.search);
+    // Opened from Nexa Phone during a call ("Booking form" button): the caller's details are filled in,
+    // and the request notes say the office entered it on the phone. Everything else works as for a visitor.
+    (function prefillFromNexaPhone() {
+      var form = document.getElementById("first-name") && document.getElementById("first-name").form;
+      if (!form) return;
+      var set = function (field, value, max) { if (value && form[field] && !form[field].value) form[field].value = String(value).slice(0, max); };
+      var full = (arriving.get("name") || "").trim();
+      if (full) {
+        var parts = full.split(/\s+/);
+        set("firstName", parts.shift(), 60);
+        set("lastName", parts.join(" "), 60);
+      }
+      set("phone", arriving.get("phone"), 40);
+      set("email", arriving.get("email"), 120);
+      if (arriving.get("pickup")) { pickupLoc.input.value = arriving.get("pickup").slice(0, 200); updateLocation(pickupLoc); }
+      if (arriving.get("by") === "office") {
+        var details = document.getElementById("details");
+        if (!/Entered by the Nexa office/.test(details.value)) details.value = "Entered by the Nexa office during a phone call." + (details.value ? "\n" + details.value : "");
+      }
+    })();
     var arrivingPlace = arriving.get("delivery") || arriving.get("dropoff");
     if (arrivingPlace) {
       dropoffLoc.input.value = arrivingPlace.slice(0, 200);
