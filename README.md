@@ -65,6 +65,7 @@ The route is then checked against the `US_AREAS` boxes. If it still leaves Canad
 | **v1.37** | Meet the team: "Our AI assistants" with Reina and Colt (illustrations `images/reina.webp/.jpg`, `images/colt.webp/.jpg`, both together in `images/reina-colt.webp`), clearly labelled as AI assistants, not people, with a person always one step away. "Call Reina" / "Call Colt" buttons dial 1-844-491-6392 then 8 (Reina) or 9 (Colt) | tag `v1.37` |
 | **v1.39** | Mohammad's photo and profile removed from Meet the team (photo file deleted); one founder line with mohammad@nexahorsetransport.ca and 647-581-1547 | tag `v1.39` |
 | **v1.40** | Founder line moved from Meet the team to the purple footer on every page (Founder & President: Mohammad Reza, mohammad@nexahorsetransport.ca, 647-581-1547) | tag `v1.40` |
+| **v1.41** | SEO: Calgary page focused on Calgary (title, heading, "Popular routes from Calgary", 3 new FAQs); Alberta page "Horse transport & hauling in Alberta" with a hauling section and FAQ; home page link words "horse transport in Calgary" and "horse hauling across Alberta"; "equine transport" / "equine hauling" wording added; sitemap dates and llms.txt updated | tag `v1.41` |
 
 The `release/v1.0` branch is never changed, so version 1.0 can always be restored exactly.
 
