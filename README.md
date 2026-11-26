@@ -64,6 +64,7 @@ The route is then checked against the `US_AREAS` boxes. If it still leaves Canad
 | **v1.36** | New business emails: info@nexahorsetransport.ca shown everywhere on the site (footers, contact, terms, privacy, phone menu, structured data, llms.txt, trip sheet); booking requests now go to booking@nexahorsetransport.ca (`TO_EMAIL` in the booking script, which also makes customer replies go there). Toll-free number written as digits, "1-844-491-6392 (toll-free)" ("sans frais" on the French page). The Nexa Gmail stays only as the Google login | tag `v1.36` |
 | **v1.37** | Meet the team: "Our AI assistants" with Reina and Colt (illustrations `images/reina.webp/.jpg`, `images/colt.webp/.jpg`, both together in `images/reina-colt.webp`), clearly labelled as AI assistants, not people, with a person always one step away. "Call Reina" / "Call Colt" buttons dial 1-844-491-6392 then 8 (Reina) or 9 (Colt) | tag `v1.37` |
 | **v1.39** | Mohammad's photo and profile removed from Meet the team (photo file deleted); one founder line with mohammad@nexahorsetransport.ca and 647-581-1547 | tag `v1.39` |
+| **v1.40** | Founder line moved from Meet the team to the purple footer on every page (Founder & President: Mohammad Reza, mohammad@nexahorsetransport.ca, 647-581-1547) | tag `v1.40` |
 
 The `release/v1.0` branch is never changed, so version 1.0 can always be restored exactly.
 

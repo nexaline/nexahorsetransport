@@ -1060,6 +1060,7 @@ html.embed .terms-dialog { max-height: min(560px, 90vh); }
   .estimate-gate .btn { align-self: stretch; }
 }
 
-/* Meet the team: one-line founder contact (no photo or profile) */
-.team-founder { margin: 40px 0 0; padding: 18px 22px; background: var(--cream); border: 1px solid var(--line); border-radius: 16px; max-width: 760px; }
-.team-founder a { color: var(--purple); font-weight: 600; overflow-wrap: anywhere; }
+/* Footer: founder contact line, on the purple footer */
+.footer-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 24px; }
+.footer-founder a { color: inherit; overflow-wrap: anywhere; }
+.footer-founder a[href^="tel:"] { white-space: nowrap; }
