@@ -43,7 +43,7 @@ var EDITABLE = {
   "Other contact role": 40, "Other contact name": 120, "Other contact phone": 40, "Other contact email": 200,
   "Other contact address": 300
 };
-var HORSE_EDITABLE = { "Name": 60, "Age (years)": 20, "Breed": 60, "Gender": 20, "Colour": 40,
+var HORSE_EDITABLE = { "Name": 60, "Age": 20, "Breed": 60, "Gender": 20, "Colour": 40,
   "Height (hands)": 20, "Weight (kg)": 20 };
 var HIDDEN = { "Private token": true };   // never sent to the browser
 var TIME_ZONE = "America/Edmonton";
