@@ -60,7 +60,7 @@ var REQUEST_COLUMNS = ["Reference", "Received", "Status", "First name", "Last na
   "Estimate lines", "Minimum charge", "Subtotal", "GST (5%)", "Estimated total",
   "SMS consent", "Terms agreed", "Private token",
   "Other contact role", "Other contact name", "Other contact phone", "Other contact email", "Other contact address",
-  "Terms version"];
+  "Terms version", "Promo code", "Promo discount"];
 var HORSE_COLUMNS = ["Reference", "Horse", "Stall", "Name", "Age", "Breed", "Gender", "Colour",
   "Height (hands)", "Weight (kg)", "Foal or young horse"];
 
@@ -225,7 +225,8 @@ function saveToSheet(data, reference, received, status, update) {
       data.smsConsent && clean(data.phone, 40) ? "Yes" : "No", data.termsAccepted ? "Yes" : "No",
       privateToken(),
       cellText(other.role, 40), cellText(other.name, 120), cellText(other.phone, 40), cellText(other.email, 200), cellText(other.address, 300),
-      data.termsAccepted ? cellText(data.termsVersion, 20) : ""
+      data.termsAccepted ? cellText(data.termsVersion, 20) : "",
+      cellText(promoCodeOf(data), 20), cellText(promoDiscountOf(data), 40)
     ];
     var requests = tab(ss, "Requests", REQUEST_COLUMNS);
     // Updating an "Estimate viewed" row keeps when it first came in and its private token.
@@ -392,7 +393,8 @@ function copySnapshot(data) {
     horseDetails: horseList(data.horseDetails),
     quote: {
       lines: (quote.lines || []).slice(0, 10).map(function (l) { return { text: clean(l && l.text, 200), amount: clean(l && l.amount, 40) }; }),
-      minimumApplied: clean(quote.minimumApplied, 40), subtotal: clean(quote.subtotal, 40), gst: clean(quote.gst, 40), total: clean(quote.total, 40)
+      minimumApplied: clean(quote.minimumApplied, 40), subtotal: clean(quote.subtotal, 40), gst: clean(quote.gst, 40), total: clean(quote.total, 40),
+      promo: promoOf(quote), promoNote: clean(quote.promoNote, 300)
     }
   };
 }
@@ -498,9 +500,7 @@ function sendCustomerCopy(snap, reference, to) {
   });
   html += '<h3 style="color:#6A2C91;margin:20px 0 6px;">Your estimate</h3><table style="border-collapse:collapse;width:100%;">';
   text.push("YOUR ESTIMATE");
-  var rows = (snap.quote.lines || []).map(function (l) { return [l.text, l.amount]; });
-  if (snap.quote.minimumApplied) rows.push(["Minimum charge applied", snap.quote.minimumApplied]);
-  rows.push(["Subtotal", snap.quote.subtotal], ["GST (5%)", snap.quote.gst], ["Estimated total", snap.quote.total]);
+  var rows = quoteRows(snap.quote);
   rows.forEach(function (row, i) {
     var last = i === rows.length - 1;
     html += '<tr><td style="' + cell + (last ? "font-weight:bold;" : "") + '">' + esc(row[0]) + '</td><td style="' + cell +
@@ -718,7 +718,7 @@ function horseList(details) {
     return {
       horse: Number(h.horse) || i + 1,
       stall: clean(h.stall, 40),
-      name: clean(h.name, 60),
+      name: horseName(clean(h.name, 60)),
       age: clean(h.age, 20),
       breed: clean(h.breed, 60),
       gender: clean(h.gender, 20),
@@ -746,12 +746,39 @@ function horseRows(details) {
   });
 }
 
+// "lady grace" -> "Lady Grace": a capital letter at the start of each word; the rest stays as typed.
+function horseName(text) {
+  return String(text || "").trim().replace(/\s+/g, " ").replace(/(^|[\s\-(])(\p{Ll})/gu, function (m, before, letter) { return before + letter.toUpperCase(); });
+}
+
+// The promo code on the estimate ("WINTER", "GST FREE"), cleaned; null when none applied.
+function promoOf(quote) {
+  var p = (quote || {}).promo;
+  if (!p || !p.code) return null;
+  return { code: clean(p.code, 20).toUpperCase(), label: clean(p.label, 40) || clean(p.code, 20).toUpperCase() + " promo",
+    amount: clean(p.amount, 40), gstFree: !!p.gstFree };
+}
+function promoCodeOf(data) {
+  var p = promoOf((data || {}).quote);
+  return p ? p.code : clean((data || {}).promoCode, 20).toUpperCase();
+}
+function promoDiscountOf(data) {
+  var p = promoOf((data || {}).quote);
+  if (p) return p.amount;
+  return clean(((data || {}).quote || {}).promoNote, 40) ? "Not applied" : "";
+}
+
+// Estimate rows for the emails: a per-km promo before the subtotal, "GST FREE" right under the GST.
 function quoteRows(quote) {
   quote = quote || {};
+  var promo = promoOf(quote);
   var rows = (quote.lines || []).map(function (l) { return [clean(l.text, 200), clean(l.amount, 40)]; });
   if (quote.minimumApplied) rows.push(["Minimum charge applied", clean(quote.minimumApplied, 40)]);
+  if (promo && !promo.gstFree) rows.push([promo.label, promo.amount]);
   rows.push(["Subtotal", clean(quote.subtotal, 40)]);
   rows.push(["GST (5%)", clean(quote.gst, 40)]);
+  if (promo && promo.gstFree) rows.push([promo.label + " (we pay your GST)", promo.amount]);
+  if (clean(quote.promoNote, 300)) rows.push(["Promo code", clean(quote.promoNote, 300)]);
   rows.push(["Estimated total", clean(quote.total, 40)]);
   return rows;
 }

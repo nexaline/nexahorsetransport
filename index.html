@@ -28,7 +28,7 @@
   <!-- Fonts load without holding up the page: text shows at once in a system font, then switches. -->
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&amp;family=Source+Sans+3:wght@400;600&amp;display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&amp;family=Source+Sans+3:wght@400;600&amp;display=swap"></noscript>
-  <link rel="stylesheet" href="styles.css?v=1.42">
+  <link rel="stylesheet" href="styles.css?v=1.43">
   <script>if (/[?&]embed=booking\b/.test(location.search)) document.documentElement.classList.add("embed");</script>
 </head>
 <body>
@@ -733,6 +733,12 @@
     var MINIMUM_CHARGE = 300;
     var MINIMUM_UNTIL_KM = 200;
     var GST_RATE = 0.05;
+    // Promo codes: one per request, any capitals, spaces ignored ("gst free" = "GSTFREE" = "GST FREE"); saved as written here.
+    // "perKm": share off the per-km price by stall type; not given on hourly trips or when the minimum charge applies.
+    // "gstFree": Nexa pays the GST, on every trip. "ends": last valid day, Alberta time (no "ends" = no end date).
+    // Nexa Phone (Reina, Colt and Opus) reads this line from this page, so keep it on one line, as valid JSON.
+    var PROMO_CODES = {"WINTER": {"perKm": {"standard": 0.05, "roomier": 0.07, "box": 0.10}, "ends": "2027-03-21"}, "GST FREE": {"gstFree": true}};
+    var PROMO_TIME_ZONE = "America/Edmonton";
     var STALLS = [
       { key: "standard", label: "Standard stall", input: "stall-standard" },
       { key: "roomier", label: "Large standing stall", input: "stall-roomier" },
@@ -757,6 +763,51 @@
       return !!(box && box.checked);
     }
 
+    // ----- Promo codes -----
+    var activePromo = null; // "WINTER" or "GST FREE" once applied
+    function promoKey(text) { return String(text || "").toUpperCase().replace(/[^A-Z0-9]/g, ""); }
+    function findPromo(text) {
+      var key = promoKey(text);
+      var names = Object.keys(PROMO_CODES).filter(function (n) { return promoKey(n) === key; });
+      return names.length ? names[0] : "";
+    }
+    function todayInAlberta() {
+      try { return new Intl.DateTimeFormat("en-CA", { timeZone: PROMO_TIME_ZONE, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()); }
+      catch (err) { return new Date().toISOString().slice(0, 10); }
+    }
+    function promoExpired(name) {
+      var rule = PROMO_CODES[name];
+      return !!(rule && rule.ends && todayInAlberta() > rule.ends);
+    }
+    function cents(n) { return Math.round(n * 100) / 100; }
+
+    // Adds the promo to a price from calcQuote(): q.promo when it applies, q.promoNote when it doesn't.
+    function applyPromo(q) {
+      if (!q || !activePromo) return q;
+      var name = activePromo, rule = PROMO_CODES[name];
+      if (!rule || promoExpired(name)) { q.promoNote = "The " + name + " code has expired."; return q; }
+      if (rule.gstFree) {
+        q.promo = { code: name, label: name + " promo", gstFree: true, amount: q.hourly ? 0 : q.gst, note: "We pay your GST" };
+        if (!q.hourly) q.total = q.subtotal;
+        return q;
+      }
+      if (rule.perKm) {
+        if (q.hourly) { q.promoNote = "The " + name + " code is for per-km trips, so it isn't applied to trips charged by the hour (under " + HOURLY_UNDER_KM + " km, or emergencies)."; return q; }
+        if (q.minimumApplied) { q.promoNote = "The " + name + " code isn't applied when the $" + MINIMUM_CHARGE + " minimum charge applies (trips of " + HOURLY_UNDER_KM + " to " + MINIMUM_UNTIL_KM + " km)."; return q; }
+        var discount = 0;
+        q.lines.forEach(function (l) { discount += l.amount * (rule.perKm[l.stall] || 0); });
+        discount = cents(discount);
+        // A short trip never goes below the minimum charge.
+        if (q.km < MINIMUM_UNTIL_KM) discount = Math.min(discount, cents(q.subtotal - MINIMUM_CHARGE));
+        if (!(discount > 0)) { q.promoNote = "The " + name + " code isn't applied when the $" + MINIMUM_CHARGE + " minimum charge applies (trips of " + HOURLY_UNDER_KM + " to " + MINIMUM_UNTIL_KM + " km)."; return q; }
+        q.promo = { code: name, label: name + " promo", amount: discount, note: "" };
+        q.subtotal = cents(q.subtotal - discount);
+        q.gst = q.subtotal * GST_RATE;
+        q.total = q.subtotal + q.gst;
+      }
+      return q;
+    }
+
     // Returns null until there is a distance and at least one horse.
     function calcQuote() {
       var km = Math.round(parseFloat(distanceInput.value));
@@ -771,12 +822,12 @@
         var amount = count * rate * km;
         horses += count;
         subtotal += amount;
-        lines.push({ text: count + " x " + s.label + " @ " + money.format(rate) + "/km x " + km + " km", amount: amount });
+        lines.push({ stall: s.key, text: count + " x " + s.label + " @ " + money.format(rate) + "/km x " + km + " km", amount: amount });
       });
       if (!horses) return null;
       // Emergencies and short trips: by the hour, from the time our truck starts. We confirm the hours.
       if (isEmergency() || km < HOURLY_UNDER_KM) {
-        return {
+        return applyPromo({
           km: km,
           hourly: true,
           reason: isEmergency() ? "Emergency trip" : "Trip under " + HOURLY_UNDER_KM + " km",
@@ -786,12 +837,12 @@
           subtotal: 0,
           gst: 0,
           total: 0
-        };
+        });
       }
       var minimumApplied = km < MINIMUM_UNTIL_KM && subtotal < MINIMUM_CHARGE;
       if (minimumApplied) subtotal = MINIMUM_CHARGE;
       var gst = subtotal * GST_RATE;
-      return {
+      return applyPromo({
         km: km,
         hourly: false,
         horses: horses,
@@ -800,7 +851,7 @@
         subtotal: subtotal,
         gst: gst,
         total: subtotal + gst
-      };
+      });
     }
 
     var kmFormat = new Intl.NumberFormat("en-CA");
@@ -880,8 +931,15 @@
       if (q.hourly) {
         list.appendChild(quoteRow(q.reason + ": hourly rate", money.format(HOURLY_RATE) + "/hour", "",
           "From the time our truck starts. We confirm the hours with you."));
-        list.appendChild(quoteRow("GST (5%)", "added", "quote-muted"));
-        total.textContent = money.format(HOURLY_RATE) + "/hour + GST";
+        if (q.promo && q.promo.gstFree) {
+          list.appendChild(quoteRow("GST (5%)", "added", "quote-muted"));
+          list.appendChild(quoteRow(q.promo.label, "We pay your GST", "quote-promo"));
+          total.textContent = money.format(HOURLY_RATE) + "/hour, we pay your GST";
+        } else {
+          list.appendChild(quoteRow("GST (5%)", "added", "quote-muted"));
+          if (q.promoNote) list.appendChild(quoteRow(q.promoNote, "", "quote-promo-note"));
+          total.textContent = money.format(HOURLY_RATE) + "/hour + GST";
+        }
         return;
       }
       var i = 0;
@@ -893,7 +951,10 @@
           money.format(RATES[s.key]) + "/km \u00d7 " + kmFormat.format(q.km) + " km"));
       });
       if (q.minimumApplied) list.appendChild(quoteRow("Minimum charge applied (" + HOURLY_UNDER_KM + " to " + MINIMUM_UNTIL_KM + " km)", money.format(MINIMUM_CHARGE)));
+      if (q.promo && !q.promo.gstFree) list.appendChild(quoteRow(q.promo.label, "-" + money.format(q.promo.amount), "quote-promo"));
       list.appendChild(quoteRow("GST (5%)", money.format(q.gst), "quote-muted"));
+      if (q.promo && q.promo.gstFree) list.appendChild(quoteRow(q.promo.label, "-" + money.format(q.promo.amount), "quote-promo", "We pay your GST"));
+      if (q.promoNote) list.appendChild(quoteRow(q.promoNote, "", "quote-promo-note"));
       total.textContent = money.format(q.total) + " CAD";
     }
     function DATES_PE() { return document.getElementById("pickup-earliest"); }
@@ -1802,15 +1863,27 @@
     }
     horseCards.addEventListener("input", saveHorseValue);
     horseCards.addEventListener("change", saveHorseValue);
+    // Show the capitals as soon as the visitor leaves the name box.
+    horseCards.addEventListener("focusout", function (e) {
+      var el = e.target;
+      if (!el.dataset || el.dataset.field !== "name") return;
+      var fixed = horseName(el.value);
+      if (fixed !== el.value) { el.value = fixed; saveHorseValue({ target: el }); }
+    });
 
     // What's sent: one entry per horse card, in order.
+    // "lady grace" -> "Lady Grace": a capital letter at the start of each word; the rest stays as typed.
+    function horseName(text) {
+      return String(text || "").trim().replace(/\s+/g, " ").replace(/(^|[\s\-(])(\p{Ll})/gu, function (m, before, letter) { return before + letter.toUpperCase(); });
+    }
+
     function horseDetailsData() {
       return horseList().slice(0, MAX_HORSE_CARDS).map(function (h, i) {
         var v = horseValues[h.key] || {};
         return {
           horse: i + 1,
           stall: h.stall,
-          name: (v.name || "").trim(),
+          name: horseName(v.name),
           age: (v.age || "").trim() ? (v.age || "").trim() + (v.foal === "Yes" ? " months" : " years") : "",
           breed: (v.breed || "").trim(),
           gender: v.gender || "",
@@ -1831,6 +1904,86 @@
     });
     renderHorseCards();
     updateQuote();
+
+    // ----- Promo code box, in every step of the form (all boxes show the same code) -----
+    var promoBoxes = [];
+    function promoMessage(text, kind) {
+      promoBoxes.forEach(function (b) {
+        b.msg.textContent = text || "";
+        b.msg.className = "promo-msg" + (kind ? " is-" + kind : "");
+      });
+    }
+    function promoDescription(name) {
+      var rule = PROMO_CODES[name] || {};
+      if (rule.gstFree) return name + " applied: we pay your GST.";
+      if (rule.perKm) {
+        var pc = function (k) { return Math.round((rule.perKm[k] || 0) * 100) + "%"; };
+        return name + " applied: " + pc("standard") + " off standard stalls, " + pc("roomier") + " off large standing stalls and " + pc("box") + " off the box stall, on per-km trips.";
+      }
+      return name + " applied.";
+    }
+    function renderPromoBoxes() {
+      promoBoxes.forEach(function (b) {
+        b.entry.hidden = !!activePromo;
+        b.applied.hidden = !activePromo;
+        b.code.textContent = activePromo || "";
+      });
+    }
+    function applyPromoText(text, box) {
+      var raw = String(text || "").trim();
+      if (!raw) { promoMessage("Please enter a promo code.", "error"); return; }
+      var name = findPromo(raw);
+      if (!name) { promoMessage("Sorry, we don't recognise that code. Please check it and try again.", "error"); return; }
+      if (promoExpired(name)) { promoMessage("This code has expired.", "error"); return; }
+      var before = activePromo;
+      activePromo = name;
+      promoBoxes.forEach(function (b) { b.input.value = ""; });
+      renderPromoBoxes();
+      updateQuote();
+      var q = calcQuote();
+      var text2 = (before && before !== name ? "Only one promo code can be used, so " + name + " now replaces " + before + ". " : "") + promoDescription(name);
+      promoMessage(q && q.promoNote ? text2 + " " + q.promoNote : text2, "ok");
+      if (estimateShown) sendEstimateToDispatch();
+      if (box) box.removeBtn.focus();
+    }
+    function removePromo(box) {
+      activePromo = null;
+      renderPromoBoxes();
+      updateQuote();
+      promoMessage("Promo code removed.", "");
+      if (estimateShown) sendEstimateToDispatch();
+      if (box) box.input.focus();
+    }
+    Array.prototype.forEach.call(document.querySelectorAll("#booking-form .form-step"), function (step, i) {
+      var n = i + 1;
+      var wrap = document.createElement("div");
+      wrap.className = "promo";
+      wrap.innerHTML =
+        '<div class="promo-entry"><label for="promo-' + n + '">Promo code</label>' +
+        '<div class="promo-row"><input id="promo-' + n + '" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="24" placeholder="Enter a code">' +
+        '<button type="button" class="btn btn-secondary btn-small promo-apply">Apply</button></div></div>' +
+        '<div class="promo-applied" hidden><span class="promo-tag">Promo code <strong class="promo-code"></strong> applied</span>' +
+        '<button type="button" class="promo-remove">Remove</button></div>' +
+        '<p class="promo-msg" aria-live="polite"></p>';
+      var box = {
+        entry: wrap.querySelector(".promo-entry"), applied: wrap.querySelector(".promo-applied"),
+        input: wrap.querySelector("input"), code: wrap.querySelector(".promo-code"),
+        msg: wrap.querySelector(".promo-msg"), removeBtn: wrap.querySelector(".promo-remove")
+      };
+      wrap.querySelector(".promo-apply").addEventListener("click", function () { applyPromoText(box.input.value, box); });
+      box.input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); applyPromoText(box.input.value, box); }
+      });
+      box.removeBtn.addEventListener("click", function () { removePromo(box); });
+      promoBoxes.push(box);
+      // Step 4: under the estimate. Steps 1 to 3: just above the Next button.
+      var estimate = step.querySelector("#quote-notice");
+      var nav = step.querySelector(".step-nav");
+      if (estimate) estimate.parentNode.insertBefore(wrap, estimate);
+      else if (nav) step.insertBefore(wrap, nav);
+      else step.appendChild(wrap);
+    });
+    renderPromoBoxes();
 
     var formStatus = document.getElementById("form-status");
     var sendButton = document.getElementById("send-booking");
@@ -1886,16 +2039,23 @@
           hourly: true,
           subtotal: money.format(HOURLY_RATE) + "/hour",
           gst: "5% added",
-          total: money.format(HOURLY_RATE) + "/hour + GST",
+          promo: q.promo ? { code: q.promo.code, label: q.promo.label, amount: "We pay your GST", gstFree: true } : null,
+          promoNote: q.promoNote || "",
+          total: q.promo && q.promo.gstFree ? money.format(HOURLY_RATE) + "/hour, we pay your GST" : money.format(HOURLY_RATE) + "/hour + GST",
           notice: NOTICE
         } : {
           lines: q.lines.map(function (l) { return { text: l.text, amount: money.format(l.amount) }; }),
           minimumApplied: q.minimumApplied ? money.format(MINIMUM_CHARGE) : "",
+          promo: q.promo ? { code: q.promo.code, label: q.promo.label, amount: "-" + money.format(q.promo.amount), gstFree: !!q.promo.gstFree, note: q.promo.note } : null,
+          promoNote: q.promoNote || "",
           subtotal: money.format(q.subtotal),
           gst: money.format(q.gst),
           total: money.format(q.total) + " CAD",
           notice: NOTICE
         },
+        // The promo code the client used ("WINTER", "GST FREE"), even when it didn't apply to this trip.
+        promoCode: activePromo || "",
+        promoDiscount: q.promo ? (q.promo.gstFree && q.hourly ? "We pay your GST" : "-" + money.format(q.promo.amount)) : "",
         otherContact: {
           role: f.otherContactRole.value,
           name: f.otherContactName.value.trim(),
@@ -1936,13 +2096,13 @@
         var q = calcQuote();
         if (!q) return;
         var data = bookingData(form, q);
-        var key = JSON.stringify([data.pickup, data.dropoff, data.distanceKm, data.horseDetails, data.dates, data.quote.total, data.name, data.phone, data.email, data.smsConsent]);
+        var key = JSON.stringify([data.pickup, data.dropoff, data.distanceKm, data.horseDetails, data.dates, data.quote.total, data.promoCode, data.name, data.phone, data.email, data.smsConsent]);
         if (key === lastEstimateKey || data.website) return;
         // (The text box is part of the key: ticking it after seeing the price sends the estimate by text.)
         lastEstimateKey = key;
         var copy = {
           estimateId: estimateId, pickup: data.pickup, dropoff: data.dropoff, distanceKm: data.distanceKm,
-          dates: data.dates, horseDetails: data.horseDetails, quote: data.quote, elapsedMs: data.elapsedMs,
+          dates: data.dates, horseDetails: data.horseDetails, quote: data.quote, promoCode: data.promoCode, promoDiscount: data.promoDiscount, elapsedMs: data.elapsedMs,
           name: data.name, phone: data.phone, email: data.email, reference: estimateLead.reference,
           // Ticked "I agree to receive text messages": Nexa Phone texts them this estimate.
           smsConsent: data.smsConsent
@@ -2584,7 +2744,10 @@
         horses: stallLines.map(function (l) { return l.label; })
           .concat((data.horseDetails || []).map(horseLine).filter(String)),
         quote: (data.quote.hourly ? hourlyLines : stallLines).concat(data.quote.minimumApplied ? [{ label: "Minimum charge applied", amount: data.quote.minimumApplied }] : [])
-          .concat([{ label: "GST (5%)", amount: data.quote.gst, muted: true }]),
+          .concat(data.quote.promo && !data.quote.promo.gstFree ? [{ label: data.quote.promo.label, amount: data.quote.promo.amount }] : [])
+          .concat([{ label: "GST (5%)", amount: data.quote.gst, muted: true }])
+          .concat(data.quote.promo && data.quote.promo.gstFree ? [{ label: data.quote.promo.label + " (we pay your GST)", amount: data.quote.promo.amount }] : [])
+          .concat(data.quote.promoNote ? [{ label: data.quote.promoNote, amount: "", muted: true }] : []),
         total: data.quote.total,
         note: "Automatic estimate. Nothing is confirmed until we call or email you.",
         a: placeName(data.pickup, "Pickup"),

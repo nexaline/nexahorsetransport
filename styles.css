@@ -1069,3 +1069,19 @@ html.embed .terms-dialog { max-height: min(560px, 90vh); }
 .footer-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 24px; }
 .footer-founder a { color: inherit; overflow-wrap: anywhere; }
 .footer-founder a[href^="tel:"] { white-space: nowrap; }
+
+/* Booking form: promo code box (every step) */
+.promo { margin: 18px 0 6px; padding: 14px 16px; border: 1px dashed #CDB6DE; border-radius: 12px; background: #FBF8FD; }
+.promo label { display: block; font-weight: 600; margin-bottom: 6px; }
+.promo-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.promo-row input { flex: 1 1 180px; min-width: 0; text-transform: uppercase; }
+.promo-applied { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.promo-tag { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: var(--purple); color: #fff; font-weight: 600; }
+.promo-tag strong { color: #FFE100; letter-spacing: .5px; }
+.promo-remove { background: none; border: 0; padding: 4px 2px; color: var(--purple); text-decoration: underline; font: inherit; font-size: .95rem; cursor: pointer; }
+.promo-msg { margin: 8px 0 0; font-size: .95rem; }
+.promo-msg:empty { display: none; }
+.promo-msg.is-error { color: #B0122B; }
+.promo-msg.is-ok { color: #2E6B34; }
+.quote-row.quote-promo span:last-child { color: #2E6B34; font-weight: 700; }
+.quote-row.quote-promo-note { font-size: .9rem; color: var(--muted); font-style: italic; }
