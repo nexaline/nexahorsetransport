@@ -738,7 +738,7 @@
     // "gstFree": Nexa pays the GST, on every trip. "ends": last valid day, Alberta time (no "ends" = no end date).
     // Nexa Phone (Reina, Colt and Opus) reads this line from this page, so keep it on one line, as valid JSON.
     var PROMO_CODES = {"WINTER": {"perKm": {"standard": 0.05, "roomier": 0.07, "box": 0.10}, "ends": "2027-03-21"}, "GST FREE": {"gstFree": true}};
-    var PROMO_TIME_ZONE = "America/Edmonton";
+    var PROMO_TIME_ZONE = "America/Regina"; // Alberta Time, UTC-6 all year (older systems show America/Edmonton as UTC-7)
     var STALLS = [
       { key: "standard", label: "Standard stall", input: "stall-standard" },
       { key: "roomier", label: "Large standing stall", input: "stall-roomier" },

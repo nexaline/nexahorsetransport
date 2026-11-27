@@ -46,7 +46,8 @@ var EDITABLE = {
 var HORSE_EDITABLE = { "Name": 60, "Age": 20, "Breed": 60, "Gender": 20, "Colour": 40,
   "Height (hands)": 20, "Weight (kg)": 20 };
 var HIDDEN = { "Private token": true };   // never sent to the browser
-var TIME_ZONE = "America/Edmonton";
+// Alberta Time: UTC-6 all year (America/Regina is UTC-6 everywhere; America/Edmonton is UTC-7 on older systems).
+var TIME_ZONE = "America/Regina";
 
 function doGet() {
   var email = currentEmail();

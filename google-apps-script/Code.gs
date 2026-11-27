@@ -49,7 +49,10 @@ var SHEET_NAME = "Nexa Booking Requests";
 var COPY_LIMIT = 2;              // "Email me a copy": copies per request
 var COPY_MINUTES = 60;           // ... available for this long after the request is sent
 var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-var TIME_ZONE = "America/Edmonton";
+// Alberta Time: UTC-6 all year since November 1, 2026. "America/Regina" is UTC-6 all year in every
+// system; "America/Edmonton" still shows UTC-7 in winter where the time zone data is older.
+var TIME_ZONE = "America/Regina";
+var NEXA_PHONE_API = "https://nexa-phone-1762.twil.io/api";
 var ESTIMATE_HOURS = 6;          // a booking sent within this time updates its "Estimate viewed" row
 
 var REQUEST_COLUMNS = ["Reference", "Received", "Status", "First name", "Last name", "Full name", "Phone", "Email",
@@ -484,7 +487,7 @@ function sendCustomerCopy(snap, reference, to) {
     '<h2 style="color:#6A2C91;margin:0 0 4px;">Your Booking / Estimate request ' + esc(reference) + '</h2>' +
     '<p style="margin:12px 0;">' + esc(hello) + '</p>' +
     '<p style="margin:0 0 16px;">Thank you for your request. Here is a copy for your records. We will call or email you soon to go over your estimate and dates.</p>';
-  if (map.blob) html += '<img src="cid:routeMap" alt="Map of the route from pickup (A) to delivery (B)" width="640" style="max-width:100%;height:auto;border:2px solid #6A2C91;border-radius:6px;">';
+  if (map.blob) html += '<img src="cid:routeMap" alt="Route map from pickup to delivery" width="640" style="max-width:100%;height:auto;border:2px solid #6A2C91;border-radius:6px;">';
   var text = ["YOUR BOOKING / ESTIMATE REQUEST " + reference, "", hello, "",
     "Thank you for your request. Here is a copy for your records. We will call or email you soon to go over your estimate and dates.", ""];
   sections.forEach(function (section) {
@@ -551,7 +554,38 @@ function sendBookingEmail(data, reference, kind) {
 
 // ---------- route map picture ----------
 
+// The client's route map: the "Night route" picture (purple route, pins, logo and distance) made by
+// Nexa Phone, the same one the client gets by text. If Nexa Phone can't make it right now, the
+// simple Google map below is used instead.
 function routeMapImage(data) {
+  var nexa = nexaRouteMap(data);
+  return nexa || staticRouteMap(data);
+}
+
+function nexaRouteMap(data) {
+  var pickup = clean((data.pickup || {}).label, 200) || point(data.pickup) || "";
+  var delivery = clean((data.dropoff || {}).label, 200) || point(data.dropoff) || "";
+  if (!pickup || !delivery) return null;
+  try {
+    var res = UrlFetchApp.fetch(NEXA_PHONE_API, {
+      method: "post", contentType: "application/json", muteHttpExceptions: true,
+      payload: JSON.stringify({ action: "website-route-map", data: { pickup: pickup, delivery: delivery, km: Number(data.distanceKm) || 0 } })
+    });
+    var out = JSON.parse(res.getContentText() || "{}");
+    if (res.getResponseCode() !== 200 || !out.ok || !/^https:\/\//.test(String(out.url || ""))) {
+      console.error("Nexa route map not made: HTTP " + res.getResponseCode() + " " + res.getContentText().slice(0, 200));
+      return null;
+    }
+    var img = UrlFetchApp.fetch(out.url, { muteHttpExceptions: true });
+    if (img.getResponseCode() !== 200) return null;
+    return { blob: img.getBlob().setName("route-map.png"), note: "", url: out.url };
+  } catch (err) {
+    console.error("Nexa route map failed: " + err);
+    return null;
+  }
+}
+
+function staticRouteMap(data) {
   var key = PropertiesService.getScriptProperties().getProperty("STATIC_MAPS_KEY");
   var a = point(data.pickup);
   var b = point(data.dropoff);
@@ -797,7 +831,7 @@ function bookingHtml(data, map, mapsLink, reference, kind) {
 
   html += '<h3 style="color:#6A2C91;margin:16px 0 6px;">Route map</h3>';
   if (map.blob) {
-    html += '<img src="cid:routeMap" alt="Map of the route from pickup (A) to delivery (B)" width="640" style="max-width:100%;height:auto;border:2px solid #6A2C91;border-radius:6px;">';
+    html += '<img src="cid:routeMap" alt="Route map from pickup to delivery" width="640" style="max-width:100%;height:auto;border:2px solid #6A2C91;border-radius:6px;">';
   }
   if (map.note) html += '<p style="margin:6px 0;color:#5E5568;">' + esc(map.note) + "</p>";
   if (mapsLink) {
