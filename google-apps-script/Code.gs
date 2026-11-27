@@ -56,12 +56,12 @@ var REQUEST_COLUMNS = ["Reference", "Received", "Status", "First name", "Last na
   "Pickup", "Pickup GPS", "Pickup entered as", "Delivery", "Delivery GPS", "Delivery entered as",
   "Trip type (detected)", "Distance (km)", "Distance source", "Route note",
   "Earliest pickup", "Latest pickup", "Earliest delivery", "Latest delivery",
-  "Number of horses", "Standard stalls", "Roomier stalls", "Box stalls", "Other details",
+  "Number of horses", "Standard stalls", "Large standing stalls", "Box stalls", "Other details",
   "Estimate lines", "Minimum charge", "Subtotal", "GST (5%)", "Estimated total",
   "SMS consent", "Terms agreed", "Private token",
   "Other contact role", "Other contact name", "Other contact phone", "Other contact email", "Other contact address",
   "Terms version"];
-var HORSE_COLUMNS = ["Reference", "Horse", "Stall", "Name", "Age (years)", "Breed", "Gender", "Colour",
+var HORSE_COLUMNS = ["Reference", "Horse", "Stall", "Name", "Age", "Breed", "Gender", "Colour",
   "Height (hands)", "Weight (kg)", "Foal or young horse"];
 
 // The website sends the booking as a JSON string with Content-Type text/plain (a "simple" request, so the
@@ -219,7 +219,7 @@ function saveToSheet(data, reference, received, status, update) {
       cellText(dropoff.label, 300), cellText(point(dropoff) || ""), cellText(dropoff.entered, 200),
       cellText(data.trip, 80), String(Number(data.distanceKm) || 0), cellText(data.distanceSource, 60), cellText(data.routeNote, 600),
       cellText(dates.pickupEarliest, 20), cellText(dates.pickupLatest, 20), cellText(dates.dropoffEarliest, 20), cellText(dates.dropoffLatest, 20),
-      String(Number(data.horses) || 0), stall("Standard stall"), stall("Roomier stall"), stall("Box stall"), cellText(data.details, 3000),
+      String(Number(data.horses) || 0), stall("Standard stall"), String(Number(stall("Large standing stall")) + Number(stall("Roomier stall"))), stall("Box stall"), cellText(data.details, 3000),
       cellText((quote.lines || []).map(function (l) { return clean(l.text, 200) + ": " + clean(l.amount, 40); }).join("\n"), 2000),
       cellText(quote.minimumApplied, 40), cellText(quote.subtotal, 40), cellText(quote.gst, 40), cellText(quote.total, 40),
       data.smsConsent && clean(data.phone, 40) ? "Yes" : "No", data.termsAccepted ? "Yes" : "No",
@@ -737,11 +737,11 @@ function horseRows(details) {
     if (h.name) bits.push(h.name);
     if (h.breed) bits.push(h.breed);
     if (h.colour) bits.push(h.colour);
-    if (h.age) bits.push(h.age + " years old");
+    if (h.age) bits.push(/^[\d.]+$/.test(h.age) ? h.age + " years old" : h.age + " old");
     if (h.gender) bits.push(h.gender);
     if (h.height) bits.push(h.height + " hands");
-    if (h.weight) bits.push(h.weight + " kg");
-    bits.push("Foal or young horse: " + h.foalOrYoung);
+    if (h.weight) bits.push(/^[\d.]+$/.test(h.weight) ? h.weight + " kg" : h.weight);
+    bits.push("Foal: " + h.foalOrYoung);
     return ["Horse " + h.horse + " (" + h.stall + ")", bits.join(" \u00b7 ")];
   });
 }
