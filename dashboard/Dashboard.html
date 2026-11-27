@@ -204,7 +204,7 @@ function drawBooking(data) {
     ["Distance", b["Distance (km)"] ? b["Distance (km)"] + " km" + (b["Trip type (detected)"] ? " · " + b["Trip type (detected)"] : "") : ""],
     ["Pickup window", [b["Earliest pickup"], b["Latest pickup"]].filter(Boolean).join(" to ")],
     ["Delivery window", [b["Earliest delivery"], b["Latest delivery"]].filter(Boolean).join(" to ")],
-    ["Stalls", ["Standard stalls", "Roomier stalls", "Box stalls"].filter(function (k) { return Number(b[k]); }).map(function (k) { return b[k] + " × " + k.replace(" stalls", ""); }).join(", ")],
+    ["Stalls", ["Standard stalls", "Large standing stalls", "Box stalls"].filter(function (k) { return Number(b[k]); }).map(function (k) { return b[k] + " × " + k.replace(" stalls", ""); }).join(", ")],
     ["Details", b["Other details"]],
     ["Estimate", b["Estimate lines"]],
     ["Estimated total", b["Estimated total"]],
