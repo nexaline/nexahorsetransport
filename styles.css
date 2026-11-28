@@ -195,6 +195,14 @@ h3 { font-weight: 700; }
 }
 
 .hero h1 .eyebrow { display: block; text-transform: uppercase; line-height: 1.4; }
+.hero h1:has(> .eyebrow:only-child) { margin-bottom: 0; }
+
+/* v1.45: slogan shown as an image (same font, size and colour as the old heading text) */
+.hero-slogan { margin: 0 0 20px; }
+.hero-slogan img { display: block; width: calc(clamp(2.4rem, 6vw, 3.5rem) * 10.066); max-width: 100%; height: auto; }
+@media (max-width: 600px) {
+  .hero-slogan img { width: calc(clamp(2.4rem, 6vw, 3.5rem) * 7.862); }
+}
 
 .hero-lead { margin: 0 0 32px; max-width: 560px; font-size: 1.25rem; color: var(--on-purple-muted); }
 
